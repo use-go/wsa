@@ -4,14 +4,15 @@ import (
 	"container/list"
 	"encoding/json"
 	"errors"
-	"events/eLiveListCtrl"
-	"events/eStreamerEvent"
-	"logger"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eLiveListCtrl"
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

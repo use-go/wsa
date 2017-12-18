@@ -2,8 +2,9 @@ package aac
 
 import (
 	"fmt"
-	"logger"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 //ADTS : 本地流，需要ADTS header +aac ES

@@ -3,10 +3,11 @@ package RTSPService
 import (
 	"errors"
 	"fmt"
-	"logger"
-	"mediaTypes/amf"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

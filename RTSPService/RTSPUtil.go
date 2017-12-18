@@ -5,19 +5,20 @@ import (
 	"container/list"
 	"encoding/base64"
 	"fmt"
-	"logger"
-	"mediaTypes/aac"
-	"mediaTypes/amf"
-	"mediaTypes/flv"
-	"mediaTypes/h264"
-	"mediaTypes/mp3"
 	"net"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
+	"github.com/use-go/websocketStreamServer/mediaTypes/mp3"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

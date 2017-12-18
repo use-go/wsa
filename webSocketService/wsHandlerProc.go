@@ -3,8 +3,9 @@ package webSocketService
 import (
 	"encoding/json"
 	"errors"
-	"logger"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 func (this *websocketHandler) ctrlPlay(data []byte) (err error) {

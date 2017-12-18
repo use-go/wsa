@@ -1,8 +1,9 @@
 package flv
 
 import (
-	"logger"
 	"os"
+
+	"github.com/use-go/websocketStreamServer/logger"
 )
 
 type FlvFileReader struct {

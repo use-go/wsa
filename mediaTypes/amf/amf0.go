@@ -6,7 +6,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"logger"
+
+	"github.com/use-go/websocketStreamServer/logger"
 )
 
 const (
@@ -100,7 +101,7 @@ func (this *AMF0Encoder) EncodeNumber(num float64) (err error) {
 	return nil
 }
 
-func (this *AMF0Encoder)EncodeNU(){
+func (this *AMF0Encoder) EncodeNU() {
 
 }
 

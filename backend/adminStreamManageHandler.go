@@ -4,14 +4,15 @@ import (
 	"container/list"
 	"encoding/json"
 	"errors"
-	"events/eLiveListCtrl"
-	"events/eRTMPEvent"
-	"events/eStreamerEvent"
-	"logger"
 	"net/http"
 	"strconv"
 	"strings"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eLiveListCtrl"
+	"github.com/use-go/websocketStreamServer/events/eRTMPEvent"
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type adminStreamManageHandler struct {
@@ -173,24 +174,23 @@ func doSetWhiteList(w http.ResponseWriter, r *http.Request) {
 func doSetUpStreamApp(w http.ResponseWriter, r *http.Request) {
 }
 
-func doPullRtmpStream(w http.ResponseWriter, r *http.Request){
+func doPullRtmpStream(w http.ResponseWriter, r *http.Request) {
 }
 
-func doAddSink(w http.ResponseWriter, r *http.Request){
+func doAddSink(w http.ResponseWriter, r *http.Request) {
 }
 
-func doDelSink(w http.ResponseWriter, r *http.Request){
+func doDelSink(w http.ResponseWriter, r *http.Request) {
 }
 
-func doAddSource(w http.ResponseWriter, r *http.Request){
+func doAddSource(w http.ResponseWriter, r *http.Request) {
 }
 
-func doDelSource(w http.ResponseWriter, r *http.Request){
+func doDelSource(w http.ResponseWriter, r *http.Request) {
 }
 
-func doGetSource(w http.ResponseWriter, r *http.Request){
+func doGetSource(w http.ResponseWriter, r *http.Request) {
 }
-
 
 //Enable BlackList
 // need form data " opcode = 1

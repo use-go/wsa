@@ -2,9 +2,10 @@ package RTMPService
 
 import (
 	"fmt"
-	"logger"
 	"sync"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type rtmpPublisher struct {

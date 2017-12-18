@@ -3,14 +3,15 @@ package RTMPService
 import (
 	"encoding/json"
 	"errors"
-	"events/eRTMPEvent"
 	"fmt"
-	"logger"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eRTMPEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

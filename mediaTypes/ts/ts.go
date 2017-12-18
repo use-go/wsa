@@ -2,11 +2,12 @@ package ts
 
 import (
 	"container/list"
-	"logger"
-	"mediaTypes/aac"
-	"mediaTypes/flv"
-	"mediaTypes/h264"
-	"mediaTypes/mp3"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
+	"github.com/use-go/websocketStreamServer/mediaTypes/mp3"
 )
 
 var crc32Table []uint32
@@ -146,7 +147,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 		}
 
 		tsCount, padSize = this.getTsCount(payloadSize, addPCR, addDts)
-		if tag.TagType==flv.FLV_TAG_Audio{
+		if tag.TagType == flv.FLV_TAG_Audio {
 			this.calAudioTime(tag)
 
 		}

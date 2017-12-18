@@ -3,12 +3,13 @@ package RTSPService
 import (
 	"errors"
 	"fmt"
-	"logger"
 	"math/rand"
-	"mediaTypes/aac"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
 )
 
 func (this *RTSPHandler) sendErrorReply(lines []string, code int) (err error) {

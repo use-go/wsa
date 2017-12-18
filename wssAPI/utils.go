@@ -7,11 +7,12 @@ import (
 	"encoding/hex"
 	"io"
 	"io/ioutil"
-	"logger"
 	"net"
 	"os"
 	"reflect"
 	"time"
+
+	"github.com/use-go/websocketStreamServer/logger"
 )
 
 func CheckDirectory(dir string) (bool, error) {

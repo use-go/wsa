@@ -2,7 +2,8 @@ package eStreamerEvent
 
 import (
 	"net"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 
 type EveAddSource struct {
 	StreamName string
-	RemoteIp	net.Addr
+	RemoteIp   net.Addr
 	Producer   wssAPI.Obj
 	Id         int64      //outPut
 	SrcObj     wssAPI.Obj //out

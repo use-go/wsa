@@ -4,11 +4,12 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"logger"
-	"mediaTypes/flv"
 	"sync"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

@@ -2,16 +2,17 @@ package mp4
 
 import (
 	"fmt"
-	"logger"
-	"mediaTypes/aac"
-	"mediaTypes/amf"
-	"mediaTypes/flv"
-	"mediaTypes/h264"
-	"mediaTypes/mp3"
 	"os"
 	"strconv"
 	"strings"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
+	"github.com/use-go/websocketStreamServer/mediaTypes/mp3"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const save_to_file = false
@@ -161,7 +162,7 @@ func (this *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 		//logger.LOGD(asc.Sample_rate)
 		//this.audioSampleRate = uint32(asc.Sample_rate)
 		//logger.LOGT(asc.Object_type)
-		 asc := aac.GenerateAudioSpecificConfig(tag.Data[2:])
+		asc := aac.GenerateAudioSpecificConfig(tag.Data[2:])
 		logger.LOGD(tag.Data[2:])
 		logger.LOGD(asc.SamplingFrequency)
 		this.audioSampleRate = uint32(asc.SamplingFrequency)
@@ -192,7 +193,7 @@ func (this *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 			default:
 				this.audioCodecId = CODEC_ID_AAC
 			}
-			this.audioCodecId=CODEC_ID_AAC
+			this.audioCodecId = CODEC_ID_AAC
 		} else {
 			this.ascData = this.aacForHttp(tag, "")
 			objType := (tag.Data[2] & 0xf8) >> 3
@@ -206,7 +207,7 @@ func (this *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 			default:
 				this.audioCodecId = CODEC_ID_AAC
 			}
-			this.audioCodecId=CODEC_ID_AAC
+			this.audioCodecId = CODEC_ID_AAC
 		}
 
 	default:
@@ -939,8 +940,8 @@ func (this *FMP4Creater) stsdA(box *MP4Box, tag *flv.FlvTag) {
 	box.Push4Bytes(0)           //version and flag
 	box.PushByte(MP4ESDescrTag) //tag MP4ESDescrTag
 	esd := &MP4Box{}
-	esd.Push2Bytes(1)                  //ES ID
-	esd.PushByte(0)                    // stream priority (0-32)
+	esd.Push2Bytes(1) //ES ID
+	esd.PushByte(0)   // stream priority (0-32)
 
 	esd.PushByte(MP4DecConfigDescrTag) //MP4DecConfigDescrTag tag
 	esdDesc := &MP4Box{}

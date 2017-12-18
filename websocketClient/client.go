@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"logger"
 	"net/http"
+
+	"logger"
+
 	"webSocketService"
 	"wssAPI"
 
@@ -25,6 +27,8 @@ func main() {
 	defer conn.Close()
 
 }
+
+// SetTest test
 func SetTest() {
 	si := wssAPI.NewSet()
 	si.Add("111")
@@ -42,6 +46,7 @@ type stPlay struct {
 	Req   int    `json:"req"`
 }
 
+// Play video
 func Play(conn *websocket.Conn) {
 
 	//play
@@ -68,8 +73,6 @@ func Play(conn *websocket.Conn) {
 	for {
 		readResult(conn)
 	}
-	//end
-	return
 }
 
 func readResult(conn *websocket.Conn) (err error) {

@@ -1,10 +1,10 @@
 package ts
 
 import (
-	"logger"
-	"mediaTypes/aac"
-	"mediaTypes/amf"
-	"mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
 )
 
 func (this *TsCreater) audioPayload(tag *flv.FlvTag) (payload []byte, size int) {
@@ -29,7 +29,7 @@ func (this *TsCreater) audioPayload(tag *flv.FlvTag) (payload []byte, size int) 
 }
 
 func (this *TsCreater) calPcrPtsDts(tag *flv.FlvTag) (pcr, pcrExt, pts, dts uint64) {
-	timeMS := uint64(tag.Timestamp )
+	timeMS := uint64(tag.Timestamp)
 	pcr = (timeMS * 90) & 0x1ffffffff
 	pcrExt = (timeMS * PCR_HZ / 1000) & 0x1ff
 	if len(tag.Data) < 5 {
@@ -42,12 +42,12 @@ func (this *TsCreater) calPcrPtsDts(tag *flv.FlvTag) (pcr, pcrExt, pts, dts uint
 	return
 }
 
-func (this *TsCreater)calAudioTime(tag *flv.FlvTag)  {
+func (this *TsCreater) calAudioTime(tag *flv.FlvTag) {
 	//tmp:=int64(90*this.audioSampleHz*int(tag.Timestamp-this.beginTime))
-	tmp:=int64(90*int(tag.Timestamp))
+	tmp := int64(90 * int(tag.Timestamp))
 	//logger.LOGT(tmp,tag.Timestamp-this.beginTime)
 	//audioPtsDelta := int64(90000 * int64(this.audioFrameSize) / int64(this.audioSampleHz))
 	//this.audioPts += audioPtsDelta
 	//logger.LOGD(this.audioPts)
-	this.audioPts=tmp
+	this.audioPts = tmp
 }

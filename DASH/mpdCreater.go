@@ -3,14 +3,17 @@ package DASH
 import (
 	"encoding/xml"
 	"fmt"
-	"logger"
-	"mediaTypes/flv"
 	"time"
 
-	"mediaTypes/aac"
-	"mediaTypes/h264"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+
 	"strconv"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/wssAPI"
+
+	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
 )
 
 const (
@@ -34,15 +37,15 @@ type MPD struct {
 	Type                      string      `xml:"type,attr"`
 	AvailabilityStartTime     string      `xml:"availabilityStartTime,attr"`
 	PublishTime               string      `xml:"publishTime,attr"`
-	MediaPresentationDuration string     `xml:"mediaPresentationDuration,attr,omitempty"`
-	MinimumUpdatePeriod       string     `xml:"minimumUpdatePeriod,attr,omitempty"`
+	MediaPresentationDuration string      `xml:"mediaPresentationDuration,attr,omitempty"`
+	MinimumUpdatePeriod       string      `xml:"minimumUpdatePeriod,attr,omitempty"`
 	MinBufferTime             string      `xml:"minBufferTime,attr"`
 	Xmlns                     string      `xml:"xmlns,attr"`
 	Period                    []PeriodXML `xml:"Period"`
 }
 
 type PeriodXML struct {
-	Id string `xml:"id,attr"`
+	Id            string             `xml:"id,attr"`
 	AdaptationSet []AdaptationSetXML `xml:"AdaptationSet"`
 }
 
@@ -56,13 +59,12 @@ type AdaptationSetXML struct {
 }
 
 type SegmentTemplateXML struct {
-	Media          string `xml:"media,attr"`
-	Initialization string `xml:"initialization,attr"`
-	Duration       *int   `xml:"duration,attr,omitempty"`
-	StartNumber    string `xml:"startNumber,attr"`
-	TimeScale      string `xml:"timescale,attr"`
+	Media           string              `xml:"media,attr"`
+	Initialization  string              `xml:"initialization,attr"`
+	Duration        *int                `xml:"duration,attr,omitempty"`
+	StartNumber     string              `xml:"startNumber,attr"`
+	TimeScale       string              `xml:"timescale,attr"`
 	SegmentTimeline *SegmentTimelineXML `xml:"SegmentTimeline,omitempty"`
-
 }
 
 type SegmentTimelineXML struct {
@@ -70,13 +72,10 @@ type SegmentTimelineXML struct {
 }
 
 type SegmentTimelineDesc struct {
-	T string `xml:"t,attr,omitempty"`//time
-	D string `xml:"d,attr"`//duration
-	R string `xml:"r,attr,omitempty"`//repreat count default 0
+	T string `xml:"t,attr,omitempty"` //time
+	D string `xml:"d,attr"`           //duration
+	R string `xml:"r,attr,omitempty"` //repreat count default 0
 }
-
-
-
 
 type RepresentationXML struct {
 	Id                string `xml:"id,attr"`
@@ -119,7 +118,7 @@ func (this *mpdCreater) GetXML(id string, startNumber int) (buf []byte) {
 	t := time.Now()
 	mpd.PublishTime = t.Format("2006-01-02T15:04:05.000Z")
 	//MediaPresentationDuration ignore
-	mpd.MinimumUpdatePeriod=generatePTime(0,0,0,0,0,3,0)
+	mpd.MinimumUpdatePeriod = generatePTime(0, 0, 0, 0, 0, 3, 0)
 	mpd.MinBufferTime = generatePTime(0, 0, 0, 0, 0, 1, 0)
 	mpd.Xmlns = MPDXMLNS
 	mpd.Period = this.createPeriod(startNumber)
@@ -142,13 +141,13 @@ func (this *mpdCreater) createPeriod(startNumber int) (period []PeriodXML) {
 	period = make([]PeriodXML, 0, 2)
 
 	if this.videoHeader != nil {
-		videPeroid := PeriodXML{Id:wssAPI.GenerateGUID()}
+		videPeroid := PeriodXML{Id: wssAPI.GenerateGUID()}
 		this.createVidePeroid(startNumber, &videPeroid)
 		period = append(period, videPeroid)
 	}
 
 	if this.audioHeader != nil {
-		audioPeriod := PeriodXML{Id:wssAPI.GenerateGUID()}
+		audioPeriod := PeriodXML{Id: wssAPI.GenerateGUID()}
 		this.createAudioPeroid(startNumber, &audioPeriod)
 		period = append(period, audioPeriod)
 	}
@@ -190,7 +189,7 @@ func (this *mpdCreater) createVidePeroid(startNumber int, period *PeriodXML) {
 	ada[0].SegmentTemplate.Initialization = "../video/$RepresentationID$/init.mp4"
 	ada[0].SegmentTemplate.TimeScale = "1000"
 	ada[0].SegmentTemplate.StartNumber = strconv.Itoa(startNumber)
-	ada[0].SegmentTemplate.SegmentTimeline=this.createSegmentTimeLine()
+	ada[0].SegmentTemplate.SegmentTimeline = this.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
 	ada[0].Representation[0].Id = strconv.Itoa(width) + "_" + strconv.Itoa(height)
@@ -225,7 +224,7 @@ func (this *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
 	ada[0].SegmentTemplate.Initialization = "../video/$RepresentationID$/init.mp4"
 	ada[0].SegmentTemplate.TimeScale = strconv.Itoa(sampleFreq)
 	ada[0].SegmentTemplate.StartNumber = strconv.Itoa(startNumber)
-	ada[0].SegmentTemplate.SegmentTimeline=this.createSegmentTimeLine()
+	ada[0].SegmentTemplate.SegmentTimeline = this.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
 	ada[0].Representation[0].Id = "1_stereo"
@@ -235,11 +234,11 @@ func (this *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
 	period.AdaptationSet = ada
 }
 
-func (this *mpdCreater)createSegmentTimeLine()(segTm *SegmentTimelineXML) {
+func (this *mpdCreater) createSegmentTimeLine() (segTm *SegmentTimelineXML) {
 	//bad time line
-	segTm=&SegmentTimelineXML{}
-	segTm.S=make([]SegmentTimelineDesc,1)
-	segTm.S[0].D="1000"
+	segTm = &SegmentTimelineXML{}
+	segTm.S = make([]SegmentTimelineDesc, 1)
+	segTm.S[0].D = "1000"
 
 	return
 }

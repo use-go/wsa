@@ -1,7 +1,7 @@
 package eRTMPEvent
 
 import (
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (
@@ -27,11 +27,11 @@ func (this *EvePullRTMPStream) Type() string {
 	return PullRTMPStream
 }
 
-func (this *EvePullRTMPStream) Init(protocol, app, instance,addr, streamName, sourceName string, port int) {
+func (this *EvePullRTMPStream) Init(protocol, app, instance, addr, streamName, sourceName string, port int) {
 	this.Protocol = protocol
 	this.App = app
 	this.Address = addr
-	this.Instance=instance
+	this.Instance = instance
 	this.Port = port
 	this.StreamName = streamName
 	this.SourceName = sourceName
@@ -42,7 +42,7 @@ func (this *EvePullRTMPStream) Copy() (out *EvePullRTMPStream) {
 	out = &EvePullRTMPStream{}
 	out.Protocol = this.Protocol
 	out.App = this.App
-	out.Instance=this.Instance
+	out.Instance = this.Instance
 	out.Address = this.Address
 	out.Port = this.Port
 	out.StreamName = this.StreamName

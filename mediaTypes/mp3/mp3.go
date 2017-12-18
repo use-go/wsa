@@ -3,7 +3,8 @@ package mp3
 import (
 	"errors"
 	"fmt"
-	"logger"
+
+	"github.com/use-go/websocketStreamServer/logger"
 )
 
 //MP3header ,4bytes

@@ -3,18 +3,20 @@ package RTMPService
 import (
 	"container/list"
 	"errors"
-	"events/eLiveListCtrl"
-	"events/eRTMPEvent"
-	"events/eStreamerEvent"
 	"fmt"
-	"logger"
 	"math/rand"
-	"mediaTypes/flv"
 	"net"
 	"strconv"
 	"sync"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eLiveListCtrl"
+	"github.com/use-go/websocketStreamServer/events/eRTMPEvent"
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
 )
 
 type RTMPPuller struct {
@@ -425,7 +427,7 @@ func (this *RTMPPuller) handleInvoke(pkt *RTMPPacket) (err error) {
 
 	case "_result":
 		err = this.handleRTMPResult(amfobj)
-		logger.LOGD(pkt.Body,pkt.MessageTypeId)
+		logger.LOGD(pkt.Body, pkt.MessageTypeId)
 	case "onBWDone":
 		this.rtmp.SendCheckBW()
 		this.rtmp.SendReleaseStream()
@@ -475,7 +477,7 @@ func (this *RTMPPuller) handleInvoke(pkt *RTMPPacket) (err error) {
 	default:
 		logger.LOGW(fmt.Sprintf("method %s not processed", methodProp.Value.StrValue))
 		amfobj.Dump()
-		logger.LOGD(pkt.Body,pkt.MessageTypeId)
+		logger.LOGD(pkt.Body, pkt.MessageTypeId)
 	}
 
 	return

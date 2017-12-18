@@ -3,10 +3,10 @@ package RTSPService
 import (
 	"encoding/json"
 	"errors"
-	"logger"
+	"github.com/use-go/websocketStreamServer/logger"
 	"net"
 	"strconv"
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type RTSPService struct {

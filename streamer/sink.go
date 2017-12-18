@@ -2,8 +2,8 @@ package streamer
 
 import (
 	"errors"
-	"logger"
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type streamSink struct {

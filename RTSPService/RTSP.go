@@ -1,7 +1,7 @@
 package RTSPService
 
 import (
-	"logger"
+	"github.com/use-go/websocketStreamServer/logger"
 	"net"
 	"strconv"
 )

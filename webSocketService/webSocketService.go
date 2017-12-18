@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"logger"
 	"net/http"
 	"strconv"
 	"strings"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+
+	"github.com/use-go/websocketStreamServer/wssAPI"
 
 	"github.com/gorilla/websocket"
-	"HTTPMUX"
+	"github.com/use-go/websocketStreamServer/HTTPMUX"
 )
 
 type WebSocketService struct {
@@ -19,7 +21,7 @@ type WebSocketService struct {
 }
 
 type WebSocketConfig struct {
-	Port int `json:"Port"`
+	Port  int    `json:"Port"`
 	Route string `json:"Route"`
 }
 
@@ -41,7 +43,7 @@ func (this *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 	}
 	service = this
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	HTTPMUX.AddRoute(strPort,serviceConfig.Route,this.ServeHTTP)
+	HTTPMUX.AddRoute(strPort, serviceConfig.Route, this.ServeHTTP)
 	//go func() {
 	//	if true {
 	//		strPort := ":" + strconv.Itoa(serviceConfig.Port)
@@ -92,7 +94,7 @@ func (this *WebSocketService) loadConfigFile(fileName string) (err error) {
 
 func (this *WebSocketService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
-	path=strings.TrimPrefix(path,serviceConfig.Route)
+	path = strings.TrimPrefix(path, serviceConfig.Route)
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
 	//logger.LOGT(path)

@@ -1,7 +1,7 @@
 package eLiveListCtrl
 
 import (
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type EveSetUpStreamApp struct {
@@ -23,11 +23,11 @@ func (this *EveSetUpStreamApp) Type() string {
 	return SetUpStreamApp
 }
 
-func NewSetUpStreamApp(add bool, app,instance, protocol, addr, name string, port, weight int) (out *EveSetUpStreamApp) {
+func NewSetUpStreamApp(add bool, app, instance, protocol, addr, name string, port, weight int) (out *EveSetUpStreamApp) {
 	out = &EveSetUpStreamApp{}
 	out.Add = add
 	out.App = app
-	out.Instance=instance
+	out.Instance = instance
 	out.Protocol = protocol
 	out.Addr = addr
 	out.Port = port
@@ -41,7 +41,7 @@ func (this *EveSetUpStreamApp) Copy() (out *EveSetUpStreamApp) {
 	out.Id = this.Id
 	out.Add = this.Add
 	out.App = this.App
-	out.Instance=this.Instance
+	out.Instance = this.Instance
 	out.Protocol = this.Protocol
 	out.Addr = this.Addr
 	out.Port = this.Port

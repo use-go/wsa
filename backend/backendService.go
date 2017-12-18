@@ -3,10 +3,11 @@ package backend
 import (
 	"encoding/json"
 	"errors"
-	"logger"
 	"net/http"
 	"strconv"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type backendHander interface {

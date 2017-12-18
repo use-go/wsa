@@ -3,15 +3,16 @@ package streamer
 import (
 	"container/list"
 	"errors"
-	"events/eLiveListCtrl"
-	"events/eRTMPEvent"
 	"fmt"
-	"logger"
 	"math/rand"
 	"reflect"
 	"strings"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eLiveListCtrl"
+	"github.com/use-go/websocketStreamServer/events/eRTMPEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 func enableBlackList(enable bool) (err error) {
@@ -281,13 +282,13 @@ func (this *StreamerService) pullStreamExec(app, streamName string, addr *eLiveL
 	case "rtmp":
 		task := &eRTMPEvent.EvePullRTMPStream{}
 		task.App = addr.App
-		if strings.Contains(app,"/"){
-			tmp:=strings.Split(app,"/")
-			task.Instance=strings.TrimPrefix(app,tmp[0])
-			task.Instance=strings.TrimPrefix(task.Instance,"/")
-			task.App+="/"+task.Instance
-		}else{
-			task.Instance=addr.Instance
+		if strings.Contains(app, "/") {
+			tmp := strings.Split(app, "/")
+			task.Instance = strings.TrimPrefix(app, tmp[0])
+			task.Instance = strings.TrimPrefix(task.Instance, "/")
+			task.App += "/" + task.Instance
+		} else {
+			task.Instance = addr.Instance
 		}
 		task.Address = addr.Addr
 		task.Port = addr.Port

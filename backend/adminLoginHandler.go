@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type adminLoginHandler struct {

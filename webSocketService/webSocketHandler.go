@@ -4,15 +4,16 @@ import (
 	"container/list"
 	"encoding/json"
 	"errors"
-	"events/eStreamerEvent"
 	"fmt"
-	"logger"
-	"mediaTypes/amf"
-	"mediaTypes/flv"
-	"mediaTypes/mp4"
 	"sync"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/mediaTypes/mp4"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 
 	"github.com/gorilla/websocket"
 )

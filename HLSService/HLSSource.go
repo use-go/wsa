@@ -3,18 +3,19 @@ package HLSService
 import (
 	"container/list"
 	"errors"
-	"events/eStreamerEvent"
 	"fmt"
-	"logger"
-	"mediaTypes/flv"
-	"mediaTypes/ts"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/mediaTypes/ts"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type hlsTsData struct {

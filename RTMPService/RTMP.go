@@ -3,13 +3,14 @@ package RTMPService
 import (
 	"errors"
 	"fmt"
-	"logger"
 	"math/rand"
-	"mediaTypes/flv"
 	"net"
 	"strconv"
 	"sync"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 const (

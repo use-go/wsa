@@ -1,7 +1,7 @@
 package eLiveListCtrl
 
 import (
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type EveGetLivePlayerCount struct {

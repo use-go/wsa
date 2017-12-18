@@ -5,12 +5,14 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"errors"
-	"logger"
 	"math/rand"
 	"net"
 	"strconv"
 	"time"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 //RTMP握手协议，包括简单握手和复杂握手

@@ -3,7 +3,7 @@ package RTSPService
 import (
 	"math/rand"
 	"sync"
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type ssrcManager struct {

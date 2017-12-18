@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"logger"
+	"github.com/use-go/websocketStreamServer/logger"
 )
 
 const (

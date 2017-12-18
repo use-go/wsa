@@ -3,14 +3,16 @@ package HLSService
 import (
 	"encoding/json"
 	"errors"
-	"logger"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"wssAPI"
-	"HTTPMUX"
+
+	"github.com/use-go/websocketStreamServer/logger"
+
+	"github.com/use-go/websocketStreamServer/HTTPMUX"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type HLSService struct {
@@ -47,7 +49,7 @@ func (this *HLSService) Init(msg *wssAPI.Msg) (err error) {
 	service = this
 
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	HTTPMUX.AddRoute(strPort,serviceConfig.Route,this.ServeHTTP)
+	HTTPMUX.AddRoute(strPort, serviceConfig.Route, this.ServeHTTP)
 
 	if len(serviceConfig.ICO) > 0 {
 		this.icoData, err = wssAPI.ReadFileAll(serviceConfig.ICO)

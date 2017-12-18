@@ -3,13 +3,14 @@ package RTMPService
 import (
 	"container/list"
 	"errors"
-	"events/eStreamerEvent"
 	"fmt"
-	"logger"
-	"mediaTypes/flv"
 	"strings"
 	"sync"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type RTMPHandler struct {

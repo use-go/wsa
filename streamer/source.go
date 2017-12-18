@@ -3,11 +3,12 @@ package streamer
 import (
 	"errors"
 	"fmt"
-	"logger"
-	"mediaTypes/flv"
 	"net"
 	"sync"
-	"wssAPI"
+
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type streamSource struct {

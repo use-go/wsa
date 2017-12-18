@@ -1,23 +1,24 @@
 package svrBus
 
 import (
-	"HLSService"
-	"RTMPService"
-	"backend"
 	"encoding/json"
 	"errors"
-	"logger"
 	"os"
 	"runtime"
-	"streamer"
 	"strings"
 	"sync"
 	"time"
-	"webSocketService"
-	"wssAPI"
-	"HTTPMUX"
-	"DASH"
-	"RTSPService"
+
+	"github.com/use-go/websocketStreamServer/DASH"
+	"github.com/use-go/websocketStreamServer/HLSService"
+	"github.com/use-go/websocketStreamServer/HTTPMUX"
+	"github.com/use-go/websocketStreamServer/RTMPService"
+	"github.com/use-go/websocketStreamServer/RTSPService"
+	"github.com/use-go/websocketStreamServer/backend"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/streamer"
+	"github.com/use-go/websocketStreamServer/webSocketService"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
 type busConfig struct {
@@ -27,8 +28,8 @@ type busConfig struct {
 	LogPath                 string `json:"LogPath"`
 	StreamManagerConfigName string `json:"Streamer"`
 	HLSConfigName           string `json:"HLS"`
-	DASHConfigName 			string `json:"DASH,omitempty"`
-	RTSPConfigName string `json:"RTSP,omitempty"`
+	DASHConfigName          string `json:"DASH,omitempty"`
+	RTSPConfigName          string `json:"RTSP,omitempty"`
 }
 
 type SvrBus struct {
@@ -168,15 +169,15 @@ func (this *SvrBus) loadConfig() (err error) {
 		}
 	}
 
-	if len(cfg.DASHConfigName)>0{
-		dash:=&DASH.DASHService{}
-		msg:=&wssAPI.Msg{Param1:cfg.DASHConfigName}
-		err=dash.Init(msg)
-		if err!=nil{
+	if len(cfg.DASHConfigName) > 0 {
+		dash := &DASH.DASHService{}
+		msg := &wssAPI.Msg{Param1: cfg.DASHConfigName}
+		err = dash.Init(msg)
+		if err != nil {
 			logger.LOGE(err.Error())
-		}else{
+		} else {
 			this.mutexServices.Lock()
-			this.services[dash.GetType()]=dash
+			this.services[dash.GetType()] = dash
 			this.mutexServices.Unlock()
 		}
 	}

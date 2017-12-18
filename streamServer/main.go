@@ -1,8 +1,9 @@
 package main
 
 import (
-	"logger"
-	"svrbus"
+	"github.com/use-go/websocketStreamServer/logger"
+
+	"github.com/use-go/websocketStreamServer/svrBus"
 )
 
 func main() {

@@ -2,8 +2,8 @@ package webSocketService
 
 import (
 	"encoding/json"
-	"logger"
-	"wssAPI"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 
 	"github.com/gorilla/websocket"
 )
