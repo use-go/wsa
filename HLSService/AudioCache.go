@@ -13,27 +13,27 @@ type audioCache struct {
 	aacCache  *aac.AACCreater
 }
 
-func (this *audioCache) Init(tag *flv.FlvTag) {
-	this.audioType = int((tag.Data[0] >> 4) & 0xf)
-	if this.audioType == flv.SoundFormat_AAC {
-		this.aacCache = &aac.AACCreater{}
-		this.aacCache.Init(tag.Data[2:])
+func (audio *audioCache) Init(tag *flv.FlvTag) {
+	audio.audioType = int((tag.Data[0] >> 4) & 0xf)
+	if audio.audioType == flv.SoundFormat_AAC {
+		audio.aacCache = &aac.AACCreater{}
+		audio.aacCache.Init(tag.Data[2:])
 	} else {
 		logger.LOGW("sound fmt not processed")
 	}
 }
 
-func (this *audioCache) AddTag(tag *flv.FlvTag) {
-	if this.audioType == flv.SoundFormat_AAC {
-		this.aacCache.Add(tag.Data[2:])
+func (audio *audioCache) AddTag(tag *flv.FlvTag) {
+	if audio.audioType == flv.SoundFormat_AAC {
+		audio.aacCache.Add(tag.Data[2:])
 	} else {
 		//		logger.LOGW("sound fmt not processed")
 	}
 }
 
-func (this *audioCache) Flush() (data []byte) {
-	if this.audioType == flv.SoundFormat_AAC {
-		data = this.aacCache.Flush()
+func (audio *audioCache) Flush() (data []byte) {
+	if audio.audioType == flv.SoundFormat_AAC {
+		data = audio.aacCache.Flush()
 		return data
 	} else {
 		return nil

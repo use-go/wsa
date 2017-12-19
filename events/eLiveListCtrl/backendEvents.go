@@ -2,6 +2,7 @@ package eLiveListCtrl
 
 import (
 	"container/list"
+
 	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
@@ -20,11 +21,11 @@ type EveEnableBlackList struct {
 	Enable bool
 }
 
-func (this *EveEnableBlackList) Receiver() string {
+func (eveEnableBlackList *EveEnableBlackList) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveEnableBlackList) Type() string {
+func (eveEnableBlackList *EveEnableBlackList) Type() string {
 	return EnableBlackList
 }
 
@@ -33,11 +34,11 @@ type EveSetBlackList struct {
 	Names *list.List
 }
 
-func (this *EveSetBlackList) Receiver() string {
+func (eveSetBlackList *EveSetBlackList) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveSetBlackList) Type() string {
+func (eveSetBlackList *EveSetBlackList) Type() string {
 	return SetBlackList
 }
 
@@ -46,11 +47,11 @@ type EveEnableWhiteList struct {
 	Enable bool
 }
 
-func (this *EveEnableWhiteList) Receiver() string {
+func (eveEnableWhiteList *EveEnableWhiteList) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveEnableWhiteList) Type() string {
+func (eveEnableWhiteList *EveEnableWhiteList) Type() string {
 	return EnableWhiteList
 }
 
@@ -59,10 +60,10 @@ type EveSetWhiteList struct {
 	Names *list.List
 }
 
-func (this *EveSetWhiteList) Receiver() string {
+func (eveSetWhiteList *EveSetWhiteList) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveSetWhiteList) Type() string {
+func (eveSetWhiteList *EveSetWhiteList) Type() string {
 	return SetWhiteList
 }

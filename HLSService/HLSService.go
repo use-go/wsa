@@ -30,7 +30,7 @@ type HLSConfig struct {
 var service *HLSService
 var serviceConfig HLSConfig
 
-func (this *HLSService) Init(msg *wssAPI.Msg) (err error) {
+func (hlsService *HLSService) Init(msg *wssAPI.Msg) (err error) {
 	defer func() {
 		if nil != err {
 			logger.LOGE(err.Error())
@@ -40,19 +40,19 @@ func (this *HLSService) Init(msg *wssAPI.Msg) (err error) {
 		err = errors.New("invalid param")
 		return
 	}
-	this.sources = make(map[string]*HLSSource)
+	hlsService.sources = make(map[string]*HLSSource)
 	fileName := msg.Param1.(string)
-	err = this.loadConfigFile(fileName)
+	err = hlsService.loadConfigFile(fileName)
 	if err != nil {
 		return
 	}
-	service = this
+	service = hlsService
 
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	HTTPMUX.AddRoute(strPort, serviceConfig.Route, this.ServeHTTP)
+	HTTPMUX.AddRoute(strPort, serviceConfig.Route, hlsService.ServeHTTP)
 
 	if len(serviceConfig.ICO) > 0 {
-		this.icoData, err = wssAPI.ReadFileAll(serviceConfig.ICO)
+		hlsService.icoData, err = wssAPI.ReadFileAll(serviceConfig.ICO)
 		if err != nil {
 			logger.LOGW(err.Error())
 			err = nil
@@ -69,7 +69,7 @@ func (this *HLSService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *HLSService) loadConfigFile(fileName string) (err error) {
+func (hlsService *HLSService) loadConfigFile(fileName string) (err error) {
 	buf, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		return err
@@ -81,38 +81,38 @@ func (this *HLSService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
-func (this *HLSService) Start(msg *wssAPI.Msg) (err error) {
+func (hlsService *HLSService) Start(msg *wssAPI.Msg) (err error) {
 
 	go func() {
 		//strPort := ":" + strconv.Itoa(serviceConfig.Port)
 		//mux := http.NewServeMux()
-		//mux.Handle(serviceConfig.Route, this)
+		//mux.Handle(serviceConfig.Route, hlsService)
 		//err = http.ListenAndServe(strPort, mux)
 		//if err != nil {
 		//	logger.LOGE("start websocket failed:" + err.Error())
 		//}
-		//HTTPMUX.AddRoute(strPort,serviceConfig.Route,this.ServeHTTP)
+		//HTTPMUX.AddRoute(strPort,serviceConfig.Route,hlsService.ServeHTTP)
 	}()
 	return
 }
 
-func (this *HLSService) Stop(msg *wssAPI.Msg) (err error) {
+func (hlsService *HLSService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *HLSService) GetType() string {
+func (hlsService *HLSService) GetType() string {
 	return wssAPI.OBJ_HLSServer
 }
 
-func (this *HLSService) HandleTask(task wssAPI.Task) (err error) {
+func (hlsService *HLSService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *HLSService) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (hlsService *HLSService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (hlsService *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//url path:/prefex/app/streamname/level/master.m3u8 or a.m3u8 or v.m3u8
 	//first v only
 	defer func() {
@@ -157,11 +157,11 @@ func (this *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			streamName = strings.TrimSuffix(streamName, "/")
 			//
 			//logger.LOGD(streamName)
-			this.muxSource.RLock()
-			source, exist := this.sources[streamName]
-			this.muxSource.RUnlock()
+			hlsService.muxSource.RLock()
+			source, exist := hlsService.sources[streamName]
+			hlsService.muxSource.RUnlock()
 			if exist == false {
-				source = this.createSource(streamName)
+				source = hlsService.createSource(streamName)
 				if wssAPI.InterfaceIsNil(source) {
 					logger.LOGE("add hls source " + streamName + " failed")
 					w.WriteHeader(404)
@@ -179,10 +179,10 @@ func (this *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	} else {
 		//ico or invalid
 		if "favicon.ico" == url {
-			if len(this.icoData) > 0 {
-				contentType := http.DetectContentType(this.icoData)
+			if len(hlsService.icoData) > 0 {
+				contentType := http.DetectContentType(hlsService.icoData)
 				w.Header().Set("Content-type", contentType)
-				w.Write(this.icoData)
+				w.Write(hlsService.icoData)
 			}
 		} else {
 			w.WriteHeader(404)
@@ -190,28 +190,28 @@ func (this *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (this *HLSService) Add(key string, v *HLSSource) (err error) {
-	this.muxSource.Lock()
-	defer this.muxSource.Unlock()
-	_, ok := this.sources[key]
+func (hlsService *HLSService) Add(key string, v *HLSSource) (err error) {
+	hlsService.muxSource.Lock()
+	defer hlsService.muxSource.Unlock()
+	_, ok := hlsService.sources[key]
 	if true == ok {
 		err = errors.New("source existed")
 		return
 	}
-	this.sources[key] = v
+	hlsService.sources[key] = v
 	return
 }
 
-func (this *HLSService) DelSource(key, id string) {
-	this.muxSource.Lock()
-	defer this.muxSource.Unlock()
-	src, exist := this.sources[key]
+func (hlsService *HLSService) DelSource(key, id string) {
+	hlsService.muxSource.Lock()
+	defer hlsService.muxSource.Unlock()
+	src, exist := hlsService.sources[key]
 	if exist && src.clientId == id {
-		delete(this.sources, key)
+		delete(hlsService.sources, key)
 	}
 }
 
-func (this *HLSService) createSource(streamName string) (source *HLSSource) {
+func (hlsService *HLSService) createSource(streamName string) (source *HLSSource) {
 	chSvr := make(chan bool, 1)
 	msg := &wssAPI.Msg{
 		Param1: streamName,
@@ -230,14 +230,14 @@ func (this *HLSService) createSource(streamName string) (source *HLSSource) {
 		if false == ok || false == ret {
 			source.Stop(nil)
 		} else {
-			this.muxSource.Lock()
-			defer this.muxSource.Unlock()
-			old, exist := this.sources[streamName]
+			hlsService.muxSource.Lock()
+			defer hlsService.muxSource.Unlock()
+			old, exist := hlsService.sources[streamName]
 			if exist == true {
 				source.Stop(nil)
 				return old
 			} else {
-				this.sources[streamName] = source
+				hlsService.sources[streamName] = source
 				return source
 			}
 		}

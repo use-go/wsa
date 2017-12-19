@@ -2,12 +2,14 @@ package webSocketService
 
 import (
 	"encoding/json"
+
 	"github.com/use-go/websocketStreamServer/logger"
 	"github.com/use-go/websocketStreamServer/wssAPI"
 
 	"github.com/gorilla/websocket"
 )
 
+// WS Status
 const (
 	WS_status_status = "status"
 	WS_status_error  = "error"
@@ -20,6 +22,7 @@ const (
 	WS_pkt_control = 18
 )
 
+// WS Cmd
 const (
 	WSC_play       = 1
 	WSC_play2      = 2
@@ -90,6 +93,7 @@ func supportNewCmd(cmdOld, cmdNew int) bool {
 	return cmdsMap[cmdOld].Has(cmdNew)
 }
 
+// SendWsControl Control command
 func SendWsControl(conn *websocket.Conn, ctrlType int, data []byte) (err error) {
 	dataSend := make([]byte, len(data)+4)
 	dataSend[0] = WS_pkt_control
@@ -166,6 +170,7 @@ type stResult struct {
 	Req   int    `json:"req"`
 }
 
+// const string resource
 const (
 	NETCONNECTION_CALL_FAILED         = "NetConnection.Call.Failed"
 	NETCONNECTION_CONNECT_APPSHUTDOWN = "NetConnection.Connect.AppShutdown"

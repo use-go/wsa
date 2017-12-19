@@ -16,10 +16,10 @@ type EveGetLiveList struct {
 	Lives *list.List //value =*LiveInfo
 }
 
-func (this *EveGetLiveList) Receiver() string {
+func (eveGetLiveList *EveGetLiveList) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveGetLiveList) Type() string {
+func (eveGetLiveList *EveGetLiveList) Type() string {
 	return GetLiveList
 }

@@ -16,11 +16,11 @@ type EveAddSink struct {
 	Added      bool       //out
 }
 
-func (this *EveAddSink) Receiver() string {
+func (eveAddSink *EveAddSink) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveAddSink) Type() string {
+func (eveAddSink *EveAddSink) Type() string {
 	return AddSink
 }
 
@@ -29,10 +29,10 @@ type EveDelSink struct {
 	SinkId     string //in
 }
 
-func (this *EveDelSink) Receiver() string {
+func (eveAddSink *EveDelSink) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveDelSink) Type() string {
+func (eveAddSink *EveDelSink) Type() string {
 	return DelSink
 }

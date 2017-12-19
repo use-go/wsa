@@ -153,7 +153,7 @@ func getPlayerCount(name string) (count int, err error) {
 	return
 }
 
-func (this *StreamerService) checkStreamAddAble(appStreamname string) bool {
+func (streamerService *StreamerService) checkStreamAddAble(appStreamname string) bool {
 	tmp := strings.Split(appStreamname, "/")
 	var name string
 	if len(tmp) > 1 {
@@ -161,19 +161,19 @@ func (this *StreamerService) checkStreamAddAble(appStreamname string) bool {
 	} else {
 		name = appStreamname
 	}
-	this.mutexBlackList.RLock()
-	defer this.mutexBlackList.RUnlock()
-	if this.blackOn {
-		for k, _ := range this.blacks {
+	streamerService.mutexBlackList.RLock()
+	defer streamerService.mutexBlackList.RUnlock()
+	if streamerService.blackOn {
+		for k, _ := range streamerService.blacks {
 			if name == k {
 				return false
 			}
 		}
 	}
-	this.mutexWhiteList.RLock()
-	defer this.mutexWhiteList.RUnlock()
-	if this.whiteOn {
-		for k, _ := range this.whites {
+	streamerService.mutexWhiteList.RLock()
+	defer streamerService.mutexWhiteList.RUnlock()
+	if streamerService.whiteOn {
+		for k, _ := range streamerService.whites {
 			if name == k {
 				return true
 			}
@@ -183,15 +183,15 @@ func (this *StreamerService) checkStreamAddAble(appStreamname string) bool {
 	return true
 }
 
-func (this *StreamerService) addUpstream(app *eLiveListCtrl.EveSetUpStreamApp) (err error) {
-	this.mutexUpStream.Lock()
-	defer this.mutexUpStream.Unlock()
+func (streamerService *StreamerService) addUpstream(app *eLiveListCtrl.EveSetUpStreamApp) (err error) {
+	streamerService.mutexUpStream.Lock()
+	defer streamerService.mutexUpStream.Unlock()
 	exist := false
 	if app.Weight < 1 {
 		app.Weight = 1
 	}
 	logger.LOGD(app.Id)
-	for e := this.upApps.Front(); e != nil; e = e.Next() {
+	for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
 		if v.Equal(app) {
 			exist = true
@@ -201,50 +201,49 @@ func (this *StreamerService) addUpstream(app *eLiveListCtrl.EveSetUpStreamApp) (
 
 	if exist {
 		return errors.New("add up app:" + app.Id + " existed")
-	} else {
-		this.upApps.PushBack(app.Copy())
 	}
+	streamerService.upApps.PushBack(app.Copy())
 
 	return
 }
 
-func (this *StreamerService) delUpstream(app *eLiveListCtrl.EveSetUpStreamApp) (err error) {
-	this.mutexUpStream.Lock()
-	defer this.mutexUpStream.Unlock()
-	for e := this.upApps.Front(); e != nil; e = e.Next() {
+func (streamerService *StreamerService) delUpstream(app *eLiveListCtrl.EveSetUpStreamApp) (err error) {
+	streamerService.mutexUpStream.Lock()
+	defer streamerService.mutexUpStream.Unlock()
+	for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
 		if v.Equal(app) {
-			this.upApps.Remove(e)
+			streamerService.upApps.Remove(e)
 			return
 		}
 	}
 	return errors.New("del up app: " + app.Id + " not existed")
 }
 
-func (this *StreamerService) SetParent(parent wssAPI.Obj) {
-	this.parent = parent
+func (streamerService *StreamerService) SetParent(parent wssAPI.Obj) {
+	streamerService.parent = parent
 }
 
-func (this *StreamerService) badIni() {
+// badIni IF err happened  during initialization we call streamerService
+func (streamerService *StreamerService) badIni() {
 	logger.LOGW("some bad init here!!!")
 	//taskAddUp := eLiveListCtrl.NewSetUpStreamApp(true, "live", "rtmp", "live.hkstv.hk.lxdns.com", 1935)
 	//	taskAddUp := eLiveListCtrl.NewSetUpStreamApp(true, "live", "rtmp", "127.0.0.1", 1935)
-	//	this.HandleTask(taskAddUp)
+	//	streamerService.HandleTask(taskAddUp)
 }
 
-func (this *StreamerService) InitUpstream(up eLiveListCtrl.EveSetUpStreamApp) {
-
+func (streamerService *StreamerService) InitUpstream(up eLiveListCtrl.EveSetUpStreamApp) {
 	up.Add = true
-	this.HandleTask(&up)
+	streamerService.HandleTask(&up)
 }
 
-func (this *StreamerService) getUpAddrAuto() (addr *eLiveListCtrl.EveSetUpStreamApp) {
-	this.mutexUpStream.RLock()
-	defer this.mutexUpStream.RUnlock()
-	size := this.upApps.Len()
+func (streamerService *StreamerService) getUpAddrAuto() (addr *eLiveListCtrl.EveSetUpStreamApp) {
+	streamerService.mutexUpStream.RLock()
+	defer streamerService.mutexUpStream.RUnlock()
+	size := streamerService.upApps.Len()
 	if size > 0 {
 		totalWeight := 0
-		for e := this.upApps.Front(); e != nil; e = e.Next() {
+		for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 			v := e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
 			totalWeight += v.Weight
 		}
@@ -254,7 +253,7 @@ func (this *StreamerService) getUpAddrAuto() (addr *eLiveListCtrl.EveSetUpStream
 		}
 		idx := rand.Intn(totalWeight) + 1
 		cur := 0
-		for e := this.upApps.Front(); e != nil; e = e.Next() {
+		for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 			v := e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
 			cur += v.Weight
 			if cur >= idx {
@@ -265,17 +264,17 @@ func (this *StreamerService) getUpAddrAuto() (addr *eLiveListCtrl.EveSetUpStream
 	return
 }
 
-func (this *StreamerService) getUpAddrCopy() (addrs *list.List) {
-	this.mutexUpStream.RLock()
-	defer this.mutexUpStream.RUnlock()
+func (streamerService *StreamerService) getUpAddrCopy() (addrs *list.List) {
+	streamerService.mutexUpStream.RLock()
+	defer streamerService.mutexUpStream.RUnlock()
 	addrs = list.New()
-	for e := this.upApps.Front(); e != nil; e = e.Next() {
+	for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 		addrs.PushBack(e.Value.(*eLiveListCtrl.EveSetUpStreamApp))
 	}
 	return
 }
 
-func (this *StreamerService) pullStreamExec(app, streamName string, addr *eLiveListCtrl.EveSetUpStreamApp) (src wssAPI.Obj, ok bool) {
+func (streamerService *StreamerService) pullStreamExec(app, streamName string, addr *eLiveListCtrl.EveSetUpStreamApp) (src wssAPI.Obj, ok bool) {
 	chRet := make(chan wssAPI.Obj) //这个ch由任务执行者来关闭
 	protocol := strings.ToLower(addr.Protocol)
 	switch protocol {
@@ -322,14 +321,14 @@ func (this *StreamerService) pullStreamExec(app, streamName string, addr *eLiveL
 	return
 }
 
-func (this *StreamerService) pullStream(app, streamName, sinkId string, sinker wssAPI.Obj) {
+func (streamerService *StreamerService) pullStream(app, streamName, sinkId string, sinker wssAPI.Obj) {
 	//按权重随机一个
-	addr := this.getUpAddrAuto()
+	addr := streamerService.getUpAddrAuto()
 	if nil == addr {
 		logger.LOGE("upstream not found")
 		return
 	}
-	src, ok := this.pullStreamExec(app, streamName, addr)
+	src, ok := streamerService.pullStreamExec(app, streamName, addr)
 	defer func() {
 		if true == ok && wssAPI.InterfaceValid(src) {
 			source, ok := src.(*streamSource)
@@ -356,7 +355,7 @@ func (this *StreamerService) pullStream(app, streamName, sinkId string, sinker w
 		return
 	}
 	//按顺序进行
-	addrs := this.getUpAddrCopy()
+	addrs := streamerService.getUpAddrCopy()
 	for e := addrs.Front(); e != nil; e = e.Next() {
 		var addr *eLiveListCtrl.EveSetUpStreamApp
 		addr, ok = e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
@@ -364,7 +363,7 @@ func (this *StreamerService) pullStream(app, streamName, sinkId string, sinker w
 			logger.LOGE("invalid addr")
 			continue
 		}
-		src, ok = this.pullStreamExec(app, streamName, addr)
+		src, ok = streamerService.pullStreamExec(app, streamName, addr)
 		if true == ok && wssAPI.InterfaceValid(src) {
 			return
 		}

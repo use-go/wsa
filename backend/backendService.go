@@ -26,14 +26,14 @@ type BackendConfig struct {
 
 var serviceConfig BackendConfig
 
-func (this *BackendService) Init(msg *wssAPI.Msg) (err error) {
+func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 	if msg == nil || msg.Param1 == nil {
 		logger.LOGE("init backend service failed")
 		return errors.New("invalid param!")
 	}
 
 	fileName := msg.Param1.(string)
-	err = this.loadConfigFile(fileName)
+	err = backendService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return errors.New("load backend config failed")
@@ -57,7 +57,7 @@ func (this *BackendService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *BackendService) loadConfigFile(fileName string) (err error) {
+func (backendService *BackendService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		return
@@ -70,27 +70,27 @@ func (this *BackendService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
-func (this *BackendService) Start(msg *wssAPI.Msg) (err error) {
+func (backendService *BackendService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *BackendService) Stop(msg *wssAPI.Msg) (err error) {
+func (backendService *BackendService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *BackendService) GetType() string {
+func (backendService *BackendService) GetType() string {
 	return wssAPI.OBJ_BackendServer
 }
 
-func (this *BackendService) HandleTask(task wssAPI.Task) (err error) {
+func (backendService *BackendService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *BackendService) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (backendService *BackendService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *BackendService) SetParent(parent wssAPI.Obj) {
+func (backendService *BackendService) SetParent(parent wssAPI.Obj) {
 	return
 }
 

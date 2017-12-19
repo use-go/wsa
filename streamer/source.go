@@ -27,62 +27,62 @@ type streamSource struct {
 	dataProducer wssAPI.Obj
 }
 
-func (this *streamSource) Init(msg *wssAPI.Msg) (err error) {
-	this.sinks = make(map[string]*streamSink)
-	this.streamName = msg.Param1.(string)
+func (source *streamSource) Init(msg *wssAPI.Msg) (err error) {
+	source.sinks = make(map[string]*streamSink)
+	source.streamName = msg.Param1.(string)
 	return
 }
 
-func (this *streamSource) Start(msg *wssAPI.Msg) (err error) {
+func (source *streamSource) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *streamSource) Stop(msg *wssAPI.Msg) (err error) {
+func (source *streamSource) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *streamSource) GetType() string {
+func (source *streamSource) GetType() string {
 	return streamTypeSource
 }
 
-func (this *streamSource) HandleTask(task wssAPI.Task) (err error) {
+func (source *streamSource) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (source *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
 	case wssAPI.MSG_FLV_TAG:
-		if false == this.bProducer {
+		if false == source.bProducer {
 			return errors.New("src may closed or invalid")
 		}
 		tag := msg.Param1.(*flv.FlvTag)
 		switch tag.TagType {
 		case flv.FLV_TAG_Audio:
-			if this.audioHeader == nil {
-				this.audioHeader = tag.Copy()
-				this.audioHeader.Timestamp = 0
+			if source.audioHeader == nil {
+				source.audioHeader = tag.Copy()
+				source.audioHeader.Timestamp = 0
 			}
 		case flv.FLV_TAG_Video:
-			if this.videoHeader == nil {
-				this.videoHeader = tag.Copy()
-				this.videoHeader.Timestamp = 0
+			if source.videoHeader == nil {
+				source.videoHeader = tag.Copy()
+				source.videoHeader.Timestamp = 0
 			}
 			if (tag.Data[0] >> 4) == 1 {
-				this.lastKeyFrame = tag.Copy()
+				source.lastKeyFrame = tag.Copy()
 			}
 
 		case flv.FLV_TAG_ScriptData:
-			if this.metadata == nil {
-				this.metadata = tag.Copy()
+			if source.metadata == nil {
+				source.metadata = tag.Copy()
 			}
 		}
-		this.mutexSink.RLock()
-		defer this.mutexSink.RUnlock()
-		for k, v := range this.sinks {
+		source.mutexSink.RLock()
+		defer source.mutexSink.RUnlock()
+		for k, v := range source.sinks {
 			err = v.ProcessMessage(msg)
 			if err != nil {
 				logger.LOGE("send msg to sink failed,delete it:" + k)
-				delete(this.sinks, k)
+				delete(source.sinks, k)
 				v.Stop(nil)
 				err = nil //这不是源的锅
 			}
@@ -94,52 +94,52 @@ func (this *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *streamSource) HasProducer() bool {
-	return this.bProducer
+func (source *streamSource) HasProducer() bool {
+	return source.bProducer
 }
 
-func (this *streamSource) SetProducer(status bool) (remove bool) {
-	if status == this.bProducer {
+func (source *streamSource) SetProducer(status bool) (remove bool) {
+	if status == source.bProducer {
 		return
 	}
-	this.bProducer = status
-	if this.bProducer == false {
+	source.bProducer = status
+	if source.bProducer == false {
 		//通知生产者
-		logger.LOGD(this.dataProducer)
-		if wssAPI.InterfaceValid(this.dataProducer) {
+		logger.LOGD(source.dataProducer)
+		if wssAPI.InterfaceValid(source.dataProducer) {
 			logger.LOGD("force closed")
 			msg := &wssAPI.Msg{Type: wssAPI.MSG_SourceClosed_Force}
-			this.dataProducer.ProcessMessage(msg)
-			this.dataProducer = nil
+			source.dataProducer.ProcessMessage(msg)
+			source.dataProducer = nil
 		}
 		//clear cache
-		this.clearCache()
+		source.clearCache()
 		//notify sinks stop
-		if 0 == len(this.sinks) {
+		if 0 == len(source.sinks) {
 			return true
 		}
-		this.mutexSink.RLock()
-		defer this.mutexSink.RUnlock()
-		for _, v := range this.sinks {
+		source.mutexSink.RLock()
+		defer source.mutexSink.RUnlock()
+		for _, v := range source.sinks {
 			v.Stop(nil)
 		}
 		return
 	} else {
 		//notify sinks start
-		this.mutexSink.RLock()
-		defer this.mutexSink.RUnlock()
-		for _, v := range this.sinks {
+		source.mutexSink.RLock()
+		defer source.mutexSink.RUnlock()
+		for _, v := range source.sinks {
 			v.Start(nil)
 		}
 		return
 	}
 }
 
-func (this *streamSource) AddSink(id string, sinker wssAPI.Obj) (err error) {
-	this.mutexSink.Lock()
-	defer this.mutexSink.Unlock()
-	logger.LOGT(this.streamName + " add sink:" + id)
-	_, exist := this.sinks[id]
+func (source *streamSource) AddSink(id string, sinker wssAPI.Obj) (err error) {
+	source.mutexSink.Lock()
+	defer source.mutexSink.Unlock()
+	logger.LOGT(source.streamName + " add sink:" + id)
+	_, exist := source.sinks[id]
 	if true == exist {
 		return errors.New("sink " + id + " exist")
 	}
@@ -153,26 +153,26 @@ func (this *streamSource) AddSink(id string, sinker wssAPI.Obj) (err error) {
 		return
 	}
 
-	this.sinks[id] = sink
-	if this.bProducer {
+	source.sinks[id] = sink
+	if source.bProducer {
 		err = sink.Start(nil)
-		if this.metadata != nil {
-			msg.Param1 = this.metadata
+		if source.metadata != nil {
+			msg.Param1 = source.metadata
 			msg.Type = wssAPI.MSG_FLV_TAG
 			sink.ProcessMessage(msg)
 		}
-		if this.audioHeader != nil {
-			msg.Param1 = this.audioHeader
+		if source.audioHeader != nil {
+			msg.Param1 = source.audioHeader
 			msg.Type = wssAPI.MSG_FLV_TAG
 			sink.ProcessMessage(msg)
 		}
-		if this.videoHeader != nil {
-			msg.Param1 = this.videoHeader
+		if source.videoHeader != nil {
+			msg.Param1 = source.videoHeader
 			msg.Type = wssAPI.MSG_FLV_TAG
 			sink.ProcessMessage(msg)
 		}
-		if this.lastKeyFrame != nil {
-			msg.Param1 = this.lastKeyFrame
+		if source.lastKeyFrame != nil {
+			msg.Param1 = source.lastKeyFrame
 			msg.Type = wssAPI.MSG_FLV_TAG
 			logger.LOGD("not send last keyframe")
 			//			sink.ProcessMessage(msg)
@@ -181,14 +181,14 @@ func (this *streamSource) AddSink(id string, sinker wssAPI.Obj) (err error) {
 	return
 }
 
-func (this *streamSource) clearCache() {
+func (source *streamSource) clearCache() {
 	logger.LOGT("clear cache")
-	this.metadata = nil
-	this.audioHeader = nil
-	this.videoHeader = nil
-	this.lastKeyFrame = nil
+	source.metadata = nil
+	source.audioHeader = nil
+	source.videoHeader = nil
+	source.lastKeyFrame = nil
 }
 
-func (this *streamSource) SetParent(parent wssAPI.Obj) {
-	this.parent = parent
+func (source *streamSource) SetParent(parent wssAPI.Obj) {
+	source.parent = parent
 }

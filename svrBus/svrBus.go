@@ -32,26 +32,29 @@ type busConfig struct {
 	RTSPConfigName          string `json:"RTSP,omitempty"`
 }
 
-type SvrBus struct {
+//ServiceBus : ServiceBus holding all the Service that will be launched in Process
+type ServiceBus struct {
 	mutexServices sync.RWMutex
 	services      map[string]wssAPI.Obj
 }
 
-var service *SvrBus
+var serviceBus *ServiceBus
 
 func init() {
-	service = &SvrBus{}
-	wssAPI.SetBus(service)
+	serviceBus = &ServiceBus{}
+	wssAPI.SetBus(serviceBus)
 }
 
+// Start init the server processing
 func Start() {
-	service.Init(nil)
-	service.Start(nil)
+	serviceBus.Init(nil)
+	serviceBus.Start(nil)
 }
 
-func (this *SvrBus) Init(msg *wssAPI.Msg) (err error) {
-	this.services = make(map[string]wssAPI.Obj)
-	err = this.loadConfig()
+// Init the configed service such as hls/dash/rtsp
+func (srvBus *ServiceBus) Init(msg *wssAPI.Msg) (err error) {
+	srvBus.services = make(map[string]wssAPI.Obj)
+	err = srvBus.loadConfig()
 	if err != nil {
 		logger.LOGE("svr bus load config failed")
 		return
@@ -59,8 +62,8 @@ func (this *SvrBus) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *SvrBus) loadConfig() (err error) {
-	var configName string
+func (srvBus *ServiceBus) loadConfig() (err error) {
+	configName := ""
 	if len(os.Args) > 1 {
 		configName = os.Args[1]
 	} else {
@@ -81,7 +84,7 @@ func (this *SvrBus) loadConfig() (err error) {
 	}
 
 	if len(cfg.LogPath) > 0 {
-		this.createLogFile(cfg.LogPath)
+		srvBus.createLogFile(cfg.LogPath)
 	}
 
 	if true {
@@ -94,12 +97,13 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[livingSvr.GetType()] = livingSvr
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[livingSvr.GetType()] = livingSvr
+			srvBus.mutexServices.Unlock()
 		}
 	}
 
+	//start RTMP Service
 	if len(cfg.RTMPConfigName) > 0 {
 		rtmpSvr := &RTMPService.RTMPService{}
 		msg := &wssAPI.Msg{}
@@ -108,12 +112,13 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[rtmpSvr.GetType()] = rtmpSvr
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[rtmpSvr.GetType()] = rtmpSvr
+			srvBus.mutexServices.Unlock()
 		}
 	}
 
+	//start WebSocket Service
 	if len(cfg.WebSocketConfigName) > 0 {
 		webSocketSvr := &webSocketService.WebSocketService{}
 		msg := &wssAPI.Msg{}
@@ -122,12 +127,13 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[webSocketSvr.GetType()] = webSocketSvr
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[webSocketSvr.GetType()] = webSocketSvr
+			srvBus.mutexServices.Unlock()
 		}
 	}
 
+	//start backendService
 	if len(cfg.BackendConfigName) > 0 {
 		backendSvr := &backend.BackendService{}
 		msg := &wssAPI.Msg{}
@@ -136,12 +142,13 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[backendSvr.GetType()] = backendSvr
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[backendSvr.GetType()] = backendSvr
+			srvBus.mutexServices.Unlock()
 		}
 	}
 
+	//start RTSP Service
 	if len(cfg.RTSPConfigName) > 0 {
 		rtspSvr := &RTSPService.RTSPService{}
 		msg := &wssAPI.Msg{}
@@ -150,12 +157,12 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[rtspSvr.GetType()] = rtspSvr
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[rtspSvr.GetType()] = rtspSvr
+			srvBus.mutexServices.Unlock()
 		}
 	}
-
+	//start HLS Service
 	if len(cfg.HLSConfigName) > 0 {
 		hls := &HLSService.HLSService{}
 		msg := &wssAPI.Msg{Param1: cfg.HLSConfigName}
@@ -163,12 +170,12 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[hls.GetType()] = hls
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[hls.GetType()] = hls
+			srvBus.mutexServices.Unlock()
 		}
 	}
-
+	//start DASH Service
 	if len(cfg.DASHConfigName) > 0 {
 		dash := &DASH.DASHService{}
 		msg := &wssAPI.Msg{Param1: cfg.DASHConfigName}
@@ -176,15 +183,15 @@ func (this *SvrBus) loadConfig() (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			this.mutexServices.Lock()
-			this.services[dash.GetType()] = dash
-			this.mutexServices.Unlock()
+			srvBus.mutexServices.Lock()
+			srvBus.services[dash.GetType()] = dash
+			srvBus.mutexServices.Unlock()
 		}
 	}
 	return
 }
 
-func (this *SvrBus) createLogFile(logPath string) {
+func (srvBus *ServiceBus) createLogFile(logPath string) {
 	if strings.HasSuffix(logPath, "/") {
 		logPath = strings.TrimSuffix(logPath, "/")
 	}
@@ -205,7 +212,7 @@ func (this *SvrBus) createLogFile(logPath string) {
 		return
 	}
 	logger.SetOutput(fp)
-	//avoid one log file too big
+	//start a go routine in backgroud to avoid one log file grouthing too big
 	go func() {
 		logFileTick := time.Tick(time.Hour * 72)
 		for {
@@ -223,15 +230,16 @@ func (this *SvrBus) createLogFile(logPath string) {
 	}()
 }
 
-func (this *SvrBus) Start(msg *wssAPI.Msg) (err error) {
+//Start all the configed service ,such as rtsp ,websocket ,backend
+func (srvBus *ServiceBus) Start(msg *wssAPI.Msg) (err error) {
 	//if false {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//}
 	HTTPMUX.Start()
-	this.mutexServices.RLock()
-	defer this.mutexServices.RUnlock()
-	for k, v := range this.services {
-		//v.SetParent(this)
+	srvBus.mutexServices.RLock()
+	defer srvBus.mutexServices.RUnlock()
+	for k, v := range srvBus.services {
+		//v.SetParent(srvBus)
 		err = v.Start(nil)
 		if err != nil {
 			logger.LOGE("start " + k + " failed:" + err.Error())
@@ -243,34 +251,35 @@ func (this *SvrBus) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *SvrBus) Stop(msg *wssAPI.Msg) (err error) {
-	this.mutexServices.RLock()
-	defer this.mutexServices.RUnlock()
-	for _, v := range this.services {
+//Stop all the launched services
+func (srvBus *ServiceBus) Stop(msg *wssAPI.Msg) (err error) {
+	srvBus.mutexServices.RLock()
+	defer srvBus.mutexServices.RUnlock()
+	for _, v := range srvBus.services {
 		err = v.Stop(nil)
 	}
 	return
 }
 
-func (this *SvrBus) GetType() string {
+func (srvBus *ServiceBus) GetType() string {
 	return wssAPI.OBJ_ServerBus
 }
 
-func (this *SvrBus) HandleTask(task wssAPI.Task) (err error) {
-	this.mutexServices.RLock()
-	defer this.mutexServices.RUnlock()
-	handler, exist := this.services[task.Receiver()]
+func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {
+	srvBus.mutexServices.RLock()
+	defer srvBus.mutexServices.RUnlock()
+	handler, exist := srvBus.services[task.Receiver()]
 	if exist == false {
 		return errors.New("invalid task")
 	}
 	return handler.HandleTask(task)
 }
 
-func (this *SvrBus) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (srvBus *ServiceBus) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return nil
 }
 
-func (this *SvrBus) SetParent(arent wssAPI.Obj) {
+func (srvBus *ServiceBus) SetParent(arent wssAPI.Obj) {
 
 }
 

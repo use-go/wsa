@@ -9,10 +9,10 @@ type EveGetLivePlayerCount struct {
 	Count    int
 }
 
-func (this *EveGetLivePlayerCount) Receiver() string {
+func (eveGetLivePlayerCount *EveGetLivePlayerCount) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveGetLivePlayerCount) Type() string {
+func (eveGetLivePlayerCount *EveGetLivePlayerCount) Type() string {
 	return GetLivePlayerCount
 }

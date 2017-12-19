@@ -13,7 +13,7 @@ import (
 //ADTS: aac-main=0
 const (
 	AOT_NULL = iota
-	// Support?                Name
+	// Support?                                   Name
 	AOT_AAC_MAIN     ///< Y                       Main
 	AOT_AAC_LC       ///< Y                       Low Complexity
 	AOT_AAC_SSR      ///< N (code in SoC repo)    Scalable Sample Rate

@@ -25,15 +25,6 @@ const (
 	logCacheSize     = 1024
 )
 
-func init() {
-	logInstance.console = true
-	logInstance.outputSeted = false
-	logInstance.buffer = new(bytes.Buffer)
-	logInstance.chans = make(chan []byte, LogChanCacheSize)
-	logInstance.flag_log = LOG_SHORT_FILE
-	go logInstance.threadLog()
-}
-
 type logInfo struct {
 	level    int
 	flag_log int
@@ -48,12 +39,22 @@ type logInfo struct {
 
 var logInstance logInfo
 
+// log flag ,which can be combined by bit.
 const (
 	LOG_NO_FILE    = 0x0
 	LOG_LONG_FILE  = 0x1
 	LOG_SHORT_FILE = 0x2
 	LOG_TIME       = 0x4
 )
+
+func init() {
+	logInstance.console = true
+	logInstance.outputSeted = false
+	logInstance.buffer = new(bytes.Buffer)
+	logInstance.chans = make(chan []byte, LogChanCacheSize)
+	logInstance.flag_log = LOG_SHORT_FILE
+	go logInstance.threadLog()
+}
 
 func SetLogLevel(l int) {
 	logInstance.level = l
@@ -111,11 +112,11 @@ func LOGF(v ...interface{}) {
 	}
 }
 
-func (this *logInfo) getLogAppend(lvl int, v ...interface{}) (str string) {
+func (log *logInfo) getLogAppend(lvl int, v ...interface{}) (str string) {
 	str = ""
 	flag := 0
 	//time
-	flag = (this.flag_log & 0x4)
+	flag = (log.flag_log & 0x4)
 	if flag == 0x4 {
 		t := time.Now()
 		str += t.Format("[2006/01/02 15:04:05] ")
@@ -137,7 +138,7 @@ func (this *logInfo) getLogAppend(lvl int, v ...interface{}) (str string) {
 		str += "[FATAL] "
 	}
 	//location
-	flag = (this.flag_log & 0x3)
+	flag = (log.flag_log & 0x3)
 	if LOG_SHORT_FILE == flag || LOG_LONG_FILE == flag {
 		_, file, line, ok := runtime.Caller(2)
 		if false == ok {
@@ -164,62 +165,62 @@ func (this *logInfo) getLogAppend(lvl int, v ...interface{}) (str string) {
 		str += strbrackets
 	}
 	str += "\r\n"
-	if this.console {
+	if log.console {
 		fmt.Print(str)
 	}
-	//	this.Lock()
-	//	defer this.Unlock()
-	//	if this.Writer != nil {
-	//		this.Write([]byte(str))
+	//	log.Lock()
+	//	defer log.Unlock()
+	//	if log.Writer != nil {
+	//		log.Write([]byte(str))
 	//	}
-	this.chans <- []byte(str)
+	log.chans <- []byte(str)
 	return
 }
 
-func (this *logInfo) threadLog() {
-	go this.threadFlush()
+func (log *logInfo) threadLog() {
+	go log.threadFlush()
 	for {
 		select {
-		case data := <-this.chans:
+		case data := <-log.chans:
 			if len(data) > 0 {
-				this.mutexBuf.Lock()
-				this.buffer.Write(data)
-				if logCacheSize < this.buffer.Len() {
-					dataLog := this.buffer.Bytes()
-					this.buffer.Reset()
-					this.mutexBuf.Unlock()
-					this.writeLog(dataLog)
+				log.mutexBuf.Lock()
+				log.buffer.Write(data)
+				if logCacheSize < log.buffer.Len() {
+					dataLog := log.buffer.Bytes()
+					log.buffer.Reset()
+					log.mutexBuf.Unlock()
+					log.writeLog(dataLog)
 					continue
 				}
-				this.mutexBuf.Unlock()
+				log.mutexBuf.Unlock()
 			}
 		}
 	}
 }
 
-func (this *logInfo) threadFlush() {
+func (log *logInfo) threadFlush() {
 	for {
 		select {
 		case <-time.After(time.Minute * 5): //定时flush一次
-			this.flush()
+			log.flush()
 		}
 	}
 }
 
-func (this *logInfo) flush() {
-	this.mutexBuf.Lock()
-	defer this.mutexBuf.Unlock()
-	if this.buffer.Len() > 0 {
-		dataLog := this.buffer.Bytes()
-		this.buffer.Reset()
-		go this.writeLog(dataLog)
+func (log *logInfo) flush() {
+	log.mutexBuf.Lock()
+	defer log.mutexBuf.Unlock()
+	if log.buffer.Len() > 0 {
+		dataLog := log.buffer.Bytes()
+		log.buffer.Reset()
+		go log.writeLog(dataLog)
 	}
 }
 
-func (this *logInfo) writeLog(dataLog []byte) {
-	this.Lock()
-	defer this.Unlock()
-	if this.outputSeted {
-		this.Write(dataLog)
+func (log *logInfo) writeLog(dataLog []byte) {
+	log.Lock()
+	defer log.Unlock()
+	if log.outputSeted {
+		log.Write(dataLog)
 	}
 }

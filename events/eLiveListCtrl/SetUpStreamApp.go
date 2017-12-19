@@ -15,11 +15,11 @@ type EveSetUpStreamApp struct {
 	Weight   int    `json:"weight"`
 }
 
-func (this *EveSetUpStreamApp) Receiver() string {
+func (eveSetUpStreamApp *EveSetUpStreamApp) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveSetUpStreamApp) Type() string {
+func (eveSetUpStreamAppthis *EveSetUpStreamApp) Type() string {
 	return SetUpStreamApp
 }
 
@@ -36,24 +36,24 @@ func NewSetUpStreamApp(add bool, app, instance, protocol, addr, name string, por
 	return
 }
 
-func (this *EveSetUpStreamApp) Copy() (out *EveSetUpStreamApp) {
+func (eveSetUpStreamApp *EveSetUpStreamApp) Copy() (out *EveSetUpStreamApp) {
 	out = &EveSetUpStreamApp{}
-	out.Id = this.Id
-	out.Add = this.Add
-	out.App = this.App
-	out.Instance = this.Instance
-	out.Protocol = this.Protocol
-	out.Addr = this.Addr
-	out.Port = this.Port
-	out.Weight = this.Weight
+	out.Id = eveSetUpStreamApp.Id
+	out.Add = eveSetUpStreamApp.Add
+	out.App = eveSetUpStreamApp.App
+	out.Instance = eveSetUpStreamApp.Instance
+	out.Protocol = eveSetUpStreamApp.Protocol
+	out.Addr = eveSetUpStreamApp.Addr
+	out.Port = eveSetUpStreamApp.Port
+	out.Weight = eveSetUpStreamApp.Weight
 	return
 }
 
-func (this *EveSetUpStreamApp) Equal(rh *EveSetUpStreamApp) bool {
-	return this.Id == rh.Id &&
-		this.App == rh.App &&
-		this.Protocol == rh.Protocol &&
-		this.Addr == rh.Addr &&
-		this.Port == rh.Port &&
-		this.Weight == rh.Weight
+func (eveSetUpStreamApp *EveSetUpStreamApp) Equal(rh *EveSetUpStreamApp) bool {
+	return eveSetUpStreamApp.Id == rh.Id &&
+		eveSetUpStreamApp.App == rh.App &&
+		eveSetUpStreamApp.Protocol == rh.Protocol &&
+		eveSetUpStreamApp.Addr == rh.Addr &&
+		eveSetUpStreamApp.Port == rh.Port &&
+		eveSetUpStreamApp.Weight == rh.Weight
 }

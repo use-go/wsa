@@ -28,7 +28,7 @@ type WebSocketConfig struct {
 var service *WebSocketService
 var serviceConfig WebSocketConfig
 
-func (this *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
+func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 
 	if msg == nil || msg.Param1 == nil {
 		logger.LOGE("init Websocket service failed")
@@ -36,20 +36,20 @@ func (this *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 	}
 
 	fileName := msg.Param1.(string)
-	err = this.loadConfigFile(fileName)
+	err = websockService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return errors.New("load websocket config failed")
 	}
-	service = this
+	service = websockService
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	HTTPMUX.AddRoute(strPort, serviceConfig.Route, this.ServeHTTP)
+	HTTPMUX.AddRoute(strPort, serviceConfig.Route, websockService.ServeHTTP)
 	//go func() {
 	//	if true {
 	//		strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	//		//http.Handle("/", this)
+	//		//http.Handle("/", websockService)
 	//		mux := http.NewServeMux()
-	//		mux.Handle("/", this)
+	//		mux.Handle("/", websockService)
 	//		err = http.ListenAndServe(strPort, mux)
 	//		if err != nil {
 	//			logger.LOGE("start websocket failed:" + err.Error())
@@ -59,27 +59,27 @@ func (this *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
+func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *WebSocketService) Stop(msg *wssAPI.Msg) (err error) {
+func (websockService *WebSocketService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *WebSocketService) GetType() string {
+func (websockService *WebSocketService) GetType() string {
 	return wssAPI.OBJ_WebSocketServer
 }
 
-func (this *WebSocketService) HandleTask(task wssAPI.Task) (err error) {
+func (websockService *WebSocketService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *WebSocketService) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (websockService *WebSocketService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *WebSocketService) loadConfigFile(fileName string) (err error) {
+func (websockService *WebSocketService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		return
@@ -92,7 +92,7 @@ func (this *WebSocketService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
-func (this *WebSocketService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	path = strings.TrimPrefix(path, serviceConfig.Route)
 	path = strings.TrimPrefix(path, "/")
@@ -109,14 +109,14 @@ func (this *WebSocketService) ServeHTTP(w http.ResponseWriter, req *http.Request
 		return
 	}
 	logger.LOGT(fmt.Sprintf("new websocket connect %s", conn.RemoteAddr().String()))
-	this.handleConn(conn, req, path)
+	websockService.handleConn(conn, req, path)
 	defer func() {
 		conn.Close()
 		logger.LOGD("close websocket conn")
 	}()
 }
 
-func (this *WebSocketService) handleConn(conn *websocket.Conn, req *http.Request, path string) {
+func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *http.Request, path string) {
 	handler := &websocketHandler{}
 	msg := &wssAPI.Msg{}
 	msg.Param1 = conn
@@ -158,6 +158,6 @@ func (this *WebSocketService) handleConn(conn *websocket.Conn, req *http.Request
 	}
 }
 
-func (this *WebSocketService) SetParent(parent wssAPI.Obj) {
-	this.parent = parent
+func (websockService *WebSocketService) SetParent(parent wssAPI.Obj) {
+	websockService.parent = parent
 }

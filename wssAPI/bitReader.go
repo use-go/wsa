@@ -11,52 +11,52 @@ type BitReader struct {
 	curBit int
 }
 
-func (this *BitReader) Init(data []byte) {
-	this.curBit = 0
-	this.buf = make([]byte, len(data))
-	copy(this.buf, data)
+func (bitReader *BitReader) Init(data []byte) {
+	bitReader.curBit = 0
+	bitReader.buf = make([]byte, len(data))
+	copy(bitReader.buf, data)
 }
 
-func (this *BitReader) ReadBit() int {
-	if this.curBit > (len(this.buf) << 3) {
+func (bitReader *BitReader) ReadBit() int {
+	if bitReader.curBit > (len(bitReader.buf) << 3) {
 		return -1
 	}
-	idx := (this.curBit >> 3)
-	offset := this.curBit%8 + 1
-	this.curBit++
-	return int(this.buf[idx]>>uint(8-offset)) & 0x01
+	idx := (bitReader.curBit >> 3)
+	offset := bitReader.curBit%8 + 1
+	bitReader.curBit++
+	return int(bitReader.buf[idx]>>uint(8-offset)) & 0x01
 }
 
-func (this *BitReader) ReadBits(num int) int {
+func (bitReader *BitReader) ReadBits(num int) int {
 	r := 0
 	for i := 0; i < num; i++ {
-		r |= (this.ReadBit() << uint(num-i-1))
+		r |= (bitReader.ReadBit() << uint(num-i-1))
 	}
 	return r
 }
 
-func (this *BitReader) Read32Bits() uint32 {
-	idx := (this.curBit >> 3)
+func (bitReader *BitReader) Read32Bits() uint32 {
+	idx := (bitReader.curBit >> 3)
 	var r uint32
-	binary.Read(bytes.NewReader(this.buf[idx:]), binary.BigEndian, &r)
-	this.curBit += 32
+	binary.Read(bytes.NewReader(bitReader.buf[idx:]), binary.BigEndian, &r)
+	bitReader.curBit += 32
 
 	return r
 }
 
-func (this *BitReader) ReadExponentialGolombCode() int {
+func (bitReader *BitReader) ReadExponentialGolombCode() int {
 	r := 0
 	i := 0
-	for this.ReadBit() == 0 && (i < 32) {
+	for bitReader.ReadBit() == 0 && (i < 32) {
 		i++
 	}
-	r = this.ReadBits(i)
+	r = bitReader.ReadBits(i)
 	r += (1 << uint(i)) - 1
 	return r
 }
 
-func (this *BitReader) ReadSE() int {
-	r := this.ReadExponentialGolombCode()
+func (bitReader *BitReader) ReadSE() int {
+	r := bitReader.ReadExponentialGolombCode()
 	if (r & 0x01) != 0 {
 		r = (r + 1) / 2
 	} else {
@@ -65,24 +65,24 @@ func (this *BitReader) ReadSE() int {
 	return r
 }
 
-func (this *BitReader) CopyBits(num int) int {
-	cur := this.curBit
+func (bitReader *BitReader) CopyBits(num int) int {
+	cur := bitReader.curBit
 	r := 0
 	for i := 0; i < num; i++ {
-		r |= (this.copyBit(cur+i) << uint(num-i-1))
+		r |= (bitReader.copyBit(cur+i) << uint(num-i-1))
 	}
 	return r
 }
 
-func (this *BitReader) copyBit(cur int) int {
-	if cur > (len(this.buf) << 3) {
+func (bitReader *BitReader) copyBit(cur int) int {
+	if cur > (len(bitReader.buf) << 3) {
 		return -1
 	}
 	idx := (cur >> 3)
 	offset := cur%8 + 1
-	return int(this.buf[idx]>>uint(8-offset)) & 0x01
+	return int(bitReader.buf[idx]>>uint(8-offset)) & 0x01
 }
 
-func (this *BitReader) BitsLeft() int {
-	return (len(this.buf) << 3) - this.curBit
+func (bitReader *BitReader) BitsLeft() int {
+	return (len(bitReader.buf) << 3) - bitReader.curBit
 }

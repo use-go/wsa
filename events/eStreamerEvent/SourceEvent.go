@@ -20,11 +20,11 @@ type EveAddSource struct {
 	SrcObj     wssAPI.Obj //out
 }
 
-func (this *EveAddSource) Receiver() string {
+func (eveAddsource *EveAddSource) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveAddSource) Type() string {
+func (eveAddsource *EveAddSource) Type() string {
 	return AddSource
 }
 
@@ -33,11 +33,11 @@ type EveDelSource struct {
 	Id         int64  //in
 }
 
-func (this *EveDelSource) Receiver() string {
+func (eveAddsource *EveDelSource) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveDelSource) Type() string {
+func (eveAddsource *EveDelSource) Type() string {
 	return DelSource
 }
 
@@ -47,10 +47,10 @@ type EveGetSource struct {
 	HasProducer bool
 }
 
-func (this *EveGetSource) Receiver() string {
+func (eveAddsource *EveGetSource) Receiver() string {
 	return wssAPI.OBJ_StreamerServer
 }
 
-func (this *EveGetSource) Type() string {
+func (eveAddsource *EveGetSource) Type() string {
 	return GetSource
 }

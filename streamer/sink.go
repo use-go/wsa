@@ -2,6 +2,7 @@ package streamer
 
 import (
 	"errors"
+
 	"github.com/use-go/websocketStreamServer/logger"
 	"github.com/use-go/websocketStreamServer/wssAPI"
 )
@@ -12,62 +13,62 @@ type streamSink struct {
 	parent wssAPI.Obj
 }
 
-func (this *streamSink) Init(msg *wssAPI.Msg) (err error) {
+func (sink *streamSink) Init(msg *wssAPI.Msg) (err error) {
 	if nil == msg || msg.Param1 == nil || msg.Param2 == nil {
 		return errors.New("invalid init stream sink")
 	}
-	this.id = msg.Param1.(string)
-	this.sinker = msg.Param2.(wssAPI.Obj)
+	sink.id = msg.Param1.(string)
+	sink.sinker = msg.Param2.(wssAPI.Obj)
 	return
 }
 
-func (this *streamSink) Start(msg *wssAPI.Msg) (err error) {
+func (sink *streamSink) Start(msg *wssAPI.Msg) (err error) {
 	//notify sinker stream start
-	if this.sinker == nil {
+	if sink.sinker == nil {
 		logger.LOGE("sinker no seted")
 		return errors.New("no sinker to start")
 	}
 	msg = &wssAPI.Msg{}
 	msg.Type = wssAPI.MSG_PLAY_START
 	logger.LOGT("start sink")
-	//go this.sinker.ProcessMessage(msg)
-	this.sinker.ProcessMessage(msg)
+	//go sink.sinker.ProcessMessage(msg)
+	sink.sinker.ProcessMessage(msg)
 	return
 }
 
-func (this *streamSink) Stop(msg *wssAPI.Msg) (err error) {
+func (sink *streamSink) Stop(msg *wssAPI.Msg) (err error) {
 	//notify sinker stream stop
-	if this.sinker == nil {
+	if sink.sinker == nil {
 		logger.LOGE("sinker no seted")
 		return errors.New("no sinker to stop")
 	}
 	msg = &wssAPI.Msg{}
 	msg.Type = wssAPI.MSG_PLAY_STOP
-	//go this.sinker.ProcessMessage(msg)
-	this.sinker.ProcessMessage(msg)
+	//go sink.sinker.ProcessMessage(msg)
+	sink.sinker.ProcessMessage(msg)
 	return
 }
 
-func (this *streamSink) GetType() string {
+func (sink *streamSink) GetType() string {
 	return streamTypeSink
 }
 
-func (this *streamSink) HandleTask(task *wssAPI.Task) (err error) {
+func (sink *streamSink) HandleTask(task *wssAPI.Task) (err error) {
 	return
 }
 
-func (this *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (sink *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
 
-	if this.sinker != nil && msg.Type == wssAPI.MSG_FLV_TAG {
-		return this.sinker.ProcessMessage(msg)
+	if sink.sinker != nil && msg.Type == wssAPI.MSG_FLV_TAG {
+		return sink.sinker.ProcessMessage(msg)
 	}
 	return
 }
 
-func (this *streamSink) Id() string {
-	return this.id
+func (sink *streamSink) Id() string {
+	return sink.id
 }
 
-func (this *streamSink) SetParent(parent wssAPI.Obj) {
-	this.parent = parent
+func (sink *streamSink) SetParent(parent wssAPI.Obj) {
+	sink.parent = parent
 }

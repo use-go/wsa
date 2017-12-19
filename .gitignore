@@ -1,2 +1,4 @@
 examples/examples
 *.log
+debug
+/streamServer/debug
