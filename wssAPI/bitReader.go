@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-//read data by bit
+//BitReader read data by bit
 type BitReader struct {
 	buf    []byte
 	curBit int

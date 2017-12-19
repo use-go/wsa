@@ -37,33 +37,10 @@ func SetBus(bus Obj) {
 	svrbus = bus
 }
 
+//Handle Task
 func HandleTask(task Task) error {
 	if svrbus != nil {
 		return svrbus.HandleTask(task)
 	}
 	return errors.New("bus not ready")
 }
-
-//func (this *tmp) Init(msg *wssAPI.Msg) (err error) {
-//	return
-//}
-
-//func (this *tmp) Start(msg *wssAPI.Msg) (err error) {
-//	return
-//}
-
-//func (this *tmp) Stop(msg *wssAPI.Msg) (err error) {
-//	return
-//}
-
-//func (this *tmp) GetType() string {
-//	return
-//}
-
-//func (this *tmp) HandleTask(task wssAPI.Task) (err error) {
-//	return
-//}
-
-//func (this *tmp) ProcessMessage(msg *wssAPI.Msg) (err error) {
-//	return
-//}

@@ -228,7 +228,7 @@ func (this *RTSPHandler) handleRTSP(data []byte) (err error) {
 func (this *RTSPHandler) send(data []byte) (err error) {
 	this.mutexConn.Lock()
 	defer this.mutexConn.Unlock()
-	_, err = wssAPI.TcpWriteTimeOut(this.conn, data, serviceConfig.TimeoutSec)
+	_, err = wssAPI.TCPWriteTimeOut(this.conn, data, serviceConfig.TimeoutSec)
 	return
 }
 

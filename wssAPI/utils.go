@@ -15,6 +15,7 @@ import (
 	"github.com/use-go/websocketStreamServer/logger"
 )
 
+//CheckDirectory in FS
 func CheckDirectory(dir string) (bool, error) {
 	_, err := os.Stat(dir)
 	if err == nil {
@@ -26,6 +27,7 @@ func CheckDirectory(dir string) (bool, error) {
 	return false, err
 }
 
+// CreateDirectory for log
 func CreateDirectory(dir string) (bool, error) {
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
@@ -35,6 +37,7 @@ func CreateDirectory(dir string) (bool, error) {
 	return true, nil
 }
 
+// ReadFileAll from json file
 func ReadFileAll(filename string) (data []byte, err error) {
 	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
@@ -50,7 +53,8 @@ func ReadFileAll(filename string) (data []byte, err error) {
 	return
 }
 
-func TcpRead(conn net.Conn, size int) (data []byte, err error) {
+// TCPRead to get data from tcp buffer
+func TCPRead(conn net.Conn, size int) (data []byte, err error) {
 	data = make([]byte, size)
 	received := 0
 	for received < int(size) {
@@ -64,7 +68,8 @@ func TcpRead(conn net.Conn, size int) (data []byte, err error) {
 	return data, err
 }
 
-func TcpReadTimeout(conn net.Conn, size int, millSec int) (data []byte, err error) {
+// TCPReadTimeout control
+func TCPReadTimeout(conn net.Conn, size int, millSec int) (data []byte, err error) {
 	if millSec > 0 {
 		err = conn.SetReadDeadline(time.Now().Add(time.Duration(millSec) * time.Millisecond))
 		if err != nil {
@@ -88,7 +93,8 @@ func TcpReadTimeout(conn net.Conn, size int, millSec int) (data []byte, err erro
 	return data, err
 }
 
-func TcpReadTimeDuration(conn net.Conn, size int, duration time.Duration) (data []byte, err error) {
+// TCPReadTimeDuration timeout
+func TCPReadTimeDuration(conn net.Conn, size int, duration time.Duration) (data []byte, err error) {
 	if duration > 0 {
 		err = conn.SetReadDeadline(time.Now().Add(duration))
 		if err != nil {
@@ -112,7 +118,8 @@ func TcpReadTimeDuration(conn net.Conn, size int, duration time.Duration) (data 
 	return data, err
 }
 
-func TcpWrite(conn net.Conn, data []byte) (writed int, err error) {
+// TCPWrite data
+func TCPWrite(conn net.Conn, data []byte) (writed int, err error) {
 	err = conn.SetReadDeadline(time.Now().Add(time.Hour))
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -132,7 +139,8 @@ func TcpWrite(conn net.Conn, data []byte) (writed int, err error) {
 	return
 }
 
-func TcpWriteTimeOut(conn net.Conn, data []byte, millSec int) (writed int, err error) {
+//TCPWriteTimeOut control
+func TCPWriteTimeOut(conn net.Conn, data []byte, millSec int) (writed int, err error) {
 	err = conn.SetWriteDeadline(time.Now().Add(time.Millisecond * time.Duration(millSec)))
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -152,7 +160,8 @@ func TcpWriteTimeOut(conn net.Conn, data []byte, millSec int) (writed int, err e
 	return
 }
 
-func TcpWriteTimeDuration(conn net.Conn, data []byte, duration time.Duration) (writed int, err error) {
+// TCPWriteTimeDuration to control timeout
+func TCPWriteTimeDuration(conn net.Conn, data []byte, duration time.Duration) (writed int, err error) {
 	err = conn.SetWriteDeadline(time.Now().Add(duration))
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -172,6 +181,7 @@ func TcpWriteTimeDuration(conn net.Conn, data []byte, duration time.Duration) (w
 	return
 }
 
+//GenerateGUID to Get a GUID
 func GenerateGUID() string {
 	b := make([]byte, 48)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
@@ -186,6 +196,7 @@ func getMd5String(str string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+// InterfaceIsNil Check
 func InterfaceIsNil(val interface{}) bool {
 	if nil == val {
 		return true
@@ -193,6 +204,7 @@ func InterfaceIsNil(val interface{}) bool {
 	return reflect.ValueOf(val).IsNil()
 }
 
+// InterfaceValid Check
 func InterfaceValid(val interface{}) bool {
 	if nil == val {
 		return false

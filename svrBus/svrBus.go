@@ -21,7 +21,7 @@ import (
 	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
-type busConfig struct {
+type serviceBusConfig struct {
 	RTMPConfigName          string `json:"RTMP"`
 	WebSocketConfigName     string `json:"WebSocket"`
 	BackendConfigName       string `json:"Backend"`
@@ -40,6 +40,8 @@ type ServiceBus struct {
 
 var serviceBus *ServiceBus
 
+var busConfig *serviceBusConfig
+
 func init() {
 	serviceBus = &ServiceBus{}
 	wssAPI.SetBus(serviceBus)
@@ -48,6 +50,7 @@ func init() {
 // Start init the server processing
 func Start() {
 	serviceBus.Init(nil)
+	serviceBus.createAllService(nil)
 	serviceBus.Start(nil)
 }
 
@@ -59,6 +62,113 @@ func (srvBus *ServiceBus) Init(msg *wssAPI.Msg) (err error) {
 		logger.LOGE("svr bus load config failed")
 		return
 	}
+	return
+}
+
+func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
+
+	if true {
+		livingSvr := &streamer.StreamerService{}
+		msg := &wssAPI.Msg{}
+		if len(busConfig.StreamManagerConfigName) > 0 {
+			msg.Param1 = busConfig.StreamManagerConfigName
+		}
+		err = livingSvr.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[livingSvr.GetType()] = livingSvr
+			srvBus.mutexServices.Unlock()
+		}
+	}
+
+	//create RTMP Service
+	if len(busConfig.RTMPConfigName) > 0 {
+		rtmpSvr := &RTMPService.RTMPService{}
+		msg := &wssAPI.Msg{}
+		msg.Param1 = busConfig.RTMPConfigName
+		err = rtmpSvr.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[rtmpSvr.GetType()] = rtmpSvr
+			srvBus.mutexServices.Unlock()
+		}
+	}
+
+	//create WebSocket Service
+	if len(busConfig.WebSocketConfigName) > 0 {
+		webSocketSvr := &webSocketService.WebSocketService{}
+		msg := &wssAPI.Msg{}
+		msg.Param1 = busConfig.WebSocketConfigName
+		err = webSocketSvr.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[webSocketSvr.GetType()] = webSocketSvr
+			srvBus.mutexServices.Unlock()
+		}
+	}
+
+	//create backendService
+	if len(busConfig.BackendConfigName) > 0 {
+		backendSvr := &backend.BackendService{}
+		msg := &wssAPI.Msg{}
+		msg.Param1 = busConfig.BackendConfigName
+		err = backendSvr.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[backendSvr.GetType()] = backendSvr
+			srvBus.mutexServices.Unlock()
+		}
+	}
+
+	//create RTSP Service
+	if len(busConfig.RTSPConfigName) > 0 {
+		rtspSvr := &RTSPService.RTSPService{}
+		msg := &wssAPI.Msg{}
+		msg.Param1 = busConfig.RTSPConfigName
+		err = rtspSvr.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[rtspSvr.GetType()] = rtspSvr
+			srvBus.mutexServices.Unlock()
+		}
+	}
+	//create HLS Service
+	if len(busConfig.HLSConfigName) > 0 {
+		hls := &HLSService.HLSService{}
+		msg := &wssAPI.Msg{Param1: busConfig.HLSConfigName}
+		err = hls.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[hls.GetType()] = hls
+			srvBus.mutexServices.Unlock()
+		}
+	}
+	//create DASH Service
+	if len(busConfig.DASHConfigName) > 0 {
+		dash := &DASH.DASHService{}
+		msg := &wssAPI.Msg{Param1: busConfig.DASHConfigName}
+		err = dash.Init(msg)
+		if err != nil {
+			logger.LOGE(err.Error())
+		} else {
+			srvBus.mutexServices.Lock()
+			srvBus.services[dash.GetType()] = dash
+			srvBus.mutexServices.Unlock()
+		}
+	}
+
 	return
 }
 
@@ -75,119 +185,18 @@ func (srvBus *ServiceBus) loadConfig() (err error) {
 		logger.LOGE("load config file failed:" + err.Error())
 		return
 	}
-	cfg := &busConfig{}
-	err = json.Unmarshal(data, cfg)
+	busConfig = &serviceBusConfig{}
+	err = json.Unmarshal(data, busConfig)
 
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
 
-	if len(cfg.LogPath) > 0 {
-		srvBus.createLogFile(cfg.LogPath)
+	if len(busConfig.LogPath) > 0 {
+		srvBus.createLogFile(busConfig.LogPath)
 	}
 
-	if true {
-		livingSvr := &streamer.StreamerService{}
-		msg := &wssAPI.Msg{}
-		if len(cfg.StreamManagerConfigName) > 0 {
-			msg.Param1 = cfg.StreamManagerConfigName
-		}
-		err = livingSvr.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[livingSvr.GetType()] = livingSvr
-			srvBus.mutexServices.Unlock()
-		}
-	}
-
-	//start RTMP Service
-	if len(cfg.RTMPConfigName) > 0 {
-		rtmpSvr := &RTMPService.RTMPService{}
-		msg := &wssAPI.Msg{}
-		msg.Param1 = cfg.RTMPConfigName
-		err = rtmpSvr.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[rtmpSvr.GetType()] = rtmpSvr
-			srvBus.mutexServices.Unlock()
-		}
-	}
-
-	//start WebSocket Service
-	if len(cfg.WebSocketConfigName) > 0 {
-		webSocketSvr := &webSocketService.WebSocketService{}
-		msg := &wssAPI.Msg{}
-		msg.Param1 = cfg.WebSocketConfigName
-		err = webSocketSvr.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[webSocketSvr.GetType()] = webSocketSvr
-			srvBus.mutexServices.Unlock()
-		}
-	}
-
-	//start backendService
-	if len(cfg.BackendConfigName) > 0 {
-		backendSvr := &backend.BackendService{}
-		msg := &wssAPI.Msg{}
-		msg.Param1 = cfg.BackendConfigName
-		err = backendSvr.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[backendSvr.GetType()] = backendSvr
-			srvBus.mutexServices.Unlock()
-		}
-	}
-
-	//start RTSP Service
-	if len(cfg.RTSPConfigName) > 0 {
-		rtspSvr := &RTSPService.RTSPService{}
-		msg := &wssAPI.Msg{}
-		msg.Param1 = cfg.RTSPConfigName
-		err = rtspSvr.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[rtspSvr.GetType()] = rtspSvr
-			srvBus.mutexServices.Unlock()
-		}
-	}
-	//start HLS Service
-	if len(cfg.HLSConfigName) > 0 {
-		hls := &HLSService.HLSService{}
-		msg := &wssAPI.Msg{Param1: cfg.HLSConfigName}
-		err = hls.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[hls.GetType()] = hls
-			srvBus.mutexServices.Unlock()
-		}
-	}
-	//start DASH Service
-	if len(cfg.DASHConfigName) > 0 {
-		dash := &DASH.DASHService{}
-		msg := &wssAPI.Msg{Param1: cfg.DASHConfigName}
-		err = dash.Init(msg)
-		if err != nil {
-			logger.LOGE(err.Error())
-		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[dash.GetType()] = dash
-			srvBus.mutexServices.Unlock()
-		}
-	}
 	return
 }
 

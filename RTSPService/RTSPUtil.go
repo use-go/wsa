@@ -51,7 +51,7 @@ func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 		return
 	}
 	if '$' == firstByte[0] {
-		threeBytes, err := wssAPI.TcpRead(conn, 3)
+		threeBytes, err := wssAPI.TCPRead(conn, 3)
 		_, err = conn.Read(threeBytes)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -62,7 +62,7 @@ func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 			logger.LOGE(err.Error())
 			return nil, err
 		}
-		dataLast, err := wssAPI.TcpRead(conn, int(dataLength))
+		dataLast, err := wssAPI.TCPRead(conn, int(dataLength))
 		if err != nil {
 			logger.LOGE(err.Error())
 			return nil, err

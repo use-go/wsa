@@ -3,9 +3,10 @@ package RTSPService
 import (
 	"encoding/json"
 	"errors"
-	"github.com/use-go/websocketStreamServer/logger"
 	"net"
 	"strconv"
+
+	"github.com/use-go/websocketStreamServer/logger"
 	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
@@ -20,7 +21,7 @@ type RTSPConfig struct {
 var service *RTSPService
 var serviceConfig RTSPConfig
 
-func (this *RTSPService) Init(msg *wssAPI.Msg) (err error) {
+func (rtspService *RTSPService) Init(msg *wssAPI.Msg) (err error) {
 	if nil == msg || nil == msg.Param1 {
 		logger.LOGE("init rtsp server failed")
 		return errors.New("invalid param init rtsp server")
@@ -30,7 +31,7 @@ func (this *RTSPService) Init(msg *wssAPI.Msg) (err error) {
 		logger.LOGE("bad param init rtsp server")
 		return errors.New("invalid param init rtsp server")
 	}
-	err = this.loadConfigFile(fileName)
+	err = rtspService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE("load rtsp config failed:" + err.Error())
 		return
@@ -38,7 +39,7 @@ func (this *RTSPService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTSPService) loadConfigFile(fileName string) (err error) {
+func (rtspService *RTSPService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		return
@@ -57,7 +58,7 @@ func (this *RTSPService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
-func (this *RTSPService) Start(msg *wssAPI.Msg) (err error) {
+func (rtspService *RTSPService) Start(msg *wssAPI.Msg) (err error) {
 	logger.LOGT("start RTSP server")
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
 	tcp, err := net.ResolveTCPAddr("tcp4", strPort)
@@ -70,22 +71,22 @@ func (this *RTSPService) Start(msg *wssAPI.Msg) (err error) {
 		logger.LOGE(err.Error())
 		return
 	}
-	go this.rtspLoop(listener)
+	go rtspService.rtspLoop(listener)
 	return
 }
 
-func (this *RTSPService) rtspLoop(listener *net.TCPListener) {
+func (rtspService *RTSPService) rtspLoop(listener *net.TCPListener) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			logger.LOGE(err.Error())
 			continue
 		}
-		go this.handleConnect(conn)
+		go rtspService.handleConnect(conn)
 	}
 }
 
-func (this *RTSPService) handleConnect(conn net.Conn) {
+func (rtspService *RTSPService) handleConnect(conn net.Conn) {
 	defer func() {
 		conn.Close()
 	}()
@@ -109,18 +110,18 @@ func (this *RTSPService) handleConnect(conn net.Conn) {
 	}
 }
 
-func (this *RTSPService) Stop(msg *wssAPI.Msg) (err error) {
+func (rtspService *RTSPService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTSPService) GetType() string {
+func (rtspService *RTSPService) GetType() string {
 	return wssAPI.OBJ_RTSPServer
 }
 
-func (this *RTSPService) HandleTask(task wssAPI.Task) (err error) {
+func (rtspService *RTSPService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *RTSPService) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (rtspService *RTSPService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }

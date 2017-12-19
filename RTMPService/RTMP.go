@@ -319,7 +319,7 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 }
 
 func (this *RTMP) rtmpSocketRead(size int) (data []byte, err error) {
-	data, err = wssAPI.TcpRead(this.Conn, size)
+	data, err = wssAPI.TCPRead(this.Conn, size)
 	if err != nil {
 		return
 	}
@@ -388,7 +388,7 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		return
 	}
 
-	_, err = wssAPI.TcpWrite(this.Conn, buf)
+	_, err = wssAPI.TCPWrite(this.Conn, buf)
 	if err != nil {
 		return
 	}
@@ -420,7 +420,7 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		if err != nil {
 			return err
 		}
-		_, err = wssAPI.TcpWrite(this.Conn, buf)
+		_, err = wssAPI.TCPWrite(this.Conn, buf)
 		if err != nil {
 			return err
 		}
