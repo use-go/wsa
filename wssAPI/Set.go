@@ -4,11 +4,13 @@ import (
 	"sync"
 )
 
+//Set for interface Status
 type Set struct {
 	m map[interface{}]bool
 	sync.RWMutex
 }
 
+// NewSet to New a Set Object
 func NewSet() *Set {
 	return &Set{
 		m: make(map[interface{}]bool),

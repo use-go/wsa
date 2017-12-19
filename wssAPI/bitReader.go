@@ -11,12 +11,14 @@ type BitReader struct {
 	curBit int
 }
 
+// Init bit array
 func (bitReader *BitReader) Init(data []byte) {
 	bitReader.curBit = 0
 	bitReader.buf = make([]byte, len(data))
 	copy(bitReader.buf, data)
 }
 
+// ReadBit from Array
 func (bitReader *BitReader) ReadBit() int {
 	if bitReader.curBit > (len(bitReader.buf) << 3) {
 		return -1
@@ -27,6 +29,7 @@ func (bitReader *BitReader) ReadBit() int {
 	return int(bitReader.buf[idx]>>uint(8-offset)) & 0x01
 }
 
+// Readbits some count
 func (bitReader *BitReader) ReadBits(num int) int {
 	r := 0
 	for i := 0; i < num; i++ {
@@ -35,6 +38,7 @@ func (bitReader *BitReader) ReadBits(num int) int {
 	return r
 }
 
+// Read32Bits for 32bit
 func (bitReader *BitReader) Read32Bits() uint32 {
 	idx := (bitReader.curBit >> 3)
 	var r uint32

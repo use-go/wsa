@@ -1,9 +1,11 @@
 package fragmentMP4
 
-import "mediaTypes/flv"
+import (
+	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+)
 
-func ftypBox()(box *MP4Box)  {
-	box=&MP4Box{}
+func ftypBox() (box *MP4Box) {
+	box = &MP4Box{}
 	box.Init([]byte("ftyp"))
 	box.PushBytes([]byte("iso5"))
 	box.Push4Bytes(1)
@@ -12,8 +14,8 @@ func ftypBox()(box *MP4Box)  {
 	return box
 }
 
-func moovBox(audioTag ,vdeoTag *flv.FlvTag)(box *MP4Box)  {
-	box=&MP4Box{}
+func moovBox(audioTag, vdeoTag *flv.FlvTag) (box *MP4Box) {
+	box = &MP4Box{}
 	box.Init([]byte("moov"))
 	//mvhd
 
@@ -22,18 +24,18 @@ func moovBox(audioTag ,vdeoTag *flv.FlvTag)(box *MP4Box)  {
 	return
 }
 
-func mvhdBox()(box *MP4Box)  {
-	return 
+func mvhdBox() (box *MP4Box) {
+	return
 }
 
-func mvexBox(audioTag ,vdeoTag *flv.FlvTag)(box *MP4Box)  {
-	return 
+func mvexBox(audioTag, vdeoTag *flv.FlvTag) (box *MP4Box) {
+	return
 }
 
-func trexBox(tag *flv.FlvTag)(box *MP4Box)  {
-return
+func trexBox(tag *flv.FlvTag) (box *MP4Box) {
+	return
 }
 
-func trakBox(tag *flv.FlvTag)(box *MP4Box)  {
-return
+func trakBox(tag *flv.FlvTag) (box *MP4Box) {
+	return
 }

@@ -1,5 +1,9 @@
 package wssAPI
 
+/*
+Mark the Serivce Type
+*/
+
 const (
 	OBJ_ServerBus       = "ServerBus"
 	OBJ_RTMPServer      = "RTMPServer"
