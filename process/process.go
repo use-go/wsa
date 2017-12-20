@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//Package process , this is the main process to control all the services
 package process
 
 import (
@@ -26,6 +25,13 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+/*
+Package process , this is the main process to control all the services
+1、read process config from configuration
+2、create and init each service
+3、start each configed service
+*/
+
 type processConfiguration struct {
 	RTMPConfigName          string `json:"RTMP"`
 	WebSocketConfigName     string `json:"WebSocket"`
@@ -37,32 +43,32 @@ type processConfiguration struct {
 	RTSPConfigName          string `json:"RTSP,omitempty"`
 }
 
-//LaunchedServices : LaunchedServices holding all the Service that will be launched in Process
-type LaunchedServices struct {
+//Context : Context holding all the Service that will be launched in Process
+type Context struct {
 	mutexServices sync.RWMutex
 	services      map[string]wssAPI.MsgHandler
 }
 
-var processServices *LaunchedServices
+var processContext *Context
 
 var processConfig *processConfiguration
 
 func init() {
-	processServices = &LaunchedServices{}
-	wssAPI.SetHandler(processServices)
+	processContext = &Context{}
+	wssAPI.SetHandler(processContext)
 }
 
 // Start init the server processing
 func Start() {
-	processServices.Init(nil)
-	processServices.createAllService(nil)
-	processServices.Start(nil)
+	processContext.Init(nil)
+	processContext.createAllService(nil)
+	processContext.Start(nil)
 }
 
 // Init the configed service such as hls/dash/rtsp
-func (srvBus *LaunchedServices) Init(msg *wssAPI.Msg) (err error) {
-	srvBus.services = make(map[string]wssAPI.MsgHandler)
-	err = srvBus.loadConfig()
+func (processCtx *Context) Init(msg *wssAPI.Msg) (err error) {
+	processCtx.services = make(map[string]wssAPI.MsgHandler)
+	err = processCtx.loadConfig()
 	if err != nil {
 		logger.LOGE("svr bus load config failed")
 		return
@@ -70,7 +76,7 @@ func (srvBus *LaunchedServices) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
+func (processCtx *Context) createAllService(msg *wssAPI.Msg) (err error) {
 
 	if true {
 		livingSvr := &streamer.StreamerService{}
@@ -82,9 +88,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[livingSvr.GetType()] = livingSvr
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[livingSvr.GetType()] = livingSvr
+			processCtx.mutexServices.Unlock()
 		}
 	}
 
@@ -97,9 +103,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[rtmpSvr.GetType()] = rtmpSvr
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[rtmpSvr.GetType()] = rtmpSvr
+			processCtx.mutexServices.Unlock()
 		}
 	}
 
@@ -112,9 +118,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[webSocketSvr.GetType()] = webSocketSvr
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[webSocketSvr.GetType()] = webSocketSvr
+			processCtx.mutexServices.Unlock()
 		}
 	}
 
@@ -127,9 +133,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[backendSvr.GetType()] = backendSvr
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[backendSvr.GetType()] = backendSvr
+			processCtx.mutexServices.Unlock()
 		}
 	}
 
@@ -142,9 +148,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[rtspSvr.GetType()] = rtspSvr
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[rtspSvr.GetType()] = rtspSvr
+			processCtx.mutexServices.Unlock()
 		}
 	}
 	//create HLS Service
@@ -155,9 +161,9 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[hls.GetType()] = hls
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[hls.GetType()] = hls
+			processCtx.mutexServices.Unlock()
 		}
 	}
 	//create DASH Service
@@ -168,16 +174,16 @@ func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 		if err != nil {
 			logger.LOGE(err.Error())
 		} else {
-			srvBus.mutexServices.Lock()
-			srvBus.services[dash.GetType()] = dash
-			srvBus.mutexServices.Unlock()
+			processCtx.mutexServices.Lock()
+			processCtx.services[dash.GetType()] = dash
+			processCtx.mutexServices.Unlock()
 		}
 	}
 
 	return
 }
 
-func (srvBus *LaunchedServices) loadConfig() (err error) {
+func (processCtx *Context) loadConfig() (err error) {
 	configName := ""
 	if len(os.Args) > 1 {
 		configName = os.Args[1]
@@ -199,13 +205,13 @@ func (srvBus *LaunchedServices) loadConfig() (err error) {
 	}
 
 	if len(processConfig.LogPath) > 0 {
-		srvBus.createLogFile(processConfig.LogPath)
+		processCtx.createLogFile(processConfig.LogPath)
 	}
 
 	return
 }
 
-func (srvBus *LaunchedServices) createLogFile(logPath string) {
+func (processCtx *Context) createLogFile(logPath string) {
 	if strings.HasSuffix(logPath, "/") {
 		logPath = strings.TrimSuffix(logPath, "/")
 	}
@@ -245,15 +251,15 @@ func (srvBus *LaunchedServices) createLogFile(logPath string) {
 }
 
 //Start all the configed service ,such as rtsp ,websocket ,backend
-func (srvBus *LaunchedServices) Start(msg *wssAPI.Msg) (err error) {
+func (processCtx *Context) Start(msg *wssAPI.Msg) (err error) {
 	//if false {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//}
 	HTTPMUX.Start()
-	srvBus.mutexServices.RLock()
-	defer srvBus.mutexServices.RUnlock()
-	for k, v := range srvBus.services {
-		//v.SetParent(srvBus)
+	processCtx.mutexServices.RLock()
+	defer processCtx.mutexServices.RUnlock()
+	for k, v := range processCtx.services {
+		//v.SetParent(processCtx)
 		err = v.Start(nil)
 		if err != nil {
 			logger.LOGE("start " + k + " failed:" + err.Error())
@@ -266,25 +272,25 @@ func (srvBus *LaunchedServices) Start(msg *wssAPI.Msg) (err error) {
 }
 
 //Stop all the launched services
-func (srvBus *LaunchedServices) Stop(msg *wssAPI.Msg) (err error) {
-	srvBus.mutexServices.RLock()
-	defer srvBus.mutexServices.RUnlock()
-	for _, v := range srvBus.services {
+func (processCtx *Context) Stop(msg *wssAPI.Msg) (err error) {
+	processCtx.mutexServices.RLock()
+	defer processCtx.mutexServices.RUnlock()
+	for _, v := range processCtx.services {
 		err = v.Stop(nil)
 	}
 	return
 }
 
 //GetType for process
-func (srvBus *LaunchedServices) GetType() string {
+func (processCtx *Context) GetType() string {
 	return wssAPI.OBJProcess
 }
 
 //HandleTask for process
-func (srvBus *LaunchedServices) HandleTask(task wssAPI.Task) (err error) {
-	srvBus.mutexServices.RLock()
-	defer srvBus.mutexServices.RUnlock()
-	handler, exist := srvBus.services[task.Receiver()]
+func (processCtx *Context) HandleTask(task wssAPI.Task) (err error) {
+	processCtx.mutexServices.RLock()
+	defer processCtx.mutexServices.RUnlock()
+	handler, exist := processCtx.services[task.Receiver()]
 	if exist == false {
 		return errors.New("invalid task")
 	}
@@ -292,12 +298,12 @@ func (srvBus *LaunchedServices) HandleTask(task wssAPI.Task) (err error) {
 }
 
 //ProcessMessage for process
-func (srvBus *LaunchedServices) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (processCtx *Context) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return nil
 }
 
 //SetParent for process
-func (srvBus *LaunchedServices) SetParent(arent wssAPI.MsgHandler) {
+func (processCtx *Context) SetParent(arent wssAPI.MsgHandler) {
 
 }
 

@@ -26,7 +26,7 @@ type WebSocketConfig struct {
 	Route string `json:"Route"`
 }
 
-var service *WebSocketService
+var wsService *WebSocketService
 var serviceConfig WebSocketConfig
 
 // Init  interface implemention
@@ -43,7 +43,7 @@ func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 		logger.LOGE(err.Error())
 		return errors.New("load websocket config failed")
 	}
-	service = websockService
+	wsService = websockService
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
 	HTTPMUX.AddRoute(strPort, serviceConfig.Route, websockService.ServeHTTP)
 	//go func() {
