@@ -1,4 +1,4 @@
-package backend
+package backendService
 
 type LoginResponseData struct {
 	Code int    `json:"code"`

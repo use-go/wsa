@@ -1,8 +1,14 @@
+// Copyright 2017 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
+/*
+life circle of app
+*/
 import (
 	"github.com/use-go/websocket-streamserver/logger"
-
 	"github.com/use-go/websocket-streamserver/process"
 )
 

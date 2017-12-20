@@ -1,4 +1,4 @@
-package backend
+package backendService
 
 import (
 	"crypto/md5"
