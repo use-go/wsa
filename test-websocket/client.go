@@ -55,7 +55,7 @@ func Play(conn *websocket.Conn) {
 	stPlay.Name = "hks"
 
 	dataSend, _ := json.Marshal(stPlay)
-	err := webSocketService.SendWsControl(conn, webSocketService.WSC_play, dataSend)
+	err := webSocketService.SendWsControl(conn, webSocketService.WSCPlay, dataSend)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
@@ -85,11 +85,11 @@ func readResult(conn *websocket.Conn) (err error) {
 		logger.LOGT(data)
 		pktType := data[0]
 		switch pktType {
-		case webSocketService.WS_pkt_audio:
+		case webSocketService. WSPktAudio:
 			logger.LOGT("audio")
-		case webSocketService.WS_pkt_video:
+		case webSocketService. WSPktVideo:
 			logger.LOGT("video")
-		case webSocketService.WS_pkt_control:
+		case webSocketService. WSPktControl:
 			logger.LOGT(data)
 		}
 	}

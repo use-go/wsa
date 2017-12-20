@@ -13,9 +13,9 @@ func (websockHandler *websocketHandler) ctrlPlay(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("play failed")
-			err = websockHandler.sendWsStatus(websockHandler.conn, WS_status_error, NETSTREAM_PLAY_FAILED, st.Req)
+			err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_PLAY_FAILED, st.Req)
 		} else {
-			websockHandler.lastCmd = WSC_play
+			websockHandler.lastCmd = WSCPlay
 		}
 	}()
 	err = json.Unmarshal(data, st)
@@ -23,7 +23,7 @@ func (websockHandler *websocketHandler) ctrlPlay(data []byte) (err error) {
 		logger.LOGE("invalid params")
 		return err
 	}
-	if false == supportNewCmd(websockHandler.lastCmd, WSC_play) {
+	if false == supportNewCmd(websockHandler.lastCmd, WSCPlay) {
 		logger.LOGE("bad cmd")
 		err = errors.New("bad cmd")
 		return
@@ -31,23 +31,23 @@ func (websockHandler *websocketHandler) ctrlPlay(data []byte) (err error) {
 	//清除之前的
 
 	switch websockHandler.lastCmd {
-	case WSC_close:
+	case WSCClose:
 		err = websockHandler.doPlay(st)
-	case WSC_play:
+	case WSCPlay:
 		err = websockHandler.doClose()
 		if err != nil {
 			logger.LOGE("close failed ")
 			return
 		}
 		err = websockHandler.doPlay(st)
-	case WSC_play2:
+	case WSCPlay2:
 		err = websockHandler.doClose()
 		if err != nil {
 			logger.LOGE("close failed ")
 			return
 		}
 		err = websockHandler.doPlay(st)
-	case WSC_pause:
+	case WSCPause:
 		err = websockHandler.doClose()
 		if err != nil {
 			logger.LOGE("close failed ")
@@ -77,13 +77,13 @@ func (websockHandler *websocketHandler) ctrlResume(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("resume failed do nothing")
-			websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_FAILED, st.Req)
 
 		} else {
-			websockHandler.lastCmd = WSC_play
+			websockHandler.lastCmd = WSCPlay
 		}
 	}()
-	if false == supportNewCmd(websockHandler.lastCmd, WSC_resume) {
+	if false == supportNewCmd(websockHandler.lastCmd, WSCResume) {
 		logger.LOGE("bad cmd")
 		err = errors.New("bad cmd")
 		return
@@ -94,7 +94,7 @@ func (websockHandler *websocketHandler) ctrlResume(data []byte) (err error) {
 	}
 	//only pase support resume
 	switch websockHandler.lastCmd {
-	case WSC_pause:
+	case WSCPause:
 		err = websockHandler.doResume(st)
 	default:
 		err = errors.New("invalid last cmd")
@@ -108,12 +108,12 @@ func (websockHandler *websocketHandler) ctrlPause(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("pause failed")
-			websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_FAILED, st.Req)
 		} else {
-			websockHandler.lastCmd = WSC_pause
+			websockHandler.lastCmd = WSCPause
 		}
 	}()
-	if false == supportNewCmd(websockHandler.lastCmd, WSC_pause) {
+	if false == supportNewCmd(websockHandler.lastCmd, WSCPause) {
 		logger.LOGE("bad cmd")
 		err = errors.New("bad cmd")
 		return
@@ -124,9 +124,9 @@ func (websockHandler *websocketHandler) ctrlPause(data []byte) (err error) {
 		return err
 	}
 	switch websockHandler.lastCmd {
-	case WSC_play:
+	case WSCPlay:
 		websockHandler.doPause(st)
-	case WSC_play2:
+	case WSCPlay2:
 		websockHandler.doPause(st)
 	default:
 		err = errors.New("invalid last cmd in pause")
@@ -149,10 +149,10 @@ func (websockHandler *websocketHandler) ctrlClose(data []byte) (err error) {
 	st := &stClose{}
 	defer func() {
 		if err != nil {
-			websockHandler.sendWsStatus(websockHandler.conn, WS_status_error, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_FAILED, st.Req)
 		} else {
 
-			websockHandler.lastCmd = WSC_close
+			websockHandler.lastCmd = WSCClose
 		}
 	}()
 	err = json.Unmarshal(data, st)
@@ -169,9 +169,9 @@ func (websockHandler *websocketHandler) ctrlStop(data []byte) (err error) {
 	err = json.Unmarshal(data, st)
 	defer func() {
 		if err != nil {
-			websockHandler.sendWsStatus(websockHandler.conn, WS_status_error, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_FAILED, st.Req)
 		} else {
-			websockHandler.lastCmd = WSC_close
+			websockHandler.lastCmd = WSCClose
 		}
 	}()
 	if err != nil {
@@ -229,7 +229,7 @@ func (websockHandler *websocketHandler) doPlay(st *stPlay) (err error) {
 		return
 	}
 
-	err = websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_PLAY_START, st.Req)
+	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_START, st.Req)
 	return
 }
 
@@ -241,14 +241,14 @@ func (websockHandler *websocketHandler) doPlay2() (err error) {
 
 func (websockHandler *websocketHandler) doResume(st *stResume) (err error) {
 	logger.LOGT("resume play start")
-	err = websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_PLAY_START, st.Req)
+	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_START, st.Req)
 	return
 }
 
 func (websockHandler *websocketHandler) doPause(st *stPause) (err error) {
 	logger.LOGT("pause do nothing")
 
-	websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_PAUSE_NOTIFY, st.Req)
+	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PAUSE_NOTIFY, st.Req)
 	return
 }
 

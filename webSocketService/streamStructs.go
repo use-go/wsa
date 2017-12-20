@@ -11,28 +11,28 @@ import (
 
 // WS Status
 const (
-	WS_status_status = "status"
-	WS_status_error  = "error"
+	WSStatusStatus = "status"
+	WSStatusError  = "error"
 )
 
 //1byte type
 const (
-	WS_pkt_audio   = 8
-	WS_pkt_video   = 9
-	WS_pkt_control = 18
+	WSPktAudio   = 8
+	WSPktVideo   = 9
+	WSPktControl = 18
 )
 
 // WS Cmd
 const (
-	WSC_play       = 1
-	WSC_play2      = 2
-	WSC_resume     = 3
-	WSC_pause      = 4
-	WSC_seek       = 5
-	WSC_close      = 7
-	WSC_stop       = 6
-	WSC_publish    = 0x10
-	WSC_onMetaData = 9
+	WSCPlay       = 1
+	WSCPlay2      = 2
+	WSCResume     = 3
+	WSCPause      = 4
+	WSCSeek       = 5
+	WSCClose      = 7
+	WSCStop       = 6
+	WSCPublish    = 0x10
+	WSCOnMetaData = 9
 )
 
 var cmdsMap map[int]*wssAPI.Set
@@ -42,46 +42,46 @@ func init() {
 	//初始状态close，可以play,close,publish
 	{
 		tmp := wssAPI.NewSet()
-		tmp.Add(WSC_play)
-		tmp.Add(WSC_play2)
-		tmp.Add(WSC_close)
-		tmp.Add(WSC_publish)
-		cmdsMap[WSC_close] = tmp
+		tmp.Add(WSCPlay)
+		tmp.Add(WSCPlay2)
+		tmp.Add(WSCClose)
+		tmp.Add(WSCPublish)
+		cmdsMap[WSCClose] = tmp
 	}
 	//play 可以close pause seek
 	{
 		tmp := wssAPI.NewSet()
-		tmp.Add(WSC_pause)
-		tmp.Add(WSC_play)
-		tmp.Add(WSC_play2)
-		tmp.Add(WSC_seek)
-		tmp.Add(WSC_close)
-		cmdsMap[WSC_play] = tmp
+		tmp.Add(WSCPause)
+		tmp.Add(WSCPlay)
+		tmp.Add(WSCPlay2)
+		tmp.Add(WSCSeek)
+		tmp.Add(WSCClose)
+		cmdsMap[WSCPlay] = tmp
 	}
 	//play2 =play
 	{
 		tmp := wssAPI.NewSet()
-		tmp.Add(WSC_pause)
-		tmp.Add(WSC_play)
-		tmp.Add(WSC_play2)
-		tmp.Add(WSC_seek)
-		tmp.Add(WSC_close)
-		cmdsMap[WSC_play2] = tmp
+		tmp.Add(WSCPause)
+		tmp.Add(WSCPlay)
+		tmp.Add(WSCPlay2)
+		tmp.Add(WSCSeek)
+		tmp.Add(WSCClose)
+		cmdsMap[WSCPlay2] = tmp
 	}
 	//pause
 	{
 		tmp := wssAPI.NewSet()
-		tmp.Add(WSC_resume)
-		tmp.Add(WSC_play)
-		tmp.Add(WSC_play2)
-		tmp.Add(WSC_close)
-		cmdsMap[WSC_pause] = tmp
+		tmp.Add(WSCResume)
+		tmp.Add(WSCPlay)
+		tmp.Add(WSCPlay2)
+		tmp.Add(WSCClose)
+		cmdsMap[WSCPause] = tmp
 	}
 	//publish
 	{
 		tmp := wssAPI.NewSet()
-		tmp.Add(WSC_close)
-		cmdsMap[WSC_publish] = tmp
+		tmp.Add(WSCClose)
+		cmdsMap[WSCPublish] = tmp
 	}
 }
 
@@ -96,7 +96,7 @@ func supportNewCmd(cmdOld, cmdNew int) bool {
 // SendWsControl Control command
 func SendWsControl(conn *websocket.Conn, ctrlType int, data []byte) (err error) {
 	dataSend := make([]byte, len(data)+4)
-	dataSend[0] = WS_pkt_control
+	dataSend[0] = WSPktControl
 	dataSend[1] = byte((ctrlType >> 16) & 0xff)
 	dataSend[2] = byte((ctrlType >> 8) & 0xff)
 	dataSend[3] = byte((ctrlType >> 0) & 0xff)
@@ -112,7 +112,7 @@ func SendWsStatus(conn *websocket.Conn, level, code string, req int) (err error)
 		return
 	}
 	dataSend := make([]byte, len(dataJson)+4)
-	dataSend[0] = WS_pkt_control
+	dataSend[0] = WSPktControl
 	dataSend[1] = 0
 	dataSend[2] = 0
 	dataSend[3] = 0

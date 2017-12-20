@@ -60,7 +60,7 @@ func (websockHandler *websocketHandler) Init(msg *wssAPI.Msg) (err error) {
 	websockHandler.conn = msg.Param1.(*websocket.Conn)
 	websockHandler.app = msg.Param2.(string)
 	websockHandler.waitPlaying = new(sync.WaitGroup)
-	websockHandler.lastCmd = WSC_close
+	websockHandler.lastCmd = WSCClose
 	return
 }
 
@@ -87,7 +87,7 @@ func (websockHandler *websocketHandler) ProcessMessage(msg *wssAPI.Msg) (err err
 		websockHandler.hasSink = true
 	case wssAPI.MSG_GetSource_Failed:
 		websockHandler.hasSink = false
-		websockHandler.sendWsStatus(websockHandler.conn, WS_status_error, NETSTREAM_PLAY_FAILED, 0)
+		websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_PLAY_FAILED, 0)
 	case wssAPI.MSG_FLV_TAG:
 		tag := msg.Param1.(*flv.FlvTag)
 		err = websockHandler.appendFlvTag(tag)
@@ -163,9 +163,9 @@ func (websockHandler *websocketHandler) processWSMessage(data []byte) (err error
 	}
 	msgType := int(data[0])
 	switch msgType {
-	case WS_pkt_audio:
-	case WS_pkt_video:
-	case WS_pkt_control:
+	case WSPktAudio:
+	case WSPktVideo:
+	case WSPktControl:
 		logger.LOGD("recv control data:")
 		logger.LOGD(data)
 		return websockHandler.controlMsg(data[1:])
@@ -188,23 +188,23 @@ func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
 	}
 	logger.LOGT(ctrlType)
 	switch ctrlType {
-	case WSC_play:
+	case WSCPlay:
 		return websockHandler.ctrlPlay(data[3:])
-	case WSC_play2:
+	case WSCPlay2:
 		return websockHandler.ctrlPlay2(data[3:])
-	case WSC_resume:
+	case WSCResume:
 		return websockHandler.ctrlResume(data[3:])
-	case WSC_pause:
+	case WSCPause:
 		return websockHandler.ctrlPause(data[3:])
-	case WSC_seek:
+	case WSCSeek:
 		return websockHandler.ctrlSeek(data[3:])
-	case WSC_close:
+	case WSCClose:
 		return websockHandler.ctrlClose(data[3:])
-	case WSC_stop:
+	case WSCStop:
 		return websockHandler.ctrlStop(data[3:])
-	case WSC_publish:
+	case WSCPublish:
 		return websockHandler.ctrlPublish(data[3:])
-	case WSC_onMetaData:
+	case WSCOnMetaData:
 		return websockHandler.ctrlOnMetadata(data[3:])
 	default:
 		logger.LOGE("unknowd websocket control type")
@@ -318,11 +318,11 @@ func (websockHandler *websocketHandler) threadPlay() {
 		tag := websockHandler.stPlay.cache.Front().Value.(*flv.FlvTag)
 		websockHandler.stPlay.cache.Remove(websockHandler.stPlay.cache.Front())
 		websockHandler.stPlay.mutexCache.Unlock()
-		if WSC_pause == websockHandler.lastCmd {
+		if WSCPause == websockHandler.lastCmd {
 			continue
 		}
 		if tag.TagType == flv.FLV_TAG_ScriptData {
-			err := websockHandler.sendWsControl(websockHandler.conn, WSC_onMetaData, tag.Data)
+			err := websockHandler.sendWsControl(websockHandler.conn, WSCOnMetaData, tag.Data)
 			if err != nil {
 				logger.LOGE(err.Error())
 				websockHandler.isPlaying = false
@@ -354,7 +354,7 @@ func (websockHandler *websocketHandler) stopPlay() {
 	websockHandler.isPlaying = false
 	websockHandler.waitPlaying.Wait()
 	websockHandler.stPlay.reset()
-	websockHandler.sendWsStatus(websockHandler.conn, WS_status_status, NETSTREAM_PLAY_STOP, 0)
+	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_STOP, 0)
 }
 
 func (websockHandler *websocketHandler) stopPublish() {
@@ -365,7 +365,7 @@ func (websockHandler *websocketHandler) sendWsControl(conn *websocket.Conn, ctrl
 	websockHandler.mutexWs.Lock()
 	defer websockHandler.mutexWs.Unlock()
 	dataSend := make([]byte, len(data)+4)
-	dataSend[0] = WS_pkt_control
+	dataSend[0] = WSPktControl
 	dataSend[1] = byte((ctrlType >> 16) & 0xff)
 	dataSend[2] = byte((ctrlType >> 8) & 0xff)
 	dataSend[3] = byte((ctrlType >> 0) & 0xff)
@@ -383,7 +383,7 @@ func (websockHandler *websocketHandler) sendWsStatus(conn *websocket.Conn, level
 		return
 	}
 	dataSend := make([]byte, len(dataJson)+4)
-	dataSend[0] = WS_pkt_control
+	dataSend[0] = WSPktControl
 	dataSend[1] = 0
 	dataSend[2] = 0
 	dataSend[3] = 0
