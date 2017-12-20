@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/DASH"
+	"github.com/use-go/websocketStreamServer/DASHService"
 	"github.com/use-go/websocketStreamServer/HLSService"
 	"github.com/use-go/websocketStreamServer/HTTPMUX"
 	"github.com/use-go/websocketStreamServer/RTMPService"
@@ -157,7 +157,7 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 	//create DASH Service
 	if len(busConfig.DASHConfigName) > 0 {
-		dash := &DASH.DASHService{}
+		dash := &DASHService.DASHService{}
 		msg := &wssAPI.Msg{Param1: busConfig.DASHConfigName}
 		err = dash.Init(msg)
 		if err != nil {
@@ -270,10 +270,12 @@ func (srvBus *ServiceBus) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//GetType for svrBus
 func (srvBus *ServiceBus) GetType() string {
 	return wssAPI.OBJServerBus
 }
 
+//HandleTask for svrBus
 func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {
 	srvBus.mutexServices.RLock()
 	defer srvBus.mutexServices.RUnlock()
@@ -284,14 +286,17 @@ func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {
 	return handler.HandleTask(task)
 }
 
+//ProcessMessage for svrBus
 func (srvBus *ServiceBus) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return nil
 }
 
+//SetParent for svrBus
 func (srvBus *ServiceBus) SetParent(arent wssAPI.MsgHandler) {
 
 }
 
+//AddSvr for svrBus
 func AddSvr(svr wssAPI.MsgHandler) {
 	logger.LOGE("add svr")
 }

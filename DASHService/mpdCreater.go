@@ -1,4 +1,4 @@
-package DASH
+package DASHService
 
 import (
 	"encoding/xml"
@@ -16,6 +16,7 @@ import (
 	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
 )
 
+// const string for media description
 const (
 	ProfileFull        = "urn:mpeg:dash:profile:full:2011"
 	ProfileISOOnDemand = "urn:mpeg:dash:profile:isoff-on-demand:2011"
@@ -31,6 +32,7 @@ const (
 	SchemeIdUri = "urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
 )
 
+// MPD Struct
 type MPD struct {
 	Id                        string      `xml:"id,attr"`
 	Profiles                  string      `xml:"profiles,attr"`
@@ -67,16 +69,19 @@ type SegmentTemplateXML struct {
 	SegmentTimeline *SegmentTimelineXML `xml:"SegmentTimeline,omitempty"`
 }
 
+//SegmentTimelineXML from file
 type SegmentTimelineXML struct {
 	S []SegmentTimelineDesc `xml:"S"`
 }
 
+// SegmentTimelineDesc from file
 type SegmentTimelineDesc struct {
 	T string `xml:"t,attr,omitempty"` //time
 	D string `xml:"d,attr"`           //duration
 	R string `xml:"r,attr,omitempty"` //repreat count default 0
 }
 
+//RepresentationXML file
 type RepresentationXML struct {
 	Id                string `xml:"id,attr"`
 	Bandwidth         string `xml:"bandwidth,attr"`
@@ -86,6 +91,7 @@ type RepresentationXML struct {
 	AudioSamplingRate string `xml:"audioSamplingRate,attr,omitempty"`
 }
 
+//AudioChannelConfigurationXML file
 type AudioChannelConfigurationXML struct {
 	SchemeIdUri string `xml:"schemeIdUri,attr"`
 	Value       int    `xml:"value,attr"`
@@ -97,11 +103,11 @@ type mpdCreater struct {
 	avaStartTime string
 }
 
-func (this *mpdCreater) init(videoHeader, audioHeader *flv.FlvTag) {
-	this.audioHeader = audioHeader
-	this.videoHeader = videoHeader
+func (dashMpdCreater *mpdCreater) init(videoHeader, audioHeader *flv.FlvTag) {
+	dashMpdCreater.audioHeader = audioHeader
+	dashMpdCreater.videoHeader = videoHeader
 	t := time.Now()
-	this.avaStartTime = t.Format("2006-01-02T15:04:05.000Z")
+	dashMpdCreater.avaStartTime = t.Format("2006-01-02T15:04:05.000Z")
 }
 
 func generatePTime(year, month, day, hour, minute, sec, mill int) string {
@@ -110,18 +116,18 @@ func generatePTime(year, month, day, hour, minute, sec, mill int) string {
 	return str
 }
 
-func (this *mpdCreater) GetXML(id string, startNumber int) (buf []byte) {
+func (dashMpdCreater *mpdCreater) GetXML(id string, startNumber int) (buf []byte) {
 	mpd := &MPD{Id: id,
 		Profiles: ProfileISOLive,
 		Type:     dynamicMPD,
-		AvailabilityStartTime: this.avaStartTime}
+		AvailabilityStartTime: dashMpdCreater.avaStartTime}
 	t := time.Now()
 	mpd.PublishTime = t.Format("2006-01-02T15:04:05.000Z")
 	//MediaPresentationDuration ignore
 	mpd.MinimumUpdatePeriod = generatePTime(0, 0, 0, 0, 0, 3, 0)
 	mpd.MinBufferTime = generatePTime(0, 0, 0, 0, 0, 1, 0)
 	mpd.Xmlns = MPDXMLNS
-	mpd.Period = this.createPeriod(startNumber)
+	mpd.Period = dashMpdCreater.createPeriod(startNumber)
 
 	buf, err := xml.Marshal(mpd)
 
@@ -136,19 +142,19 @@ func (this *mpdCreater) GetXML(id string, startNumber int) (buf []byte) {
 	return data
 }
 
-func (this *mpdCreater) createPeriod(startNumber int) (period []PeriodXML) {
+func (dashMpdCreater *mpdCreater) createPeriod(startNumber int) (period []PeriodXML) {
 
 	period = make([]PeriodXML, 0, 2)
 
-	if this.videoHeader != nil {
+	if dashMpdCreater.videoHeader != nil {
 		videPeroid := PeriodXML{Id: wssAPI.GenerateGUID()}
-		this.createVidePeroid(startNumber, &videPeroid)
+		dashMpdCreater.createVidePeroid(startNumber, &videPeroid)
 		period = append(period, videPeroid)
 	}
 
-	if this.audioHeader != nil {
+	if dashMpdCreater.audioHeader != nil {
 		audioPeriod := PeriodXML{Id: wssAPI.GenerateGUID()}
-		this.createAudioPeroid(startNumber, &audioPeriod)
+		dashMpdCreater.createAudioPeroid(startNumber, &audioPeriod)
 		period = append(period, audioPeriod)
 	}
 
@@ -158,13 +164,13 @@ func (this *mpdCreater) createPeriod(startNumber int) (period []PeriodXML) {
 	return period
 }
 
-func (this *mpdCreater) createVidePeroid(startNumber int, period *PeriodXML) {
+func (dashMpdCreater *mpdCreater) createVidePeroid(startNumber int, period *PeriodXML) {
 	ada := make([]AdaptationSetXML, 1)
 	ada[0].MimeType = "video/mp4"
 	var width, height, fps int
-	if this.videoHeader.Data[0] == 0x17 && this.videoHeader.Data[1] == 0 {
+	if dashMpdCreater.videoHeader.Data[0] == 0x17 && dashMpdCreater.videoHeader.Data[1] == 0 {
 		ada[0].Codecs = "avc1."
-		sps, _ := h264.GetSpsPpsFromAVC(this.videoHeader.Data[5:])
+		sps, _ := h264.GetSpsPpsFromAVC(dashMpdCreater.videoHeader.Data[5:])
 		str := fmt.Sprintf("%x", sps[1])
 		if len(str) == 1 {
 			ada[0].Codecs += "0"
@@ -189,7 +195,7 @@ func (this *mpdCreater) createVidePeroid(startNumber int, period *PeriodXML) {
 	ada[0].SegmentTemplate.Initialization = "../video/$RepresentationID$/init.mp4"
 	ada[0].SegmentTemplate.TimeScale = "1000"
 	ada[0].SegmentTemplate.StartNumber = strconv.Itoa(startNumber)
-	ada[0].SegmentTemplate.SegmentTimeline = this.createSegmentTimeLine()
+	ada[0].SegmentTemplate.SegmentTimeline = dashMpdCreater.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
 	ada[0].Representation[0].Id = strconv.Itoa(width) + "_" + strconv.Itoa(height)
@@ -201,15 +207,15 @@ func (this *mpdCreater) createVidePeroid(startNumber int, period *PeriodXML) {
 	period.AdaptationSet = ada
 }
 
-func (this *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
+func (dashMpdCreater *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
 	ada := make([]AdaptationSetXML, 1)
 
 	ada[0].MimeType = "audio/mp4"
 	ada[0].Lang = "en"
 	sampleFreq := 0
 	channel := 0
-	if this.audioHeader.Data[0]>>4 == flv.SoundFormat_AAC {
-		asc := aac.MP4AudioGetConfig(this.audioHeader.Data[2:])
+	if dashMpdCreater.audioHeader.Data[0]>>4 == flv.SoundFormat_AAC {
+		asc := aac.MP4AudioGetConfig(dashMpdCreater.audioHeader.Data[2:])
 		ada[0].Codecs = "mp4a.40."
 		ada[0].Codecs += strconv.Itoa(asc.Object_type)
 		sampleFreq = asc.Sample_rate
@@ -224,7 +230,7 @@ func (this *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
 	ada[0].SegmentTemplate.Initialization = "../video/$RepresentationID$/init.mp4"
 	ada[0].SegmentTemplate.TimeScale = strconv.Itoa(sampleFreq)
 	ada[0].SegmentTemplate.StartNumber = strconv.Itoa(startNumber)
-	ada[0].SegmentTemplate.SegmentTimeline = this.createSegmentTimeLine()
+	ada[0].SegmentTemplate.SegmentTimeline = dashMpdCreater.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
 	ada[0].Representation[0].Id = "1_stereo"
@@ -234,7 +240,7 @@ func (this *mpdCreater) createAudioPeroid(startNumber int, period *PeriodXML) {
 	period.AdaptationSet = ada
 }
 
-func (this *mpdCreater) createSegmentTimeLine() (segTm *SegmentTimelineXML) {
+func (dashMpdCreater *mpdCreater) createSegmentTimeLine() (segTm *SegmentTimelineXML) {
 	//bad time line
 	segTm = &SegmentTimelineXML{}
 	segTm.S = make([]SegmentTimelineDesc, 1)
