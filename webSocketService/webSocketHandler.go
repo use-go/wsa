@@ -8,14 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
-	"github.com/use-go/websocketStreamServer/mediaTypes/mp4"
-	"github.com/use-go/websocketStreamServer/wssAPI"
-
 	"github.com/gorilla/websocket"
+	
+	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/mp4"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 const (

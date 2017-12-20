@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
 )
 
 func (this *RTSPHandler) sendErrorReply(lines []string, code int) (err error) {

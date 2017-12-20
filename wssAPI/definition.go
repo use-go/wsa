@@ -31,17 +31,17 @@ type MsgHandler interface {
 	//	SetParent(parent MsgHandler)
 }
 
-var svrbus MsgHandler
+var handler MsgHandler
 
-//SetBus to associate the action handler
-func SetBus(bus MsgHandler) {
-	svrbus = bus
+//SetHandler to associate the action handler for some object
+func SetHandler(hdlr MsgHandler) {
+	handler = hdlr
 }
 
 //HandleTask to deal Task from service bus
 func HandleTask(task Task) error {
-	if svrbus != nil {
-		return svrbus.HandleTask(task)
+	if handler != nil {
+		return handler.HandleTask(task)
 	}
-	return errors.New("service bus not ready")
+	return errors.New("service process not ready")
 }

@@ -1,4 +1,9 @@
-package svrBus
+// Copyright 2017 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//Package process , this is the main process to control all the services
+package process
 
 import (
 	"encoding/json"
@@ -9,19 +14,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/DASHService"
-	"github.com/use-go/websocketStreamServer/HLSService"
-	"github.com/use-go/websocketStreamServer/HTTPMUX"
-	"github.com/use-go/websocketStreamServer/RTMPService"
-	"github.com/use-go/websocketStreamServer/RTSPService"
-	"github.com/use-go/websocketStreamServer/backend"
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/streamer"
-	"github.com/use-go/websocketStreamServer/webSocketService"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/DASHService"
+	"github.com/use-go/websocket-streamserver/HLSService"
+	"github.com/use-go/websocket-streamserver/HTTPMUX"
+	"github.com/use-go/websocket-streamserver/RTMPService"
+	"github.com/use-go/websocket-streamserver/RTSPService"
+	"github.com/use-go/websocket-streamserver/backend"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/streamer"
+	"github.com/use-go/websocket-streamserver/webSocketService"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-type serviceBusConfig struct {
+type processConfiguration struct {
 	RTMPConfigName          string `json:"RTMP"`
 	WebSocketConfigName     string `json:"WebSocket"`
 	BackendConfigName       string `json:"Backend"`
@@ -32,30 +37,30 @@ type serviceBusConfig struct {
 	RTSPConfigName          string `json:"RTSP,omitempty"`
 }
 
-//ServiceBus : ServiceBus holding all the Service that will be launched in Process
-type ServiceBus struct {
+//LaunchedServices : LaunchedServices holding all the Service that will be launched in Process
+type LaunchedServices struct {
 	mutexServices sync.RWMutex
 	services      map[string]wssAPI.MsgHandler
 }
 
-var serviceBus *ServiceBus
+var processServices *LaunchedServices
 
-var busConfig *serviceBusConfig
+var processConfig *processConfiguration
 
 func init() {
-	serviceBus = &ServiceBus{}
-	wssAPI.SetBus(serviceBus)
+	processServices = &LaunchedServices{}
+	wssAPI.SetHandler(processServices)
 }
 
 // Start init the server processing
 func Start() {
-	serviceBus.Init(nil)
-	serviceBus.createAllService(nil)
-	serviceBus.Start(nil)
+	processServices.Init(nil)
+	processServices.createAllService(nil)
+	processServices.Start(nil)
 }
 
 // Init the configed service such as hls/dash/rtsp
-func (srvBus *ServiceBus) Init(msg *wssAPI.Msg) (err error) {
+func (srvBus *LaunchedServices) Init(msg *wssAPI.Msg) (err error) {
 	srvBus.services = make(map[string]wssAPI.MsgHandler)
 	err = srvBus.loadConfig()
 	if err != nil {
@@ -65,13 +70,13 @@ func (srvBus *ServiceBus) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
+func (srvBus *LaunchedServices) createAllService(msg *wssAPI.Msg) (err error) {
 
 	if true {
 		livingSvr := &streamer.StreamerService{}
 		msg := &wssAPI.Msg{}
-		if len(busConfig.StreamManagerConfigName) > 0 {
-			msg.Param1 = busConfig.StreamManagerConfigName
+		if len(processConfig.StreamManagerConfigName) > 0 {
+			msg.Param1 = processConfig.StreamManagerConfigName
 		}
 		err = livingSvr.Init(msg)
 		if err != nil {
@@ -84,10 +89,10 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 
 	//create RTMP Service
-	if len(busConfig.RTMPConfigName) > 0 {
+	if len(processConfig.RTMPConfigName) > 0 {
 		rtmpSvr := &RTMPService.RTMPService{}
 		msg := &wssAPI.Msg{}
-		msg.Param1 = busConfig.RTMPConfigName
+		msg.Param1 = processConfig.RTMPConfigName
 		err = rtmpSvr.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -99,10 +104,10 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 
 	//create WebSocket Service
-	if len(busConfig.WebSocketConfigName) > 0 {
+	if len(processConfig.WebSocketConfigName) > 0 {
 		webSocketSvr := &webSocketService.WebSocketService{}
 		msg := &wssAPI.Msg{}
-		msg.Param1 = busConfig.WebSocketConfigName
+		msg.Param1 = processConfig.WebSocketConfigName
 		err = webSocketSvr.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -114,10 +119,10 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 
 	//create backendService
-	if len(busConfig.BackendConfigName) > 0 {
+	if len(processConfig.BackendConfigName) > 0 {
 		backendSvr := &backend.BackendService{}
 		msg := &wssAPI.Msg{}
-		msg.Param1 = busConfig.BackendConfigName
+		msg.Param1 = processConfig.BackendConfigName
 		err = backendSvr.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -129,10 +134,10 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 
 	//create RTSP Service
-	if len(busConfig.RTSPConfigName) > 0 {
+	if len(processConfig.RTSPConfigName) > 0 {
 		rtspSvr := &RTSPService.RTSPService{}
 		msg := &wssAPI.Msg{}
-		msg.Param1 = busConfig.RTSPConfigName
+		msg.Param1 = processConfig.RTSPConfigName
 		err = rtspSvr.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -143,9 +148,9 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 		}
 	}
 	//create HLS Service
-	if len(busConfig.HLSConfigName) > 0 {
+	if len(processConfig.HLSConfigName) > 0 {
 		hls := &HLSService.HLSService{}
-		msg := &wssAPI.Msg{Param1: busConfig.HLSConfigName}
+		msg := &wssAPI.Msg{Param1: processConfig.HLSConfigName}
 		err = hls.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -156,9 +161,9 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 		}
 	}
 	//create DASH Service
-	if len(busConfig.DASHConfigName) > 0 {
+	if len(processConfig.DASHConfigName) > 0 {
 		dash := &DASHService.DASHService{}
-		msg := &wssAPI.Msg{Param1: busConfig.DASHConfigName}
+		msg := &wssAPI.Msg{Param1: processConfig.DASHConfigName}
 		err = dash.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -172,7 +177,7 @@ func (srvBus *ServiceBus) createAllService(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (srvBus *ServiceBus) loadConfig() (err error) {
+func (srvBus *LaunchedServices) loadConfig() (err error) {
 	configName := ""
 	if len(os.Args) > 1 {
 		configName = os.Args[1]
@@ -185,22 +190,22 @@ func (srvBus *ServiceBus) loadConfig() (err error) {
 		logger.LOGE("load config file failed:" + err.Error())
 		return
 	}
-	busConfig = &serviceBusConfig{}
-	err = json.Unmarshal(data, busConfig)
+	processConfig = &processConfiguration{}
+	err = json.Unmarshal(data, processConfig)
 
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
 
-	if len(busConfig.LogPath) > 0 {
-		srvBus.createLogFile(busConfig.LogPath)
+	if len(processConfig.LogPath) > 0 {
+		srvBus.createLogFile(processConfig.LogPath)
 	}
 
 	return
 }
 
-func (srvBus *ServiceBus) createLogFile(logPath string) {
+func (srvBus *LaunchedServices) createLogFile(logPath string) {
 	if strings.HasSuffix(logPath, "/") {
 		logPath = strings.TrimSuffix(logPath, "/")
 	}
@@ -240,7 +245,7 @@ func (srvBus *ServiceBus) createLogFile(logPath string) {
 }
 
 //Start all the configed service ,such as rtsp ,websocket ,backend
-func (srvBus *ServiceBus) Start(msg *wssAPI.Msg) (err error) {
+func (srvBus *LaunchedServices) Start(msg *wssAPI.Msg) (err error) {
 	//if false {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//}
@@ -261,7 +266,7 @@ func (srvBus *ServiceBus) Start(msg *wssAPI.Msg) (err error) {
 }
 
 //Stop all the launched services
-func (srvBus *ServiceBus) Stop(msg *wssAPI.Msg) (err error) {
+func (srvBus *LaunchedServices) Stop(msg *wssAPI.Msg) (err error) {
 	srvBus.mutexServices.RLock()
 	defer srvBus.mutexServices.RUnlock()
 	for _, v := range srvBus.services {
@@ -270,13 +275,13 @@ func (srvBus *ServiceBus) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-//GetType for svrBus
-func (srvBus *ServiceBus) GetType() string {
+//GetType for process
+func (srvBus *LaunchedServices) GetType() string {
 	return wssAPI.OBJServerBus
 }
 
-//HandleTask for svrBus
-func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {
+//HandleTask for process
+func (srvBus *LaunchedServices) HandleTask(task wssAPI.Task) (err error) {
 	srvBus.mutexServices.RLock()
 	defer srvBus.mutexServices.RUnlock()
 	handler, exist := srvBus.services[task.Receiver()]
@@ -286,17 +291,17 @@ func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {
 	return handler.HandleTask(task)
 }
 
-//ProcessMessage for svrBus
-func (srvBus *ServiceBus) ProcessMessage(msg *wssAPI.Msg) (err error) {
+//ProcessMessage for process
+func (srvBus *LaunchedServices) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return nil
 }
 
-//SetParent for svrBus
-func (srvBus *ServiceBus) SetParent(arent wssAPI.MsgHandler) {
+//SetParent for process
+func (srvBus *LaunchedServices) SetParent(arent wssAPI.MsgHandler) {
 
 }
 
-//AddSvr for svrBus
+//AddSvr for process
 func AddSvr(svr wssAPI.MsgHandler) {
 	logger.LOGE("add svr")
 }

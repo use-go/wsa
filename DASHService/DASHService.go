@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/HTTPMUX"
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/HTTPMUX"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 //http://addr/DASH/streamName/req

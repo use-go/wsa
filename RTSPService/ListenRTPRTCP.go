@@ -2,7 +2,7 @@
 package RTSPService
 
 import (
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 	"net"
 	"sync"
 )

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 
-	"github.com/use-go/websocketStreamServer/svrBus"
+	"github.com/use-go/websocket-streamserver/process"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func initLogger() {
 }
 
 func startServers() {
-	svrBus.Start()
+	process.Start()
 
 	ch := make(chan int)
 	<-ch

@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 
-	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
+	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
 
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 
 	"github.com/panda-media/muxer-fmp4/codec/H264"
 	"github.com/panda-media/muxer-fmp4/dashSlicer"
-	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 //DASHSource description

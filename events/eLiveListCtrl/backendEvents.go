@@ -3,7 +3,7 @@ package eLiveListCtrl
 import (
 	"container/list"
 
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 const (

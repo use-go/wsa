@@ -2,7 +2,7 @@ package RTSPService
 
 import (
 	//	"logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 )
 
 const (

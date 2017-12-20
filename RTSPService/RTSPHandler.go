@@ -3,19 +3,19 @@ package RTSPService
 import (
 	"container/list"
 	"errors"
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 	"net"
 
-	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
-	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
-	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
+	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
 	//	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 type RTSPHandler struct {

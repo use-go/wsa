@@ -6,7 +6,7 @@ the mutex struct
 import (
 	"net/http"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 )
 
 var ports map[string]*http.ServeMux

@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 )
 
 //CheckDirectory in FS

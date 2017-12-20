@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/use-go/websocketStreamServer/events/eLiveListCtrl"
-	"github.com/use-go/websocketStreamServer/events/eStreamerEvent"
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/events/eLiveListCtrl"
+	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 const (

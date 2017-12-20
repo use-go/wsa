@@ -1,10 +1,10 @@
 package ts
 
 import (
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
-	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 )
 
 func (this *TsCreater) audioPayload(tag *flv.FlvTag) (payload []byte, size int) {

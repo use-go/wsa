@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 //RTMP握手协议，包括简单握手和复杂握手

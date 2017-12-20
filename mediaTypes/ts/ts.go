@@ -3,11 +3,11 @@ package ts
 import (
 	"container/list"
 
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
-	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
-	"github.com/use-go/websocketStreamServer/mediaTypes/mp3"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
+	"github.com/use-go/websocket-streamserver/mediaTypes/mp3"
 )
 
 var crc32Table []uint32

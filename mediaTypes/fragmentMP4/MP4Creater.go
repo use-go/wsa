@@ -1,7 +1,7 @@
 package fragmentMP4
 
 import (
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 )
 
 func ftypBox() (box *MP4Box) {

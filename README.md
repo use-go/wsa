@@ -1,6 +1,6 @@
-# WebSocketStreamServer
+# websocket-streamserver
 
-based and forked from [playease](https://github.com/studease/playease)
+based and forked from [this websocket-streamserver](https://github.com/widefire/websocket-streamserver)
 
 ## a stream server support rtmp and websocket in html5
 

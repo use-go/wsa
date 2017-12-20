@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 )
 
 const (

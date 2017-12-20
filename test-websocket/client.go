@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocket-streamserver/logger"
 
-	"github.com/use-go/websocketStreamServer/webSocketService"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/webSocketService"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 
 	"github.com/gorilla/websocket"
 )

@@ -1,9 +1,9 @@
 package HLSService
 
 import (
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 )
 
 //may be aac or mp3 or other

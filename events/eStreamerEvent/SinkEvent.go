@@ -1,7 +1,7 @@
 package eStreamerEvent
 
 import (
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 const (

@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/use-go/websocketStreamServer/logger"
-	"github.com/use-go/websocketStreamServer/mediaTypes/aac"
-	"github.com/use-go/websocketStreamServer/mediaTypes/amf"
-	"github.com/use-go/websocketStreamServer/mediaTypes/flv"
-	"github.com/use-go/websocketStreamServer/mediaTypes/h264"
-	"github.com/use-go/websocketStreamServer/mediaTypes/mp3"
-	"github.com/use-go/websocketStreamServer/wssAPI"
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
+	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
+	"github.com/use-go/websocket-streamserver/mediaTypes/mp3"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 const save_to_file = false
