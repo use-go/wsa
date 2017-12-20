@@ -20,7 +20,7 @@ type EvePullRTMPStream struct {
 }
 
 func (this *EvePullRTMPStream) Receiver() string {
-	return wssAPI.OBJ_RTMPServer
+	return wssAPI.OBJRTMPServer
 }
 
 func (this *EvePullRTMPStream) Type() string {

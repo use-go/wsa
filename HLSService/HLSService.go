@@ -101,7 +101,7 @@ func (hlsService *HLSService) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (hlsService *HLSService) GetType() string {
-	return wssAPI.OBJ_HLSServer
+	return wssAPI.OBJHLSServer
 }
 
 func (hlsService *HLSService) HandleTask(task wssAPI.Task) (err error) {

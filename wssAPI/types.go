@@ -5,14 +5,14 @@ Mark the Serivce Type
 */
 
 const (
-	OBJ_ServerBus       = "ServerBus"
-	OBJ_RTMPServer      = "RTMPServer"
-	OBJ_WebSocketServer = "WebsocketServer"
-	OBJ_BackendServer   = "BackendServer"
-	OBJ_StreamerServer  = "StreamerServer"
-	OBJ_RTSPServer      = "RTSPServer"
-	OBJ_HLSServer       = "HLSServer"
-	OBJ_DASHServer      = `DASHServer`
+	OBJServerBus       = "ServerBus"
+	OBJRTMPServer      = "RTMPServer"
+	OBJWebSocketServer = "WebsocketServer"
+	OBJBackendServer   = "BackendServer"
+	OBJStreamerServer  = "StreamerServer"
+	OBJRTSPServer      = "RTSPServer"
+	OBJHLSServer       = "HLSServer"
+	OBJDASHServer      = `DASHServer`
 )
 
 const (

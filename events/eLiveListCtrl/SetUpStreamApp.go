@@ -16,7 +16,7 @@ type EveSetUpStreamApp struct {
 }
 
 func (eveSetUpStreamApp *EveSetUpStreamApp) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveSetUpStreamAppthis *EveSetUpStreamApp) Type() string {

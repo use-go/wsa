@@ -73,7 +73,7 @@ func (websockService *WebSocketService) Stop(msg *wssAPI.Msg) (err error) {
 
 // GetType interface implemention
 func (websockService *WebSocketService) GetType() string {
-	return wssAPI.OBJ_WebSocketServer
+	return wssAPI.OBJWebSocketServer
 }
 
 // HandleTask interface implemention

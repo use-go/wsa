@@ -79,7 +79,7 @@ func (this *RTMPService) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (this *RTMPService) GetType() string {
-	return wssAPI.OBJ_RTMPServer
+	return wssAPI.OBJRTMPServer
 }
 
 func (this *RTMPService) HandleTask(task wssAPI.Task) (err error) {

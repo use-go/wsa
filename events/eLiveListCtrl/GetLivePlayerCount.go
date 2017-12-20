@@ -10,7 +10,7 @@ type EveGetLivePlayerCount struct {
 }
 
 func (eveGetLivePlayerCount *EveGetLivePlayerCount) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveGetLivePlayerCount *EveGetLivePlayerCount) Type() string {

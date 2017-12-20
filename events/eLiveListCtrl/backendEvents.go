@@ -22,7 +22,7 @@ type EveEnableBlackList struct {
 }
 
 func (eveEnableBlackList *EveEnableBlackList) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveEnableBlackList *EveEnableBlackList) Type() string {
@@ -35,7 +35,7 @@ type EveSetBlackList struct {
 }
 
 func (eveSetBlackList *EveSetBlackList) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveSetBlackList *EveSetBlackList) Type() string {
@@ -48,7 +48,7 @@ type EveEnableWhiteList struct {
 }
 
 func (eveEnableWhiteList *EveEnableWhiteList) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveEnableWhiteList *EveEnableWhiteList) Type() string {
@@ -61,7 +61,7 @@ type EveSetWhiteList struct {
 }
 
 func (eveSetWhiteList *EveSetWhiteList) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveSetWhiteList *EveSetWhiteList) Type() string {

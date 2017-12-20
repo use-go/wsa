@@ -17,7 +17,7 @@ type EveGetLiveList struct {
 }
 
 func (eveGetLiveList *EveGetLiveList) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveGetLiveList *EveGetLiveList) Type() string {

@@ -79,7 +79,7 @@ func (backendService *BackendService) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (backendService *BackendService) GetType() string {
-	return wssAPI.OBJ_BackendServer
+	return wssAPI.OBJBackendServer
 }
 
 func (backendService *BackendService) HandleTask(task wssAPI.Task) (err error) {

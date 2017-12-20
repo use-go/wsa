@@ -91,7 +91,7 @@ func (streamerService *StreamerService) Stop(msg *wssAPI.Msg) (err error) {
 
 //GetType : Get current Server Type to Identity which server it is
 func (streamerService *StreamerService) GetType() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error) {

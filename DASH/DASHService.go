@@ -129,7 +129,7 @@ func (this *DASHService) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (this *DASHService) GetType() string {
-	return wssAPI.OBJ_DASHServer
+	return wssAPI.OBJDASHServer
 }
 
 func (this *DASHService) HandleTask(task wssAPI.Task) (err error) {

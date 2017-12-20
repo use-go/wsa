@@ -271,7 +271,7 @@ func (srvBus *ServiceBus) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (srvBus *ServiceBus) GetType() string {
-	return wssAPI.OBJ_ServerBus
+	return wssAPI.OBJServerBus
 }
 
 func (srvBus *ServiceBus) HandleTask(task wssAPI.Task) (err error) {

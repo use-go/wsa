@@ -21,7 +21,7 @@ type EveAddSource struct {
 }
 
 func (eveAddsource *EveAddSource) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveAddsource *EveAddSource) Type() string {
@@ -34,7 +34,7 @@ type EveDelSource struct {
 }
 
 func (eveAddsource *EveDelSource) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveAddsource *EveDelSource) Type() string {
@@ -48,7 +48,7 @@ type EveGetSource struct {
 }
 
 func (eveAddsource *EveGetSource) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveAddsource *EveGetSource) Type() string {

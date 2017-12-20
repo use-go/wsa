@@ -17,7 +17,7 @@ type EveAddSink struct {
 }
 
 func (eveAddSink *EveAddSink) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveAddSink *EveAddSink) Type() string {
@@ -30,7 +30,7 @@ type EveDelSink struct {
 }
 
 func (eveAddSink *EveDelSink) Receiver() string {
-	return wssAPI.OBJ_StreamerServer
+	return wssAPI.OBJStreamerServer
 }
 
 func (eveAddSink *EveDelSink) Type() string {

@@ -115,7 +115,7 @@ func (rtspService *RTSPService) Stop(msg *wssAPI.Msg) (err error) {
 }
 
 func (rtspService *RTSPService) GetType() string {
-	return wssAPI.OBJ_RTSPServer
+	return wssAPI.OBJRTSPServer
 }
 
 func (rtspService *RTSPService) HandleTask(task wssAPI.Task) (err error) {
