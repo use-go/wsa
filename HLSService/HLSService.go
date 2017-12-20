@@ -206,7 +206,7 @@ func (hlsService *HLSService) DelSource(key, id string) {
 	hlsService.muxSource.Lock()
 	defer hlsService.muxSource.Unlock()
 	src, exist := hlsService.sources[key]
-	if exist && src.clientId == id {
+	if exist && src.clientID == id {
 		delete(hlsService.sources, key)
 	}
 }

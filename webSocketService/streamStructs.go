@@ -104,19 +104,20 @@ func SendWsControl(conn *websocket.Conn, ctrlType int, data []byte) (err error) 
 	return conn.WriteMessage(websocket.BinaryMessage, dataSend)
 }
 
+//SendWsStatus code to client
 func SendWsStatus(conn *websocket.Conn, level, code string, req int) (err error) {
 	st := &stResult{Level: level, Code: code, Req: req}
-	dataJson, err := json.Marshal(st)
+	dataJSON, err := json.Marshal(st)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
-	dataSend := make([]byte, len(dataJson)+4)
+	dataSend := make([]byte, len(dataJSON)+4)
 	dataSend[0] = WSPktControl
 	dataSend[1] = 0
 	dataSend[2] = 0
 	dataSend[3] = 0
-	copy(dataSend[4:], dataJson)
+	copy(dataSend[4:], dataJSON)
 	err = conn.WriteMessage(websocket.BinaryMessage, dataSend)
 	return
 }
@@ -172,15 +173,14 @@ type stResult struct {
 
 // const string resource
 const (
-	NETCONNECTION_CALL_FAILED         = "NetConnection.Call.Failed"
-	NETCONNECTION_CONNECT_APPSHUTDOWN = "NetConnection.Connect.AppShutdown"
-	NETCONNECTION_CONNECT_CLOSED      = "NetConnection.Connect.Closed"
-	NETCONNECTION_CONNECT_FAILED      = "NetConnection.Connect.Failed"
-	NETCONNECTION_CONNECT_IDLETIMEOUT = "NetConnection.Connect.IdleTimeout"
-	NETCONNECTION_CONNECT_INVALIDAPP  = "NetConnection.Connect.InvalidApp"
-	NETCONNECTION_CONNECT_REJECTED    = "NetConnection.Connect.Rejected"
-	NETCONNECTION_CONNECT_SUCCESS     = "NetConnection.Connect.Success"
-
+	NETCONNECTION_CALL_FAILED           = "NetConnection.Call.Failed"
+	NETCONNECTION_CONNECT_APPSHUTDOWN   = "NetConnection.Connect.AppShutdown"
+	NETCONNECTION_CONNECT_CLOSED        = "NetConnection.Connect.Closed"
+	NETCONNECTION_CONNECT_FAILED        = "NetConnection.Connect.Failed"
+	NETCONNECTION_CONNECT_IDLETIMEOUT   = "NetConnection.Connect.IdleTimeout"
+	NETCONNECTION_CONNECT_INVALIDAPP    = "NetConnection.Connect.InvalidApp"
+	NETCONNECTION_CONNECT_REJECTED      = "NetConnection.Connect.Rejected"
+	NETCONNECTION_CONNECT_SUCCESS       = "NetConnection.Connect.Success"
 	NETSTREAM_BUFFER_EMPTY              = "NetStream.Buffer.Empty"
 	NETSTREAM_BUFFER_FLUSH              = "NetStream.Buffer.Flush"
 	NETSTREAM_BUFFER_FULL               = "NetStream.Buffer.Full"

@@ -29,7 +29,7 @@ type websocketHandler struct {
 	streamName   string
 	playName     string
 	pubName      string
-	clientId     string
+	clientID     string
 	isPlaying    bool
 	mutexPlaying sync.RWMutex
 	waitPlaying  *sync.WaitGroup
@@ -170,7 +170,7 @@ func (websockHandler *websocketHandler) processWSMessage(data []byte) (err error
 		logger.LOGD(data)
 		return websockHandler.controlMsg(data[1:])
 	default:
-		err = errors.New(fmt.Sprintf("msg type %d not supported", msgType))
+		err = fmt.Errorf("msg type %d not supported", msgType)
 		logger.LOGW("invalid binary data")
 		return
 	}
@@ -210,7 +210,6 @@ func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
 		logger.LOGE("unknowd websocket control type")
 		return errors.New("invalid ctrl msg type")
 	}
-	return
 }
 
 func (websockHandler *websocketHandler) sendSlice(slice *mp4.FMP4Slice) (err error) {
@@ -247,23 +246,23 @@ func (websockHandler *websocketHandler) delSource(streamName string, id int) (er
 	return
 }
 
-func (websockHandler *websocketHandler) addSink(streamName, clientId string, sinker wssAPI.MsgHandler) (err error) {
-	taskAddsink := &eStreamerEvent.EveAddSink{StreamName: streamName, SinkId: clientId, Sinker: sinker}
+func (websockHandler *websocketHandler) addSink(streamName, clientID string, sinker wssAPI.MsgHandler) (err error) {
+	taskAddsink := &eStreamerEvent.EveAddSink{StreamName: streamName, SinkId: clientID, Sinker: sinker}
 	err = wssAPI.HandleTask(taskAddsink)
 	if err != nil {
-		logger.LOGE(fmt.Sprintf("add sink %s %s failed :%s", streamName, clientId, err.Error()))
+		logger.LOGE(fmt.Sprintf("add sink %s %s failed :%s", streamName, clientID, err.Error()))
 		return
 	}
 	websockHandler.hasSink = taskAddsink.Added
 	return
 }
 
-func (websockHandler *websocketHandler) delSink(streamName, clientId string) (err error) {
-	taskDelSink := &eStreamerEvent.EveDelSink{StreamName: streamName, SinkId: clientId}
+func (websockHandler *websocketHandler) delSink(streamName, clientID string) (err error) {
+	taskDelSink := &eStreamerEvent.EveDelSink{StreamName: streamName, SinkId: clientID}
 	err = wssAPI.HandleTask(taskDelSink)
 	websockHandler.hasSink = false
 	if err != nil {
-		logger.LOGE(fmt.Sprintf("del sink %s %s failed:\n%s", streamName, clientId, err.Error()))
+		logger.LOGE(fmt.Sprintf("del sink %s %s failed:\n%s", streamName, clientID, err.Error()))
 	}
 	logger.LOGE("del sinker")
 	return
@@ -377,17 +376,17 @@ func (websockHandler *websocketHandler) sendWsStatus(conn *websocket.Conn, level
 	websockHandler.mutexWs.Lock()
 	defer websockHandler.mutexWs.Unlock()
 	st := &stResult{Level: level, Code: code, Req: req}
-	dataJson, err := json.Marshal(st)
+	dataJSON, err := json.Marshal(st)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
-	dataSend := make([]byte, len(dataJson)+4)
+	dataSend := make([]byte, len(dataJSON)+4)
 	dataSend[0] = WSPktControl
 	dataSend[1] = 0
 	dataSend[2] = 0
 	dataSend[3] = 0
-	copy(dataSend[4:], dataJson)
+	copy(dataSend[4:], dataJSON)
 	err = conn.WriteMessage(websocket.BinaryMessage, dataSend)
 	return
 }

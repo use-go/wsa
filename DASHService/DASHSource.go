@@ -20,7 +20,7 @@ import (
 
 //DASHSource description
 type DASHSource struct {
-	clientId   string
+	clientID   string
 	chSvr      chan bool
 	chValid    bool
 	streamName string
@@ -120,10 +120,10 @@ func (dashSource *DASHSource) Init(msg *wssAPI.Msg) (err error) {
 		return errors.New("invalid param init hls source")
 	}
 	dashSource.chValid = true
-	dashSource.clientId = wssAPI.GenerateGUID()
+	dashSource.clientID = wssAPI.GenerateGUID()
 	taskAddSink := &eStreamerEvent.EveAddSink{
 		StreamName: dashSource.streamName,
-		SinkId:     dashSource.clientId,
+		SinkId:     dashSource.clientID,
 		Sinker:     dashSource}
 
 	wssAPI.HandleTask(taskAddSink)
@@ -138,16 +138,16 @@ func (dashSource *DASHSource) Start(msg *wssAPI.Msg) (err error) {
 
 func (dashSource *DASHSource) Stop(msg *wssAPI.Msg) (err error) {
 	if dashSource.sinkAdded {
-		logger.LOGD("del sink:" + dashSource.clientId)
+		logger.LOGD("del sink:" + dashSource.clientID)
 		taskDelSink := &eStreamerEvent.EveDelSink{}
 		taskDelSink.StreamName = dashSource.streamName
-		taskDelSink.SinkId = dashSource.clientId
+		taskDelSink.SinkId = dashSource.clientID
 		go wssAPI.HandleTask(taskDelSink)
 		dashSource.sinkAdded = false
-		logger.LOGT("del sinker:" + dashSource.clientId)
+		logger.LOGT("del sinker:" + dashSource.clientID)
 	}
 	if dashSource.inSvr {
-		service.Del(dashSource.streamName, dashSource.clientId)
+		service.Del(dashSource.streamName, dashSource.clientID)
 	}
 	if dashSource.chValid {
 		close(dashSource.chSvr)

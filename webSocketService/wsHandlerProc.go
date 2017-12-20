@@ -202,7 +202,7 @@ func (websockHandler *websocketHandler) doClose() (err error) {
 		websockHandler.stopPlay()
 	}
 	if websockHandler.hasSink {
-		websockHandler.delSink(websockHandler.streamName, websockHandler.clientId)
+		websockHandler.delSink(websockHandler.streamName, websockHandler.clientID)
 	}
 	if websockHandler.isPublish {
 		websockHandler.stopPublish()
@@ -216,14 +216,14 @@ func (websockHandler *websocketHandler) doClose() (err error) {
 func (websockHandler *websocketHandler) doPlay(st *stPlay) (err error) {
 
 	logger.LOGT("play")
-	websockHandler.clientId = wssAPI.GenerateGUID()
+	websockHandler.clientID = wssAPI.GenerateGUID()
 	if len(websockHandler.app) > 0 {
 		websockHandler.streamName = websockHandler.app + "/" + st.Name
 	} else {
 		websockHandler.streamName = st.Name
 	}
 
-	err = websockHandler.addSink(websockHandler.streamName, websockHandler.clientId, websockHandler)
+	err = websockHandler.addSink(websockHandler.streamName, websockHandler.clientID, websockHandler)
 	if err != nil {
 		logger.LOGE("add sink failed: " + err.Error())
 		return

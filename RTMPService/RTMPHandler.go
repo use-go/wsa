@@ -22,7 +22,7 @@ type RTMPHandler struct {
 	srcAdded     bool
 	sinkAdded    bool
 	streamName   string
-	clientId     string
+	clientID     string
 	playInfo     RTMPPlayInfo
 	app          string
 	player       rtmpPlayer
@@ -70,10 +70,10 @@ func (this *RTMPHandler) Stop(msg *wssAPI.Msg) (err error) {
 	if this.sinkAdded {
 		taskDelSink := &eStreamerEvent.EveDelSink{}
 		taskDelSink.StreamName = this.streamName
-		taskDelSink.SinkId = this.clientId
+		taskDelSink.SinkId = this.clientID
 		wssAPI.HandleTask(taskDelSink)
 		this.sinkAdded = false
-		logger.LOGT("del sinker:" + this.clientId)
+		logger.LOGT("del sinker:" + this.clientID)
 	}
 	this.player.Stop(msg)
 	this.publisher.Stop(msg)
@@ -390,10 +390,10 @@ func (this *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 			return
 		}
 
-		this.clientId = wssAPI.GenerateGUID()
+		this.clientID = wssAPI.GenerateGUID()
 		taskAddSink := &eStreamerEvent.EveAddSink{}
 		taskAddSink.StreamName = this.streamName
-		taskAddSink.SinkId = this.clientId
+		taskAddSink.SinkId = this.clientID
 		taskAddSink.Sinker = this
 		err = wssAPI.HandleTask(taskAddSink)
 		if err != nil {

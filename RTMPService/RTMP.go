@@ -666,7 +666,7 @@ func (this *RTMP) CmdError(level string, code string, description string, idx fl
 	return
 }
 
-func (this *RTMP) CmdStatus(level, code, description, details string, clientId float64, channel int) (err error) {
+func (this *RTMP) CmdStatus(level, code, description, details string, clientID float64, channel int) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = int32(channel)
 	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
@@ -682,7 +682,7 @@ func (this *RTMP) CmdStatus(level, code, description, details string, clientId f
 	if len(details) > 0 {
 		encoder.EncodeNamedString("details", details)
 	}
-	encoder.EncodeNamedNumber("clientId", clientId)
+	encoder.EncodeNamedNumber("clientID", clientID)
 	encoder.EncodeInt24(AMF0_object_end)
 	pkt.Body, err = encoder.GetData()
 	if err != nil {

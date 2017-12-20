@@ -165,6 +165,7 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 	}
 }
 
+// SetParent handler for websocketservice
 func (websockService *WebSocketService) SetParent(parent wssAPI.MsgHandler) {
 	websockService.parent = parent
 }

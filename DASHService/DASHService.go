@@ -181,7 +181,7 @@ func (dashService *DASHService) Del(name, id string) {
 	dashService.muxSource.Lock()
 	defer dashService.muxSource.Unlock()
 	src, exist := dashService.sources[name]
-	if exist && src.clientId == id {
+	if exist && src.clientID == id {
 		delete(dashService.sources, name)
 	}
 }

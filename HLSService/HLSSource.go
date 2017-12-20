@@ -38,7 +38,7 @@ type HLSSource struct {
 	chSvr        chan bool
 	streamName   string
 	urlPref      string
-	clientId     string
+	clientID     string
 	audioHeader  *flv.FlvTag
 	videoHeader  *flv.FlvTag
 	segIdx       int64
@@ -71,10 +71,10 @@ func (hlsSource *HLSSource) Init(msg *wssAPI.Msg) (err error) {
 	hlsSource.chValid = true
 
 	//create source
-	hlsSource.clientId = wssAPI.GenerateGUID()
+	hlsSource.clientID = wssAPI.GenerateGUID()
 	taskAddSink := &eStreamerEvent.EveAddSink{
 		StreamName: hlsSource.streamName,
-		SinkId:     hlsSource.clientId,
+		SinkId:     hlsSource.clientID,
 		Sinker:     hlsSource}
 
 	wssAPI.HandleTask(taskAddSink)
@@ -102,15 +102,15 @@ func (hlsSource *HLSSource) Stop(msg *wssAPI.Msg) (err error) {
 		logger.LOGD("del sink")
 		taskDelSink := &eStreamerEvent.EveDelSink{}
 		taskDelSink.StreamName = hlsSource.streamName
-		taskDelSink.SinkId = hlsSource.clientId
+		taskDelSink.SinkId = hlsSource.clientID
 		go wssAPI.HandleTask(taskDelSink)
 		hlsSource.sinkAdded = false
-		logger.LOGT("del sinker:" + hlsSource.clientId)
+		logger.LOGT("del sinker:" + hlsSource.clientID)
 	}
 	//从service移除
 	if hlsSource.inSvrMap {
 		hlsSource.inSvrMap = false
-		service.DelSource(hlsSource.streamName, hlsSource.clientId)
+		service.DelSource(hlsSource.streamName, hlsSource.clientID)
 	}
 	//清理数据
 	if hlsSource.chValid {
