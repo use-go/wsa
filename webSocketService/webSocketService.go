@@ -8,18 +8,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/use-go/websocketStreamServer/logger"
-
-	"github.com/use-go/websocketStreamServer/wssAPI"
-
 	"github.com/gorilla/websocket"
+
 	"github.com/use-go/websocketStreamServer/HTTPMUX"
+	"github.com/use-go/websocketStreamServer/logger"
+	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
+// WebSocketService to handle webservice business
 type WebSocketService struct {
 	parent wssAPI.Obj
 }
 
+// WebSocketConfig to store webservice configinfo
 type WebSocketConfig struct {
 	Port  int    `json:"Port"`
 	Route string `json:"Route"`
@@ -28,6 +29,7 @@ type WebSocketConfig struct {
 var service *WebSocketService
 var serviceConfig WebSocketConfig
 
+// Init  interface implemention
 func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 
 	if msg == nil || msg.Param1 == nil {
@@ -59,22 +61,27 @@ func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+// Start interface implemention
 func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+// Stop interface implemention
 func (websockService *WebSocketService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+// GetType interface implemention
 func (websockService *WebSocketService) GetType() string {
 	return wssAPI.OBJ_WebSocketServer
 }
 
+// HandleTask interface implemention
 func (websockService *WebSocketService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
+// ProcessMessage interface implemention
 func (websockService *WebSocketService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
