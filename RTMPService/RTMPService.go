@@ -41,22 +41,22 @@ type RTMPConfig struct {
 var service *RTMPService
 var serviceConfig RTMPConfig
 
-func (this *RTMPService) Init(msg *wssAPI.Msg) (err error) {
+func (rtmpService *RTMPService) Init(msg *wssAPI.Msg) (err error) {
 	if nil == msg || nil == msg.Param1 {
 		logger.LOGE("invalid param init rtmp server")
 		return errors.New("init rtmp service failed")
 	}
 	fileName := msg.Param1.(string)
-	err = this.loadConfigFile(fileName)
+	err = rtmpService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return errors.New("init rtmp service failed")
 	}
-	service = this
+	service = rtmpService
 	return
 }
 
-func (this *RTMPService) Start(msg *wssAPI.Msg) (err error) {
+func (rtmpService *RTMPService) Start(msg *wssAPI.Msg) (err error) {
 	logger.LOGT("start rtmp service")
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", strPort)
@@ -64,26 +64,26 @@ func (this *RTMPService) Start(msg *wssAPI.Msg) (err error) {
 		logger.LOGE(err.Error())
 		return
 	}
-	this.listener, err = net.ListenTCP("tcp4", tcpAddr)
+	rtmpService.listener, err = net.ListenTCP("tcp4", tcpAddr)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
-	go this.rtmpLoop()
+	go rtmpService.rtmpLoop()
 	return
 }
 
-func (this *RTMPService) Stop(msg *wssAPI.Msg) (err error) {
-	this.listener.Close()
+func (rtmpService *RTMPService) Stop(msg *wssAPI.Msg) (err error) {
+	rtmpService.listener.Close()
 	return
 }
 
-func (this *RTMPService) GetType() string {
+func (rtmpService *RTMPService) GetType() string {
 	return wssAPI.OBJRTMPServer
 }
 
-func (this *RTMPService) HandleTask(task wssAPI.Task) (err error) {
-	if task.Receiver() != this.GetType() {
+func (rtmpService *RTMPService) HandleTask(task wssAPI.Task) (err error) {
+	if task.Receiver() != rtmpService.GetType() {
 		return errors.New("not my task")
 	}
 	switch task.Type() {
@@ -103,16 +103,15 @@ func (this *RTMPService) HandleTask(task wssAPI.Task) (err error) {
 		}
 		return
 	default:
-		return errors.New(fmt.Sprintf("task %s not prossed", task.Type()))
+		return fmt.Errorf("task %s not prossed", task.Type())
 	}
+}
+
+func (rtmpService *RTMPService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTMPService) ProcessMessage(msg *wssAPI.Msg) (err error) {
-	return
-}
-
-func (this *RTMPService) loadConfigFile(fileName string) (err error) {
+func (rtmpService *RTMPService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		return
@@ -141,18 +140,18 @@ func (this *RTMPService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
-func (this *RTMPService) rtmpLoop() {
+func (rtmpService *RTMPService) rtmpLoop() {
 	for {
-		conn, err := this.listener.Accept()
+		conn, err := rtmpService.listener.Accept()
 		if err != nil {
 			logger.LOGW(err.Error())
 			continue
 		}
-		go this.handleConnect(conn)
+		go rtmpService.handleConnect(conn)
 	}
 }
 
-func (this *RTMPService) handleConnect(conn net.Conn) {
+func (rtmpService *RTMPService) handleConnect(conn net.Conn) {
 	var err error
 	defer conn.Close()
 	defer logger.LOGT("close connect>>>")
@@ -177,7 +176,7 @@ func (this *RTMPService) handleConnect(conn net.Conn) {
 	logger.LOGT("new connect:" + conn.RemoteAddr().String())
 	for {
 		var packet *RTMPPacket
-		packet, err = this.readPacket(rtmp, handler.isPlaying())
+		packet, err = rtmpService.readPacket(rtmp, handler.isPlaying())
 		if err != nil {
 			handler.HandleRTMPPacket(nil)
 			return
@@ -189,7 +188,7 @@ func (this *RTMPService) handleConnect(conn net.Conn) {
 	}
 }
 
-func (this *RTMPService) readPacket(rtmp *RTMP, playing bool) (packet *RTMPPacket, err error) {
+func (rtmpService *RTMPService) readPacket(rtmp *RTMP, playing bool) (packet *RTMPPacket, err error) {
 	if false == playing {
 		err = rtmp.Conn.SetReadDeadline(time.Now().Add(time.Duration(serviceConfig.TimeoutSec) * time.Second))
 		if err != nil {
@@ -202,6 +201,6 @@ func (this *RTMPService) readPacket(rtmp *RTMP, playing bool) (packet *RTMPPacke
 	return
 }
 
-func (this *RTMPService) SetParent(parent wssAPI.MsgHandler) {
-	this.parent = parent
+func (rtmpService *RTMPService) SetParent(parent wssAPI.MsgHandler) {
+	rtmpService.parent = parent
 }

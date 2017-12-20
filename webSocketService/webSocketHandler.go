@@ -87,7 +87,7 @@ func (websockHandler *websocketHandler) ProcessMessage(msg *wssAPI.Msg) (err err
 		websockHandler.hasSink = true
 	case wssAPI.MSG_GetSource_Failed:
 		websockHandler.hasSink = false
-		websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_PLAY_FAILED, 0)
+		websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NetStreamPlayFailed, 0)
 	case wssAPI.MSG_FLV_TAG:
 		tag := msg.Param1.(*flv.FlvTag)
 		err = websockHandler.appendFlvTag(tag)
@@ -353,7 +353,7 @@ func (websockHandler *websocketHandler) stopPlay() {
 	websockHandler.isPlaying = false
 	websockHandler.waitPlaying.Wait()
 	websockHandler.stPlay.reset()
-	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_STOP, 0)
+	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamPlayStop, 0)
 }
 
 func (websockHandler *websocketHandler) stopPublish() {

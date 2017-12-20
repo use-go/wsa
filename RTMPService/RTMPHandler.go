@@ -27,7 +27,7 @@ type RTMPHandler struct {
 	app          string
 	player       rtmpPlayer
 	publisher    rtmpPublisher
-	srcId        int64
+	srcID        int64
 }
 type RTMPPlayInfo struct {
 	playReset      bool
@@ -45,104 +45,104 @@ type RTMPPlayInfo struct {
 	reset          bool
 }
 
-func (this *RTMPHandler) Init(msg *wssAPI.Msg) (err error) {
-	this.rtmpInstance = msg.Param1.(*RTMP)
+func (rtmpHandler *RTMPHandler) Init(msg *wssAPI.Msg) (err error) {
+	rtmpHandler.rtmpInstance = msg.Param1.(*RTMP)
 	msgInit := &wssAPI.Msg{}
-	msgInit.Param1 = this.rtmpInstance
-	this.player.Init(msgInit)
-	this.publisher.Init(msgInit)
+	msgInit.Param1 = rtmpHandler.rtmpInstance
+	rtmpHandler.player.Init(msgInit)
+	rtmpHandler.publisher.Init(msgInit)
 	return
 }
 
-func (this *RTMPHandler) Start(msg *wssAPI.Msg) (err error) {
+func (rtmpHandler *RTMPHandler) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTMPHandler) Stop(msg *wssAPI.Msg) (err error) {
-	if this.srcAdded {
+func (rtmpHandler *RTMPHandler) Stop(msg *wssAPI.Msg) (err error) {
+	if rtmpHandler.srcAdded {
 		taskDelSrc := &eStreamerEvent.EveDelSource{}
-		taskDelSrc.StreamName = this.streamName
-		taskDelSrc.Id = this.srcId
+		taskDelSrc.StreamName = rtmpHandler.streamName
+		taskDelSrc.Id = rtmpHandler.srcID
 		wssAPI.HandleTask(taskDelSrc)
-		logger.LOGT("del source:" + this.streamName)
-		this.srcAdded = false
+		logger.LOGT("del source:" + rtmpHandler.streamName)
+		rtmpHandler.srcAdded = false
 	}
-	if this.sinkAdded {
+	if rtmpHandler.sinkAdded {
 		taskDelSink := &eStreamerEvent.EveDelSink{}
-		taskDelSink.StreamName = this.streamName
-		taskDelSink.SinkId = this.clientID
+		taskDelSink.StreamName = rtmpHandler.streamName
+		taskDelSink.SinkId = rtmpHandler.clientID
 		wssAPI.HandleTask(taskDelSink)
-		this.sinkAdded = false
-		logger.LOGT("del sinker:" + this.clientID)
+		rtmpHandler.sinkAdded = false
+		logger.LOGT("del sinker:" + rtmpHandler.clientID)
 	}
-	this.player.Stop(msg)
-	this.publisher.Stop(msg)
+	rtmpHandler.player.Stop(msg)
+	rtmpHandler.publisher.Stop(msg)
 	return
 }
 
-func (this *RTMPHandler) GetType() string {
+func (rtmpHandler *RTMPHandler) GetType() string {
 	return rtmpTypeHandler
 }
 
-func (this *RTMPHandler) HandleTask(task wssAPI.Task) (err error) {
-	if task.Receiver() != this.GetType() {
+func (rtmpHandler *RTMPHandler) HandleTask(task wssAPI.Task) (err error) {
+	if task.Receiver() != rtmpHandler.GetType() {
 		logger.LOGW(fmt.Sprintf("invalid task receiver in rtmpHandler :%s", task.Receiver()))
 		return errors.New("invalid task")
 	}
 	return
 }
 
-func (this *RTMPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (rtmpHandler *RTMPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 
 	if msg == nil {
 		return errors.New("nil message")
 	}
 	switch msg.Type {
 	case wssAPI.MSG_GetSource_NOTIFY:
-		this.sinkAdded = true
+		rtmpHandler.sinkAdded = true
 	case wssAPI.MSG_GetSource_Failed:
 		//发送404
-		this.rtmpInstance.CmdStatus("error", "NetStream.Play.StreamNotFound",
-			"paly failed", this.streamName, 0, RTMP_channel_Invoke)
+		rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Play.StreamNotFound",
+			"paly failed", rtmpHandler.streamName, 0, RTMP_channel_Invoke)
 	case wssAPI.MSG_SourceClosed_Force:
-		this.srcAdded = false
+		rtmpHandler.srcAdded = false
 	case wssAPI.MSG_FLV_TAG:
 		tag := msg.Param1.(*flv.FlvTag)
-		err = this.player.appendFlvTag(tag)
+		err = rtmpHandler.player.appendFlvTag(tag)
 
 	case wssAPI.MSG_PLAY_START:
-		this.player.startPlay()
+		rtmpHandler.player.startPlay()
 		return
 	case wssAPI.MSG_PLAY_STOP:
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
-		this.sourceInvalid()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
+		rtmpHandler.sourceInvalid()
 		return
 	case wssAPI.MSG_PUBLISH_START:
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
 		if err != nil {
 			logger.LOGE("start publish failed")
 			return
 		}
-		if false == this.publisher.startPublish() {
+		if false == rtmpHandler.publisher.startPublish() {
 			logger.LOGE("start publish falied")
-			if true == this.srcAdded {
+			if true == rtmpHandler.srcAdded {
 				taskDelSrc := &eStreamerEvent.EveDelSource{}
-				taskDelSrc.StreamName = this.streamName
-				taskDelSrc.Id = this.srcId
+				taskDelSrc.StreamName = rtmpHandler.streamName
+				taskDelSrc.Id = rtmpHandler.srcID
 				wssAPI.HandleTask(taskDelSrc)
 			}
 		}
 		return
 	case wssAPI.MSG_PUBLISH_STOP:
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
 		if err != nil {
 			logger.LOGE("stop publish failed")
 			return
 		}
-		this.publisher.stopPublish()
+		rtmpHandler.publisher.stopPublish()
 		return
 	default:
 		logger.LOGW(fmt.Sprintf("msg type: %s not processed", msg.Type))
@@ -151,58 +151,58 @@ func (this *RTMPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTMPHandler) sourceInvalid() {
+func (rtmpHandler *RTMPHandler) sourceInvalid() {
 	logger.LOGT("stop play,keep sink")
-	this.player.stopPlay()
+	rtmpHandler.player.stopPlay()
 }
 
-func (this *RTMPHandler) HandleRTMPPacket(packet *RTMPPacket) (err error) {
+func (rtmpHandler *RTMPHandler) HandleRTMPPacket(packet *RTMPPacket) (err error) {
 	if nil == packet {
-		this.Stop(nil)
+		rtmpHandler.Stop(nil)
 		return
 	}
-	switch packet.MessageTypeId {
+	switch packet.MessageTypeID {
 	case RTMP_PACKET_TYPE_CHUNK_SIZE:
-		this.rtmpInstance.RecvChunkSize, err = AMF0DecodeInt32(packet.Body)
-		logger.LOGT(fmt.Sprintf("chunk size:%d", this.rtmpInstance.RecvChunkSize))
+		rtmpHandler.rtmpInstance.RecvChunkSize, err = AMF0DecodeInt32(packet.Body)
+		logger.LOGT(fmt.Sprintf("chunk size:%d", rtmpHandler.rtmpInstance.RecvChunkSize))
 	case RTMP_PACKET_TYPE_CONTROL:
-		err = this.rtmpInstance.HandleControl(packet)
+		err = rtmpHandler.rtmpInstance.HandleControl(packet)
 	case RTMP_PACKET_TYPE_BYTES_READ_REPORT:
 		//		logger.LOGT(packet.TimeStamp)
 		//		logger.LOGT(packet.Body)
 		//		logger.LOGT("bytes read repost")
 	case RTMP_PACKET_TYPE_SERVER_BW:
-		this.rtmpInstance.TargetBW, err = AMF0DecodeInt32(packet.Body)
-		logger.LOGT(fmt.Sprintf("确认窗口大小 %d", this.rtmpInstance.TargetBW))
+		rtmpHandler.rtmpInstance.TargetBW, err = AMF0DecodeInt32(packet.Body)
+		logger.LOGT(fmt.Sprintf("确认窗口大小 %d", rtmpHandler.rtmpInstance.TargetBW))
 	case RTMP_PACKET_TYPE_CLIENT_BW:
-		this.rtmpInstance.SelfBW, err = AMF0DecodeInt32(packet.Body)
-		this.rtmpInstance.LimitType = uint32(packet.Body[4])
-		logger.LOGT(fmt.Sprintf("设置对端宽带 %d %d ", this.rtmpInstance.SelfBW, this.rtmpInstance.LimitType))
+		rtmpHandler.rtmpInstance.SelfBW, err = AMF0DecodeInt32(packet.Body)
+		rtmpHandler.rtmpInstance.LimitType = uint32(packet.Body[4])
+		logger.LOGT(fmt.Sprintf("设置对端宽带 %d %d ", rtmpHandler.rtmpInstance.SelfBW, rtmpHandler.rtmpInstance.LimitType))
 	case RTMP_PACKET_TYPE_FLEX_MESSAGE:
-		err = this.handleInvoke(packet)
+		err = rtmpHandler.handleInvoke(packet)
 	case RTMP_PACKET_TYPE_INVOKE:
-		err = this.handleInvoke(packet)
+		err = rtmpHandler.handleInvoke(packet)
 	case RTMP_PACKET_TYPE_AUDIO:
-		return this.sendFlvToSrc(packet)
+		return rtmpHandler.sendFlvToSrc(packet)
 	case RTMP_PACKET_TYPE_VIDEO:
-		return this.sendFlvToSrc(packet)
+		return rtmpHandler.sendFlvToSrc(packet)
 	case RTMP_PACKET_TYPE_INFO:
-		return this.sendFlvToSrc(packet)
+		return rtmpHandler.sendFlvToSrc(packet)
 	default:
-		logger.LOGW(fmt.Sprintf("rtmp packet type %d not processed", packet.MessageTypeId))
+		logger.LOGW(fmt.Sprintf("rtmp packet type %d not processed", packet.MessageTypeID))
 	}
 	return
 }
 
-func (this *RTMPHandler) sendFlvToSrc(pkt *RTMPPacket) (err error) {
-	if this.publisher.isPublishing() && wssAPI.InterfaceValid(this.source) {
+func (rtmpHandler *RTMPHandler) sendFlvToSrc(pkt *RTMPPacket) (err error) {
+	if rtmpHandler.publisher.isPublishing() && wssAPI.InterfaceValid(rtmpHandler.source) {
 		msg := &wssAPI.Msg{}
 		msg.Type = wssAPI.MSG_FLV_TAG
 		msg.Param1 = pkt.ToFLVTag()
-		err = this.source.ProcessMessage(msg)
+		err = rtmpHandler.source.ProcessMessage(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
-			this.Stop(nil)
+			rtmpHandler.Stop(nil)
 		}
 		return
 	} else {
@@ -211,9 +211,9 @@ func (this *RTMPHandler) sendFlvToSrc(pkt *RTMPPacket) (err error) {
 	return
 }
 
-func (this *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
+func (rtmpHandler *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 	var amfobj *AMF0Object
-	if RTMP_PACKET_TYPE_FLEX_MESSAGE == packet.MessageTypeId {
+	if RTMP_PACKET_TYPE_FLEX_MESSAGE == packet.MessageTypeID {
 		amfobj, err = AMF0DecodeObj(packet.Body[1:])
 	} else {
 		amfobj, err = AMF0DecodeObj(packet.Body)
@@ -234,51 +234,51 @@ func (this *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 	case "connect":
 		cmdObj := amfobj.AMF0GetPropByIndex(2)
 		if cmdObj != nil {
-			this.app = cmdObj.Value.ObjValue.AMF0GetPropByName("app").Value.StrValue
-			if strings.HasSuffix(this.app, "/") {
-				this.app = strings.TrimSuffix(this.app, "/")
+			rtmpHandler.app = cmdObj.Value.ObjValue.AMF0GetPropByName("app").Value.StrValue
+			if strings.HasSuffix(rtmpHandler.app, "/") {
+				rtmpHandler.app = strings.TrimSuffix(rtmpHandler.app, "/")
 			}
 		}
-		if this.app != serviceConfig.LivePath {
-			logger.LOGE(this.app)
+		if rtmpHandler.app != serviceConfig.LivePath {
+			logger.LOGE(rtmpHandler.app)
 			logger.LOGE(serviceConfig.LivePath)
 			logger.LOGW("path wrong")
 		}
-		err = this.rtmpInstance.AcknowledgementBW()
+		err = rtmpHandler.rtmpInstance.AcknowledgementBW()
 		if err != nil {
 			return
 		}
-		err = this.rtmpInstance.SetPeerBW()
+		err = rtmpHandler.rtmpInstance.SetPeerBW()
 		if err != nil {
 			return
 		}
-		//err = this.rtmpInstance.SetChunkSize(RTMP_better_chunk_size)
+		//err = rtmpHandler.rtmpInstance.SetChunkSize(RTMP_better_chunk_size)
 		//		if err != nil {
 		//			return
 		//		}
-		err = this.rtmpInstance.OnBWDone()
+		err = rtmpHandler.rtmpInstance.OnBWDone()
 		if err != nil {
 			return
 		}
-		err = this.rtmpInstance.ConnectResult(amfobj)
+		err = rtmpHandler.rtmpInstance.ConnectResult(amfobj)
 		if err != nil {
 			return
 		}
 	case "_checkbw":
-		err = this.rtmpInstance.OnBWCheck()
+		err = rtmpHandler.rtmpInstance.OnBWCheck()
 	case "_result":
-		this.handle_result(amfobj)
+		rtmpHandler.handle_result(amfobj)
 	case "releaseStream":
 		//		idx := amfobj.AMF0GetPropByIndex(1).Value.NumValue
-		//		err = this.rtmpInstance.CmdError("error", "NetConnection.Call.Failed",
+		//		err = rtmpHandler.rtmpInstance.CmdError("error", "NetConnection.Call.Failed",
 		//			fmt.Sprintf("Method not found (%s).", "releaseStream"), idx)
 	case "FCPublish":
 		//		idx := amfobj.AMF0GetPropByIndex(1).Value.NumValue
-		//		err = this.rtmpInstance.CmdError("error", "NetConnection.Call.Failed",
+		//		err = rtmpHandler.rtmpInstance.CmdError("error", "NetConnection.Call.Failed",
 		//			fmt.Sprintf("Method not found (%s).", "FCPublish"), idx)
 	case "createStream":
 		idx := amfobj.AMF0GetPropByIndex(1).Value.NumValue
-		err = this.rtmpInstance.CmdNumberResult(idx, 1.0)
+		err = rtmpHandler.rtmpInstance.CmdNumberResult(idx, 1.0)
 	case "publish":
 		//check prop
 		if amfobj.Props.Len() < 4 {
@@ -287,122 +287,122 @@ func (this *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 			return
 		}
 
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
 		//check status
-		if true == this.publisher.isPublishing() {
+		if true == rtmpHandler.publisher.isPublishing() {
 			logger.LOGE("publish on bad status ")
 			idx := amfobj.AMF0GetPropByIndex(1).Value.NumValue
-			err = this.rtmpInstance.CmdError("error", "NetStream.Publish.Denied",
+			err = rtmpHandler.rtmpInstance.CmdError("error", "NetStream.Publish.Denied",
 				fmt.Sprintf("can not publish (%s).", "publish"), idx)
 			return
 		}
 		//add to source
-		this.streamName = this.app + "/" + amfobj.AMF0GetPropByIndex(3).Value.StrValue
+		rtmpHandler.streamName = rtmpHandler.app + "/" + amfobj.AMF0GetPropByIndex(3).Value.StrValue
 		taskAddSrc := &eStreamerEvent.EveAddSource{}
-		taskAddSrc.Producer = this
-		taskAddSrc.StreamName = this.streamName
-		taskAddSrc.RemoteIp = this.rtmpInstance.Conn.RemoteAddr()
+		taskAddSrc.Producer = rtmpHandler
+		taskAddSrc.StreamName = rtmpHandler.streamName
+		taskAddSrc.RemoteIp = rtmpHandler.rtmpInstance.Conn.RemoteAddr()
 		err = wssAPI.HandleTask(taskAddSrc)
 		if err != nil {
 			logger.LOGE("add source failed:" + err.Error())
-			err = this.rtmpInstance.CmdStatus("error", "NetStream.Publish.BadName",
-				fmt.Sprintf("publish %s.", this.streamName), "", 0, RTMP_channel_Invoke)
-			this.streamName = ""
+			err = rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Publish.BadName",
+				fmt.Sprintf("publish %s.", rtmpHandler.streamName), "", 0, RTMP_channel_Invoke)
+			rtmpHandler.streamName = ""
 			return err
 		}
-		this.source = taskAddSrc.SrcObj
-		this.srcId = taskAddSrc.Id
-		if this.source == nil {
+		rtmpHandler.source = taskAddSrc.SrcObj
+		rtmpHandler.srcID = taskAddSrc.Id
+		if rtmpHandler.source == nil {
 			logger.LOGE("add source failed:")
-			err = this.rtmpInstance.CmdStatus("error", "NetStream.Publish.BadName",
-				fmt.Sprintf("publish %s.", this.streamName), "", 0, RTMP_channel_Invoke)
-			this.streamName = ""
+			err = rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Publish.BadName",
+				fmt.Sprintf("publish %s.", rtmpHandler.streamName), "", 0, RTMP_channel_Invoke)
+			rtmpHandler.streamName = ""
 			return errors.New("bad name")
 		}
-		this.srcAdded = true
-		this.rtmpInstance.Link.Path = amfobj.AMF0GetPropByIndex(2).Value.StrValue
-		if false == this.publisher.startPublish() {
-			logger.LOGE("start publish failed:" + this.streamName)
-			//streamer.DelSource(this.streamName)
+		rtmpHandler.srcAdded = true
+		rtmpHandler.rtmpInstance.Link.Path = amfobj.AMF0GetPropByIndex(2).Value.StrValue
+		if false == rtmpHandler.publisher.startPublish() {
+			logger.LOGE("start publish failed:" + rtmpHandler.streamName)
+			//streamer.DelSource(rtmpHandler.streamName)
 			taskDelSrc := &eStreamerEvent.EveDelSource{}
-			taskDelSrc.StreamName = this.streamName
-			taskDelSrc.Id = this.srcId
+			taskDelSrc.StreamName = rtmpHandler.streamName
+			taskDelSrc.Id = rtmpHandler.srcID
 			wssAPI.HandleTask(taskDelSrc)
 			return
 		}
 	case "FCUnpublish":
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
 	case "deleteStream":
-		this.mutexStatus.Lock()
-		defer this.mutexStatus.Unlock()
+		rtmpHandler.mutexStatus.Lock()
+		defer rtmpHandler.mutexStatus.Unlock()
 	//do nothing now
 	case "play":
-		this.streamName = this.app + "/" + amfobj.AMF0GetPropByIndex(3).Value.StrValue
-		this.rtmpInstance.Link.Path = this.streamName
+		rtmpHandler.streamName = rtmpHandler.app + "/" + amfobj.AMF0GetPropByIndex(3).Value.StrValue
+		rtmpHandler.rtmpInstance.Link.Path = rtmpHandler.streamName
 		startTime := -2
 		duration := -1
 		reset := false
-		this.playInfo.startTime = -2
-		this.playInfo.duration = -1
-		this.playInfo.reset = false
+		rtmpHandler.playInfo.startTime = -2
+		rtmpHandler.playInfo.duration = -1
+		rtmpHandler.playInfo.reset = false
 		if amfobj.Props.Len() >= 5 {
-			this.playInfo.startTime = float32(amfobj.AMF0GetPropByIndex(4).Value.NumValue)
+			rtmpHandler.playInfo.startTime = float32(amfobj.AMF0GetPropByIndex(4).Value.NumValue)
 		}
 		if amfobj.Props.Len() >= 6 {
-			this.playInfo.duration = float32(amfobj.AMF0GetPropByIndex(5).Value.NumValue)
-			if this.playInfo.duration < 0 {
-				this.playInfo.duration = -1
+			rtmpHandler.playInfo.duration = float32(amfobj.AMF0GetPropByIndex(5).Value.NumValue)
+			if rtmpHandler.playInfo.duration < 0 {
+				rtmpHandler.playInfo.duration = -1
 			}
 		}
 		if amfobj.Props.Len() >= 7 {
-			this.playInfo.reset = amfobj.AMF0GetPropByIndex(6).Value.BoolValue
+			rtmpHandler.playInfo.reset = amfobj.AMF0GetPropByIndex(6).Value.BoolValue
 		}
 
 		//check player status,if playing,error
-		if false == this.player.setPlayParams(this.streamName, startTime, duration, reset) {
-			err = this.rtmpInstance.CmdStatus("error", "NetStream.Play.Failed",
-				"paly failed", this.streamName, 0, RTMP_channel_Invoke)
+		if false == rtmpHandler.player.setPlayParams(rtmpHandler.streamName, startTime, duration, reset) {
+			err = rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Play.Failed",
+				"paly failed", rtmpHandler.streamName, 0, RTMP_channel_Invoke)
 
 			return nil
 		}
-		err = this.rtmpInstance.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
+		err = rtmpHandler.rtmpInstance.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
 		if err != nil {
 			logger.LOGE(err.Error())
 			return
 		}
 
-		if true == this.playInfo.playReset {
-			err = this.rtmpInstance.CmdStatus("status", "NetStream.Play.Reset",
-				fmt.Sprintf("Playing and resetting %s", this.rtmpInstance.Link.Path),
-				this.rtmpInstance.Link.Path, 0, RTMP_channel_Invoke)
+		if true == rtmpHandler.playInfo.playReset {
+			err = rtmpHandler.rtmpInstance.CmdStatus("status", "NetStream.Play.Reset",
+				fmt.Sprintf("Playing and resetting %s", rtmpHandler.rtmpInstance.Link.Path),
+				rtmpHandler.rtmpInstance.Link.Path, 0, RTMP_channel_Invoke)
 			if err != nil {
 				logger.LOGE(err.Error())
 				return
 			}
 		}
 
-		err = this.rtmpInstance.CmdStatus("status", "NetStream.Play.Start",
-			fmt.Sprintf("Started playing %s", this.rtmpInstance.Link.Path), this.rtmpInstance.Link.Path, 0, RTMP_channel_Invoke)
+		err = rtmpHandler.rtmpInstance.CmdStatus("status", "NetStream.Play.Start",
+			fmt.Sprintf("Started playing %s", rtmpHandler.rtmpInstance.Link.Path), rtmpHandler.rtmpInstance.Link.Path, 0, RTMP_channel_Invoke)
 		if err != nil {
 			logger.LOGE(err.Error())
 			return
 		}
 
-		this.clientID = wssAPI.GenerateGUID()
+		rtmpHandler.clientID = wssAPI.GenerateGUID()
 		taskAddSink := &eStreamerEvent.EveAddSink{}
-		taskAddSink.StreamName = this.streamName
-		taskAddSink.SinkId = this.clientID
-		taskAddSink.Sinker = this
+		taskAddSink.StreamName = rtmpHandler.streamName
+		taskAddSink.SinkId = rtmpHandler.clientID
+		taskAddSink.Sinker = rtmpHandler
 		err = wssAPI.HandleTask(taskAddSink)
 		if err != nil {
 			//404
-			err = this.rtmpInstance.CmdStatus("error", "NetStream.Play.StreamNotFound",
-				"paly failed", this.streamName, 0, RTMP_channel_Invoke)
+			err = rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Play.StreamNotFound",
+				"paly failed", rtmpHandler.streamName, 0, RTMP_channel_Invoke)
 			return nil
 		}
-		this.sinkAdded = taskAddSink.Added
+		rtmpHandler.sinkAdded = taskAddSink.Added
 	case "_error":
 		amfobj.Dump()
 	case "closeStream":
@@ -413,9 +413,9 @@ func (this *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 	return
 }
 
-func (this *RTMPHandler) handle_result(amfobj *AMF0Object) {
-	transactionId := int32(amfobj.AMF0GetPropByIndex(1).Value.NumValue)
-	resultMethod := this.rtmpInstance.methodCache[transactionId]
+func (rtmpHandler *RTMPHandler) handle_result(amfobj *AMF0Object) {
+	transactionID := int32(amfobj.AMF0GetPropByIndex(1).Value.NumValue)
+	resultMethod := rtmpHandler.rtmpInstance.methodCache[transactionID]
 	switch resultMethod {
 	case "_onbwcheck":
 	default:
@@ -423,26 +423,26 @@ func (this *RTMPHandler) handle_result(amfobj *AMF0Object) {
 	}
 }
 
-func (this *RTMPHandler) startPublishing() (err error) {
-	err = this.rtmpInstance.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
+func (rtmpHandler *RTMPHandler) startPublishing() (err error) {
+	err = rtmpHandler.rtmpInstance.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return nil
 	}
-	err = this.rtmpInstance.CmdStatus("status", "NetStream.Publish.Start",
-		fmt.Sprintf("publish %s", this.rtmpInstance.Link.Path), "", 0, RTMP_channel_Invoke)
+	err = rtmpHandler.rtmpInstance.CmdStatus("status", "NetStream.Publish.Start",
+		fmt.Sprintf("publish %s", rtmpHandler.rtmpInstance.Link.Path), "", 0, RTMP_channel_Invoke)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return nil
 	}
-	this.publisher.startPublish()
+	rtmpHandler.publisher.startPublish()
 	return
 }
 
-func (this *RTMPHandler) isPlaying() bool {
-	return this.player.IsPlaying()
+func (rtmpHandler *RTMPHandler) isPlaying() bool {
+	return rtmpHandler.player.IsPlaying()
 }
 
-func (this *RTMPHandler) SetParent(parent wssAPI.MsgHandler) {
-	this.parent = parent
+func (rtmpHandler *RTMPHandler) SetParent(parent wssAPI.MsgHandler) {
+	rtmpHandler.parent = parent
 }

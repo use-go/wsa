@@ -2,3 +2,4 @@ examples/examples
 *.log
 debug
 /streamServer/debug
+main.exe

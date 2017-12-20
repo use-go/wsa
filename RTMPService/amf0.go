@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
 	"github.com/use-go/websocketStreamServer/logger"
 )
 
@@ -50,58 +51,58 @@ type AMF0Encoder struct {
 	writer *bytes.Buffer
 }
 
-func (this *AMF0Encoder) Init() {
-	this.writer = new(bytes.Buffer)
+func (amf0Encoder *AMF0Encoder) Init() {
+	amf0Encoder.writer = new(bytes.Buffer)
 }
 
-func (this *AMF0Encoder) EncodeString(str string) (err error) {
+func (amf0Encoder *AMF0Encoder) EncodeString(str string) (err error) {
 	length := uint32(len(str))
 	if length == 0 {
 		return errors.New("invald string")
 	}
 	if length >= 0xffff {
-		err = this.writer.WriteByte(AMF0_long_string)
+		err = amf0Encoder.writer.WriteByte(AMF0_long_string)
 		if err != nil {
 			return err
 		}
-		err = binary.Write(this.writer, binary.BigEndian, &length)
+		err = binary.Write(amf0Encoder.writer, binary.BigEndian, &length)
 		if err != nil {
 			return err
 		}
 	} else {
-		err = this.writer.WriteByte(AMF0_string)
+		err = amf0Encoder.writer.WriteByte(AMF0_string)
 		if err != nil {
 			return err
 		}
 		var tmp16 uint16
 		tmp16 = uint16(length)
-		err = binary.Write(this.writer, binary.BigEndian, &tmp16)
+		err = binary.Write(amf0Encoder.writer, binary.BigEndian, &tmp16)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = this.writer.Write([]byte(str))
+	_, err = amf0Encoder.writer.Write([]byte(str))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeNumber(num float64) (err error) {
-	err = this.writer.WriteByte(AMF0_number)
+func (amf0Encoder *AMF0Encoder) EncodeNumber(num float64) (err error) {
+	err = amf0Encoder.writer.WriteByte(AMF0_number)
 	if err != nil {
 		return err
 	}
-	err = binary.Write(this.writer, binary.BigEndian, &num)
+	err = binary.Write(amf0Encoder.writer, binary.BigEndian, &num)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeBool(boo bool) (err error) {
-	err = this.writer.WriteByte(AMF0_boolean)
+func (amf0Encoder *AMF0Encoder) EncodeBool(boo bool) (err error) {
+	err = amf0Encoder.writer.WriteByte(AMF0_boolean)
 	if err != nil {
 		return err
 	}
@@ -111,129 +112,129 @@ func (this *AMF0Encoder) EncodeBool(boo bool) (err error) {
 	} else {
 		tmp8 = 0
 	}
-	err = this.writer.WriteByte(tmp8)
+	err = amf0Encoder.writer.WriteByte(tmp8)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeInt16(num int16) (err error) {
-	err = binary.Write(this.writer, binary.BigEndian, &num)
+func (amf0Encoder *AMF0Encoder) EncodeInt16(num int16) (err error) {
+	err = binary.Write(amf0Encoder.writer, binary.BigEndian, &num)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeInt24(num int32) (err error) {
+func (amf0Encoder *AMF0Encoder) EncodeInt24(num int32) (err error) {
 	var tmp8 int8
 	tmp8 = int8((num >> 16) & 0xff)
-	this.writer.WriteByte(byte(tmp8))
+	amf0Encoder.writer.WriteByte(byte(tmp8))
 	tmp8 = int8((num >> 8) & 0xff)
-	this.writer.WriteByte(byte(tmp8))
+	amf0Encoder.writer.WriteByte(byte(tmp8))
 	tmp8 = int8((num >> 0) & 0xff)
-	this.writer.WriteByte(byte(tmp8))
+	amf0Encoder.writer.WriteByte(byte(tmp8))
 
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeInt32(num int32) (err error) {
-	err = binary.Write(this.writer, binary.BigEndian, &num)
+func (amf0Encoder *AMF0Encoder) EncodeInt32(num int32) (err error) {
+	err = binary.Write(amf0Encoder.writer, binary.BigEndian, &num)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeInt32LittleEndian(num int32) (err error) {
-	err = binary.Write(this.writer, binary.LittleEndian, &num)
+func (amf0Encoder *AMF0Encoder) EncodeInt32LittleEndian(num int32) (err error) {
+	err = binary.Write(amf0Encoder.writer, binary.LittleEndian, &num)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeNamedString(name string, str string) (err error) {
-	this.EncodeInt16(int16(len(name)))
-	this.writer.Write([]byte(name))
+func (amf0Encoder *AMF0Encoder) EncodeNamedString(name string, str string) (err error) {
+	amf0Encoder.EncodeInt16(int16(len(name)))
+	amf0Encoder.writer.Write([]byte(name))
 
-	err = this.EncodeString(str)
+	err = amf0Encoder.EncodeString(str)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeNamedBool(name string, boolean bool) (err error) {
-	this.EncodeInt16(int16(len(name)))
-	this.writer.Write([]byte(name))
+func (amf0Encoder *AMF0Encoder) EncodeNamedBool(name string, boolean bool) (err error) {
+	amf0Encoder.EncodeInt16(int16(len(name)))
+	amf0Encoder.writer.Write([]byte(name))
 
-	err = this.EncodeBool(boolean)
+	err = amf0Encoder.EncodeBool(boolean)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) EncodeNamedNumber(name string, num float64) (err error) {
-	this.EncodeInt16(int16(len(name)))
-	this.writer.Write([]byte(name))
+func (amf0Encoder *AMF0Encoder) EncodeNamedNumber(name string, num float64) (err error) {
+	amf0Encoder.EncodeInt16(int16(len(name)))
+	amf0Encoder.writer.Write([]byte(name))
 
-	err = this.EncodeNumber(num)
+	err = amf0Encoder.EncodeNumber(num)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (this *AMF0Encoder) AppendByteArray(data []byte) (err error) {
-	_, err = this.writer.Write(data)
+func (amf0Encoder *AMF0Encoder) AppendByteArray(data []byte) (err error) {
+	_, err = amf0Encoder.writer.Write(data)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *AMF0Encoder) AppendByte(data byte) (err error) {
-	err = this.writer.WriteByte(data)
+func (amf0Encoder *AMF0Encoder) AppendByte(data byte) (err error) {
+	err = amf0Encoder.writer.WriteByte(data)
 	return err
 }
 
-func (this *AMF0Encoder) GetData() (data []byte, err error) {
-	if this.writer == nil {
+func (amf0Encoder *AMF0Encoder) GetData() (data []byte, err error) {
+	if amf0Encoder.writer == nil {
 		return nil, errors.New("not inited amf0 encoder")
 	}
-	return this.writer.Bytes(), nil
+	return amf0Encoder.writer.Bytes(), nil
 }
 
-func (this *AMF0Encoder) GetDataSize() int {
-	return len(this.writer.Bytes())
+func (amf0Encoder *AMF0Encoder) GetDataSize() int {
+	return len(amf0Encoder.writer.Bytes())
 }
 
-func (this *AMF0Encoder) EncodeAMFObj(obj *AMF0Object) {
+func (amf0Encoder *AMF0Encoder) EncodeAMFObj(obj *AMF0Object) {
 	for v := obj.Props.Front(); v != nil; v = v.Next() {
-		ret := this.encodeProp(v.Value.(*AMF0Property))
+		ret := amf0Encoder.encodeProp(v.Value.(*AMF0Property))
 		if len(ret) > 0 {
-			this.writer.Write(ret)
+			amf0Encoder.writer.Write(ret)
 		}
 	}
 	return
 }
 
-func (this *AMF0Encoder) encodeObj(obj *AMF0Object) (data []byte) {
+func (amf0Encoder *AMF0Encoder) encodeObj(obj *AMF0Object) (data []byte) {
 	//each prop +obj_end
 	enc := &AMF0Encoder{}
 	enc.Init()
 	for v := obj.Props.Front(); v != nil; v = v.Next() {
-		enc.AppendByteArray(this.encodeProp(v.Value.(*AMF0Property)))
+		enc.AppendByteArray(amf0Encoder.encodeProp(v.Value.(*AMF0Property)))
 	}
 	enc.EncodeInt24(AMF0_object_end)
 	data, _ = enc.GetData()
 	return data
 }
 
-func (this *AMF0Encoder) encodeProp(prop *AMF0Property) (data []byte) {
+func (amf0Encoder *AMF0Encoder) encodeProp(prop *AMF0Property) (data []byte) {
 	enc := &AMF0Encoder{}
 	enc.Init()
 
@@ -251,7 +252,7 @@ func (this *AMF0Encoder) encodeProp(prop *AMF0Property) (data []byte) {
 		enc.EncodeString(prop.Value.StrValue)
 	case AMF0_object:
 		enc.AppendByte(AMF0_object)
-		enc.AppendByteArray(this.encodeObj(&prop.Value.ObjValue))
+		enc.AppendByteArray(amf0Encoder.encodeObj(&prop.Value.ObjValue))
 	case AMF0_null:
 		enc.AppendByte(AMF0_null)
 	case AMF0_ecma_array:
@@ -266,7 +267,7 @@ func (this *AMF0Encoder) encodeProp(prop *AMF0Property) (data []byte) {
 		enc.AppendByte(AMF0_strict_array)
 		enc.EncodeInt32(int32(prop.Value.ObjValue.Props.Len()))
 		for v := prop.Value.ObjValue.Props.Front(); v != nil; v = v.Next() {
-			enc.AppendByteArray(this.encodeProp(v.Value.(*AMF0Property)))
+			enc.AppendByteArray(amf0Encoder.encodeProp(v.Value.(*AMF0Property)))
 		}
 
 	case AMF0_date:
@@ -516,12 +517,12 @@ func amf0ReadStrictArray(data []byte, prop *AMF0Property) (sizeUsed int32, err e
 	return sizeUsed, err
 }
 
-func (this *AMF0Object) AMF0GetPropByIndex(index int) (prop *AMF0Property) {
-	if index >= this.Props.Len() {
+func (amf0Encoder *AMF0Object) AMF0GetPropByIndex(index int) (prop *AMF0Property) {
+	if index >= amf0Encoder.Props.Len() {
 		return nil
 	}
 	i := 0
-	for e := this.Props.Front(); e != nil; e = e.Next() {
+	for e := amf0Encoder.Props.Front(); e != nil; e = e.Next() {
 		if i == index {
 			prop = e.Value.(*AMF0Property)
 			return prop
@@ -531,8 +532,8 @@ func (this *AMF0Object) AMF0GetPropByIndex(index int) (prop *AMF0Property) {
 	return
 }
 
-func (this *AMF0Object) AMF0GetPropByName(name string) (prop *AMF0Property) {
-	for e := this.Props.Front(); e != nil; e = e.Next() {
+func (amf0Encoder *AMF0Object) AMF0GetPropByName(name string) (prop *AMF0Property) {
+	for e := amf0Encoder.Props.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*AMF0Property)
 		if v.Name == name {
 			prop = v
@@ -542,14 +543,14 @@ func (this *AMF0Object) AMF0GetPropByName(name string) (prop *AMF0Property) {
 	return nil
 }
 
-func (this *AMF0Object) Dump() {
-	for e := this.Props.Front(); e != nil; e = e.Next() {
+func (amf0Encoder *AMF0Object) Dump() {
+	for e := amf0Encoder.Props.Front(); e != nil; e = e.Next() {
 		prop := e.Value.(*AMF0Property)
-		this.dumpProp(prop)
+		amf0Encoder.dumpProp(prop)
 	}
 }
 
-func (this *AMF0Object) dumpProp(prop *AMF0Property) {
+func (amf0Encoder *AMF0Object) dumpProp(prop *AMF0Property) {
 	if len(prop.Name) > 0 {
 		logger.LOGT(prop.Name)
 	}

@@ -37,43 +37,43 @@ type rtmpPlayer struct {
 	rtmp           *RTMP
 }
 
-func (this *rtmpPlayer) Init(msg *wssAPI.Msg) (err error) {
-	this.playStatus = play_idle
-	this.waitPlaying = new(sync.WaitGroup)
-	this.rtmp = msg.Param1.(*RTMP)
-	this.resetCache()
+func (rtmpplayer *rtmpPlayer) Init(msg *wssAPI.Msg) (err error) {
+	rtmpplayer.playStatus = play_idle
+	rtmpplayer.waitPlaying = new(sync.WaitGroup)
+	rtmpplayer.rtmp = msg.Param1.(*RTMP)
+	rtmpplayer.resetCache()
 	return
 }
 
-func (this *rtmpPlayer) Start(msg *wssAPI.Msg) (err error) {
-	this.startPlay()
+func (rtmpplayer *rtmpPlayer) Start(msg *wssAPI.Msg) (err error) {
+	rtmpplayer.startPlay()
 	return
 }
 
-func (this *rtmpPlayer) Stop(msg *wssAPI.Msg) (err error) {
-	this.stopPlay()
+func (rtmpplayer *rtmpPlayer) Stop(msg *wssAPI.Msg) (err error) {
+	rtmpplayer.stopPlay()
 	return
 }
 
-func (this *rtmpPlayer) GetType() string {
+func (rtmpplayer *rtmpPlayer) GetType() string {
 	return ""
 }
 
-func (this *rtmpPlayer) HandleTask(task *wssAPI.Task) (err error) {
+func (rtmpplayer *rtmpPlayer) HandleTask(task *wssAPI.Task) (err error) {
 	return
 }
 
-func (this *rtmpPlayer) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (rtmpplayer *rtmpPlayer) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *rtmpPlayer) startPlay() {
-	this.mutexStatus.Lock()
-	defer this.mutexStatus.Unlock()
-	switch this.playStatus {
+func (rtmpplayer *rtmpPlayer) startPlay() {
+	rtmpplayer.mutexStatus.Lock()
+	defer rtmpplayer.mutexStatus.Unlock()
+	switch rtmpplayer.playStatus {
 	case play_idle:
-		go this.threadPlay()
-		this.playStatus = play_playing
+		go rtmpplayer.threadPlay()
+		rtmpplayer.playStatus = play_playing
 	case play_paused:
 		logger.LOGE("pause not processed")
 		return
@@ -83,10 +83,10 @@ func (this *rtmpPlayer) startPlay() {
 
 }
 
-func (this *rtmpPlayer) stopPlay() {
-	this.mutexStatus.Lock()
-	defer this.mutexStatus.Unlock()
-	switch this.playStatus {
+func (rtmpplayer *rtmpPlayer) stopPlay() {
+	rtmpplayer.mutexStatus.Lock()
+	defer rtmpplayer.mutexStatus.Unlock()
+	switch rtmpplayer.playStatus {
 	case play_idle:
 		return
 	case play_paused:
@@ -95,104 +95,104 @@ func (this *rtmpPlayer) stopPlay() {
 	case play_playing:
 		//stop play thread
 		//reset
-		this.playing = false
-		this.waitPlaying.Wait()
-		this.playStatus = play_idle
-		this.resetCache()
+		rtmpplayer.playing = false
+		rtmpplayer.waitPlaying.Wait()
+		rtmpplayer.playStatus = play_idle
+		rtmpplayer.resetCache()
 	}
 
 }
 
-func (this *rtmpPlayer) pause() {
+func (rtmpplayer *rtmpPlayer) pause() {
 
 }
 
-func (this *rtmpPlayer) IsPlaying() bool {
-	return this.playStatus == play_playing
+func (rtmpplayer *rtmpPlayer) IsPlaying() bool {
+	return rtmpplayer.playStatus == play_playing
 }
 
-func (this *rtmpPlayer) appendFlvTag(tag *flv.FlvTag) (err error) {
-	this.mutexStatus.RLock()
-	defer this.mutexStatus.RUnlock()
-	if this.playStatus != play_playing {
+func (rtmpplayer *rtmpPlayer) appendFlvTag(tag *flv.FlvTag) (err error) {
+	rtmpplayer.mutexStatus.RLock()
+	defer rtmpplayer.mutexStatus.RUnlock()
+	if rtmpplayer.playStatus != play_playing {
 		err = errors.New("not playing ,can not recv mediaData")
 		logger.LOGE(err.Error())
 		return
 	}
 	tag = tag.Copy()
-	//	if this.beginTime == 0 && tag.Timestamp > 0 {
-	//		this.beginTime = tag.Timestamp
+	//	if rtmpplayer.beginTime == 0 && tag.Timestamp > 0 {
+	//		rtmpplayer.beginTime = tag.Timestamp
 	//	}
-	//	tag.Timestamp -= this.beginTime
-	if false == this.keyFrameWrited && tag.TagType == flv.FLV_TAG_Video {
-		if this.videoHeader == nil {
-			this.videoHeader = tag
+	//	tag.Timestamp -= rtmpplayer.beginTime
+	if false == rtmpplayer.keyFrameWrited && tag.TagType == flv.FLV_TAG_Video {
+		if rtmpplayer.videoHeader == nil {
+			rtmpplayer.videoHeader = tag
 		} else {
 			if (tag.Data[0] >> 4) == 1 {
-				this.keyFrameWrited = true
+				rtmpplayer.keyFrameWrited = true
 			} else {
 				return
 			}
 		}
 
 	}
-	this.mutexCache.Lock()
-	defer this.mutexCache.Unlock()
-	this.cache.PushBack(tag)
+	rtmpplayer.mutexCache.Lock()
+	defer rtmpplayer.mutexCache.Unlock()
+	rtmpplayer.cache.PushBack(tag)
 	return
 }
 
-func (this *rtmpPlayer) setPlayParams(path string, startTime, duration int, reset bool) bool {
-	this.mutexStatus.RLock()
-	defer this.mutexStatus.RUnlock()
-	if this.playStatus != play_idle {
+func (rtmpplayer *rtmpPlayer) setPlayParams(path string, startTime, duration int, reset bool) bool {
+	rtmpplayer.mutexStatus.RLock()
+	defer rtmpplayer.mutexStatus.RUnlock()
+	if rtmpplayer.playStatus != play_idle {
 		return false
 	}
 	return true
 }
 
-func (this *rtmpPlayer) resetCache() {
-	this.audioHeader = nil
-	this.videoHeader = nil
-	this.metadata = nil
-	this.beginTime = 0
-	this.keyFrameWrited = false
-	this.mutexCache.Lock()
-	defer this.mutexCache.Unlock()
-	this.cache = list.New()
+func (rtmpplayer *rtmpPlayer) resetCache() {
+	rtmpplayer.audioHeader = nil
+	rtmpplayer.videoHeader = nil
+	rtmpplayer.metadata = nil
+	rtmpplayer.beginTime = 0
+	rtmpplayer.keyFrameWrited = false
+	rtmpplayer.mutexCache.Lock()
+	defer rtmpplayer.mutexCache.Unlock()
+	rtmpplayer.cache = list.New()
 }
 
-func (this *rtmpPlayer) threadPlay() {
-	this.playing = true
-	this.waitPlaying.Add(1)
+func (rtmpplayer *rtmpPlayer) threadPlay() {
+	rtmpplayer.playing = true
+	rtmpplayer.waitPlaying.Add(1)
 	defer func() {
-		this.waitPlaying.Done()
-		this.sendPlayEnds()
-		this.playStatus = play_idle
+		rtmpplayer.waitPlaying.Done()
+		rtmpplayer.sendPlayEnds()
+		rtmpplayer.playStatus = play_idle
 	}()
-	this.sendPlayStarts()
+	rtmpplayer.sendPlayStarts()
 
-	for this.playing == true {
-		this.mutexCache.Lock()
-		if this.cache == nil || this.cache.Len() == 0 {
-			this.mutexCache.Unlock()
+	for rtmpplayer.playing == true {
+		rtmpplayer.mutexCache.Lock()
+		if rtmpplayer.cache == nil || rtmpplayer.cache.Len() == 0 {
+			rtmpplayer.mutexCache.Unlock()
 			time.Sleep(10 * time.Millisecond)
 			continue
 		}
-		if this.cache.Len() > serviceConfig.CacheCount {
-			this.mutexCache.Unlock()
+		if rtmpplayer.cache.Len() > serviceConfig.CacheCount {
+			rtmpplayer.mutexCache.Unlock()
 			//bw not enough
-			this.rtmp.CmdStatus("warning", "NetStream.Play.InsufficientBW",
-				"instufficient bw", this.rtmp.Link.Path, 0, RTMP_channel_Invoke)
+			rtmpplayer.rtmp.CmdStatus("warning", "NetStream.Play.InsufficientBW",
+				"instufficient bw", rtmpplayer.rtmp.Link.Path, 0, RTMP_channel_Invoke)
 			//shutdown
 			return
 		}
-		tag := this.cache.Front().Value.(*flv.FlvTag)
-		this.cache.Remove(this.cache.Front())
-		this.mutexCache.Unlock()
+		tag := rtmpplayer.cache.Front().Value.(*flv.FlvTag)
+		rtmpplayer.cache.Remove(rtmpplayer.cache.Front())
+		rtmpplayer.mutexCache.Unlock()
 		//时间错误
 
-		err := this.rtmp.SendPacket(FlvTagToRTMPPacket(tag), false)
+		err := rtmpplayer.rtmp.SendPacket(FlvTagToRTMPPacket(tag), false)
 		if err != nil {
 			logger.LOGE("send rtmp packet failed in play")
 			return
@@ -200,23 +200,23 @@ func (this *rtmpPlayer) threadPlay() {
 	}
 }
 
-func (this *rtmpPlayer) sendPlayEnds() {
+func (rtmpplayer *rtmpPlayer) sendPlayEnds() {
 
-	err := this.rtmp.SendCtrl(RTMP_CTRL_streamEof, 1, 0)
+	err := rtmpplayer.rtmp.SendCtrl(RTMP_CTRL_streamEof, 1, 0)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
 
-	err = this.rtmp.FCUnpublish()
+	err = rtmpplayer.rtmp.FCUnpublish()
 	if err != nil {
 		logger.LOGE("FCUnpublish failed:" + err.Error())
 		return
 	}
 
-	err = this.rtmp.CmdStatus("status", "NetStream.Play.UnpublishNotify",
-		fmt.Sprintf("%s is unpublished", this.rtmp.Link.Path),
-		this.rtmp.Link.Path, 0, RTMP_channel_Invoke)
+	err = rtmpplayer.rtmp.CmdStatus("status", "NetStream.Play.UnpublishNotify",
+		fmt.Sprintf("%s is unpublished", rtmpplayer.rtmp.Link.Path),
+		rtmpplayer.rtmp.Link.Path, 0, RTMP_channel_Invoke)
 
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -224,32 +224,32 @@ func (this *rtmpPlayer) sendPlayEnds() {
 	}
 }
 
-func (this *rtmpPlayer) sendPlayStarts() {
-	err := this.rtmp.CmdStatus("status", "NetStream.Play.PublishNotify",
-		fmt.Sprintf("%s is now unpublished", this.rtmp.Link.Path),
-		this.rtmp.Link.Path,
+func (rtmpplayer *rtmpPlayer) sendPlayStarts() {
+	err := rtmpplayer.rtmp.CmdStatus("status", "NetStream.Play.PublishNotify",
+		fmt.Sprintf("%s is now unpublished", rtmpplayer.rtmp.Link.Path),
+		rtmpplayer.rtmp.Link.Path,
 		0, RTMP_channel_Invoke)
 	if err != nil {
 		logger.LOGE(err.Error())
 	}
-	err = this.rtmp.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
+	err = rtmpplayer.rtmp.SendCtrl(RTMP_CTRL_streamBegin, 1, 0)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
 	}
 
-	if true == this.reset {
-		err = this.rtmp.CmdStatus("status", "NetStream.Play.Reset",
-			fmt.Sprintf("Playing and resetting %s", this.rtmp.Link.Path),
-			this.rtmp.Link.Path, 0, RTMP_channel_Invoke)
+	if true == rtmpplayer.reset {
+		err = rtmpplayer.rtmp.CmdStatus("status", "NetStream.Play.Reset",
+			fmt.Sprintf("Playing and resetting %s", rtmpplayer.rtmp.Link.Path),
+			rtmpplayer.rtmp.Link.Path, 0, RTMP_channel_Invoke)
 		if err != nil {
 			logger.LOGE(err.Error())
 			return
 		}
 	}
 
-	err = this.rtmp.CmdStatus("status", "NetStream.Play.Start",
-		fmt.Sprintf("Started playing %s", this.rtmp.Link.Path), this.rtmp.Link.Path, 0, RTMP_channel_Invoke)
+	err = rtmpplayer.rtmp.CmdStatus("status", "NetStream.Play.Start",
+		fmt.Sprintf("Started playing %s", rtmpplayer.rtmp.Link.Path), rtmpplayer.rtmp.Link.Path, 0, RTMP_channel_Invoke)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
@@ -258,6 +258,6 @@ func (this *rtmpPlayer) sendPlayStarts() {
 	logger.LOGT("start playing")
 }
 
-func (this *rtmpPlayer) SetParent(parent wssAPI.MsgHandler) {
-	this.parent = parent
+func (rtmpplayer *rtmpPlayer) SetParent(parent wssAPI.MsgHandler) {
+	rtmpplayer.parent = parent
 }

@@ -13,7 +13,7 @@ func (websockHandler *websocketHandler) ctrlPlay(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("play failed")
-			err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_PLAY_FAILED, st.Req)
+			err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NetStreamPlayFailed, st.Req)
 		} else {
 			websockHandler.lastCmd = WSCPlay
 		}
@@ -77,7 +77,7 @@ func (websockHandler *websocketHandler) ctrlResume(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("resume failed do nothing")
-			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamFailed, st.Req)
 
 		} else {
 			websockHandler.lastCmd = WSCPlay
@@ -108,7 +108,7 @@ func (websockHandler *websocketHandler) ctrlPause(data []byte) (err error) {
 	defer func() {
 		if err != nil {
 			logger.LOGE("pause failed")
-			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamFailed, st.Req)
 		} else {
 			websockHandler.lastCmd = WSCPause
 		}
@@ -149,7 +149,7 @@ func (websockHandler *websocketHandler) ctrlClose(data []byte) (err error) {
 	st := &stClose{}
 	defer func() {
 		if err != nil {
-			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NetStreamFailed, st.Req)
 		} else {
 
 			websockHandler.lastCmd = WSCClose
@@ -169,7 +169,7 @@ func (websockHandler *websocketHandler) ctrlStop(data []byte) (err error) {
 	err = json.Unmarshal(data, st)
 	defer func() {
 		if err != nil {
-			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NETSTREAM_FAILED, st.Req)
+			websockHandler.sendWsStatus(websockHandler.conn, WSStatusError, NetStreamFailed, st.Req)
 		} else {
 			websockHandler.lastCmd = WSCClose
 		}
@@ -229,7 +229,7 @@ func (websockHandler *websocketHandler) doPlay(st *stPlay) (err error) {
 		return
 	}
 
-	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_START, st.Req)
+	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamPlayStart, st.Req)
 	return
 }
 
@@ -241,14 +241,14 @@ func (websockHandler *websocketHandler) doPlay2() (err error) {
 
 func (websockHandler *websocketHandler) doResume(st *stResume) (err error) {
 	logger.LOGT("resume play start")
-	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PLAY_START, st.Req)
+	err = websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamPlayStart, st.Req)
 	return
 }
 
 func (websockHandler *websocketHandler) doPause(st *stPause) (err error) {
 	logger.LOGT("pause do nothing")
 
-	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NETSTREAM_PAUSE_NOTIFY, st.Req)
+	websockHandler.sendWsStatus(websockHandler.conn, WSStatusStatus, NetStreamPauseNotify, st.Req)
 	return
 }
 

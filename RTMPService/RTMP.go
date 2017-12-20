@@ -1,7 +1,6 @@
 package RTMPService
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -13,6 +12,7 @@ import (
 	"github.com/use-go/websocketStreamServer/wssAPI"
 )
 
+//RTMP Protocol Setting
 const (
 	RTMP_protocol_rtmp      = "rtmp"
 	RTMP_default_chunk_size = 128
@@ -58,6 +58,7 @@ const (
 	RTMP_CTRL_streamBufferReady = 32
 )
 
+// RTMP HEADER TYPE
 const (
 	RTMP_HEADER_TYPE_0 = 0
 	RTMP_HEADER_TYPE_1 = 1
@@ -65,6 +66,7 @@ const (
 	RTMP_HEADER_TYPE_3 = 3
 )
 
+//RTMP_LINK struct
 type RTMP_LINK struct {
 	Protocol    string
 	App         string
@@ -80,23 +82,25 @@ type RTMP_LINK struct {
 	StopTime    int
 }
 
+//RTMPPacket struct
 type RTMPPacket struct {
 	ChunkStreamID   int32
 	Fmt             byte
 	TimeStamp       uint32 //fmt 0为绝对时间，1或2为相对时间
 	MessageLength   uint32
-	MessageTypeId   byte
-	MessageStreamId uint32
+	MessageTypeID   byte
+	MessageStreamID uint32
 	Body            []byte
 	BodyReaded      int32
 }
 
+//RTMP Description
 type RTMP struct {
 	Conn                      net.Conn
 	SendChunkSize             uint32
 	RecvChunkSize             uint32
 	NumInvokes                int32
-	StreamId                  uint32
+	StreamID                  uint32
 	Link                      RTMP_LINK
 	AudioCodecs               int32
 	VideoCodecs               int32
@@ -112,28 +116,28 @@ type RTMP struct {
 	mutexMethod               sync.RWMutex
 }
 
-func (this *RTMPPacket) Copy() (dst *RTMPPacket) {
+func (rtmp *RTMPPacket) Copy() (dst *RTMPPacket) {
 	dst = &RTMPPacket{}
-	dst.BodyReaded = this.BodyReaded
+	dst.BodyReaded = rtmp.BodyReaded
 	dst.Body = make([]byte, dst.BodyReaded)
-	copy(dst.Body, this.Body)
-	dst.ChunkStreamID = this.ChunkStreamID
-	dst.Fmt = this.Fmt
-	dst.MessageLength = this.MessageLength
-	dst.MessageStreamId = this.MessageStreamId
-	dst.TimeStamp = this.TimeStamp
-	dst.MessageTypeId = this.MessageTypeId
+	copy(dst.Body, rtmp.Body)
+	dst.ChunkStreamID = rtmp.ChunkStreamID
+	dst.Fmt = rtmp.Fmt
+	dst.MessageLength = rtmp.MessageLength
+	dst.MessageStreamID = rtmp.MessageStreamID
+	dst.TimeStamp = rtmp.TimeStamp
+	dst.MessageTypeID = rtmp.MessageTypeID
 	return
 }
 
-func (this *RTMPPacket) ToFLVTag() (dst *flv.FlvTag) {
+func (rtmp *RTMPPacket) ToFLVTag() (dst *flv.FlvTag) {
 	dst = &flv.FlvTag{}
-	dst.TagType = this.MessageTypeId
+	dst.TagType = rtmp.MessageTypeID
 	dst.StreamID = 0
-	dst.Timestamp = this.TimeStamp
-	//dst.Data = make([]byte, len(this.Body))
-	//copy(dst.Data, this.Body)
-	dst.Data = this.Body
+	dst.Timestamp = rtmp.TimeStamp
+	//dst.Data = make([]byte, len(rtmp.Body))
+	//copy(dst.Data, rtmp.Body)
+	dst.Data = rtmp.Body
 	return
 }
 
@@ -142,8 +146,8 @@ func FlvTagToRTMPPacket(ta *flv.FlvTag) (dst *RTMPPacket) {
 	dst.ChunkStreamID = RTMP_channel_SendLive
 	dst.Fmt = 0
 	dst.TimeStamp = ta.Timestamp
-	dst.MessageStreamId = 1
-	dst.MessageTypeId = ta.TagType
+	dst.MessageStreamID = 1
+	dst.MessageTypeID = ta.TagType
 	dst.MessageLength = uint32(len(ta.Data))
 	//dst.Body = make([]byte, dst.MessageLength)
 	//copy(dst.Body, ta.Data)
@@ -151,24 +155,24 @@ func FlvTagToRTMPPacket(ta *flv.FlvTag) (dst *RTMPPacket) {
 	return
 }
 
-func (this *RTMP) Init(conn net.Conn) {
-	this.Conn = conn
-	this.SendChunkSize = RTMP_default_chunk_size
-	this.RecvChunkSize = RTMP_default_chunk_size
-	this.AudioCodecs = 3191
-	this.VideoCodecs = 252
-	this.TargetBW = 2500000
-	this.AcknowledgementWindowSize = 0
-	this.SelfBW = 2500000
-	this.LimitType = 2
-	this.buffMS = RTMP_default_buff_ms
-	this.recvCache = make(map[int32]*RTMPPacket)
-	this.methodCache = make(map[int32]string)
+func (rtmp *RTMP) Init(conn net.Conn) {
+	rtmp.Conn = conn
+	rtmp.SendChunkSize = RTMP_default_chunk_size
+	rtmp.RecvChunkSize = RTMP_default_chunk_size
+	rtmp.AudioCodecs = 3191
+	rtmp.VideoCodecs = 252
+	rtmp.TargetBW = 2500000
+	rtmp.AcknowledgementWindowSize = 0
+	rtmp.SelfBW = 2500000
+	rtmp.LimitType = 2
+	rtmp.buffMS = RTMP_default_buff_ms
+	rtmp.recvCache = make(map[int32]*RTMPPacket)
+	rtmp.methodCache = make(map[int32]string)
 }
 
-func (this *RTMP) ReadPacket() (packet *RTMPPacket, err error) {
+func (rtmp *RTMP) ReadPacket() (packet *RTMPPacket, err error) {
 	for {
-		packet, err = this.ReadChunk()
+		packet, err = rtmp.ReadChunk()
 		if err != nil {
 			logger.LOGT("read rtmp chunk failed")
 			return
@@ -186,24 +190,24 @@ func timeAdd(src, delta uint32) (ret uint32) {
 	return
 }
 
-func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
+func (rtmp *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 	//接收basic header
-	buf, err := this.rtmpSocketRead(1)
+	buf, err := rtmp.rtmpSocketRead(1)
 	if err != nil {
 		return
 	}
 	var chunkfmt byte
-	var chunkId int32
+	var chunkID int32
 	chunkfmt = (buf[0] & 0xc0) >> 6
-	chunkId = int32(buf[0] & 0x3f)
-	if chunkId == 0 {
-		buf, err = this.rtmpSocketRead(1)
+	chunkID = int32(buf[0] & 0x3f)
+	if chunkID == 0 {
+		buf, err = rtmp.rtmpSocketRead(1)
 		if err != nil {
 			return
 		}
-		chunkId = int32(buf[0]) + 64
-	} else if chunkId == 1 {
-		buf, err = this.rtmpSocketRead(2)
+		chunkID = int32(buf[0]) + 64
+	} else if chunkID == 1 {
+		buf, err = rtmp.rtmpSocketRead(2)
 		if err != nil {
 			return
 		}
@@ -211,44 +215,44 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 		if err != nil {
 			return nil, err
 		}
-		chunkId = int32(tmp16)
+		chunkID = int32(tmp16)
 	}
-	if this.recvCache[chunkId] == nil {
-		logger.LOGT("new chunkid " + strconv.Itoa(int(chunkId)))
-		this.recvCache[chunkId] = &RTMPPacket{}
-		this.recvCache[chunkId].Fmt = 0
+	if rtmp.recvCache[chunkID] == nil {
+		logger.LOGT("new chunkid " + strconv.Itoa(int(chunkID)))
+		rtmp.recvCache[chunkID] = &RTMPPacket{}
+		rtmp.recvCache[chunkID].Fmt = 0
 	}
-	this.recvCache[chunkId].ChunkStreamID = chunkId
+	rtmp.recvCache[chunkID].ChunkStreamID = chunkID
 	//接收message header
 	switch chunkfmt {
 	case 0:
-		buf, err := this.rtmpSocketRead(11)
+		buf, err := rtmp.rtmpSocketRead(11)
 		if err != nil {
 			return nil, err
 		}
-		tmpPkt := this.recvCache[chunkId]
+		tmpPkt := rtmp.recvCache[chunkID]
 		tmpPkt.TimeStamp, _ = AMF0DecodeInt24(buf)
 		tmpPkt.MessageLength, _ = AMF0DecodeInt24(buf[3:])
-		tmpPkt.MessageTypeId = buf[6]
-		tmpPkt.MessageStreamId, _ = AMF0DecodeInt32LE(buf[7:])
+		tmpPkt.MessageTypeID = buf[6]
+		tmpPkt.MessageStreamID, _ = AMF0DecodeInt32LE(buf[7:])
 		if tmpPkt.TimeStamp == 0xffffff {
-			buf, err = this.rtmpSocketRead(4)
+			buf, err = rtmp.rtmpSocketRead(4)
 			if err != nil {
 				return nil, err
 			}
 			tmpPkt.TimeStamp, _ = AMF0DecodeInt32(buf)
 		}
 	case 1:
-		buf, err := this.rtmpSocketRead(7)
+		buf, err := rtmp.rtmpSocketRead(7)
 		if err != nil {
 			return nil, err
 		}
-		tmpPkt := this.recvCache[chunkId]
+		tmpPkt := rtmp.recvCache[chunkID]
 		timeDelta, _ := AMF0DecodeInt24(buf)
 		tmpPkt.MessageLength, _ = AMF0DecodeInt24(buf[3:])
-		tmpPkt.MessageTypeId = buf[6]
+		tmpPkt.MessageTypeID = buf[6]
 		if timeDelta == 0xffffff {
-			buf, err = this.rtmpSocketRead(4)
+			buf, err = rtmp.rtmpSocketRead(4)
 			if err != nil {
 				return nil, err
 			}
@@ -256,16 +260,16 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 		}
 		tmpPkt.TimeStamp = timeAdd(tmpPkt.TimeStamp, timeDelta)
 	case 2:
-		buf, err := this.rtmpSocketRead(3)
+		buf, err := rtmp.rtmpSocketRead(3)
 
 		if err != nil {
 			return nil, err
 		}
 
-		tmpPkt := this.recvCache[chunkId]
+		tmpPkt := rtmp.recvCache[chunkID]
 		timeDelta, _ := AMF0DecodeInt24(buf)
 		if timeDelta == 0xffffff {
-			buf, err = this.rtmpSocketRead(4)
+			buf, err = rtmp.rtmpSocketRead(4)
 			if err != nil {
 				return nil, err
 			}
@@ -277,7 +281,7 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 
 	}
 	//接收chunk data
-	tmpPkt, ok := this.recvCache[chunkId]
+	tmpPkt, ok := rtmp.recvCache[chunkID]
 	if false == ok {
 		logger.LOGF("ok")
 	}
@@ -295,10 +299,10 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 	}
 	//接收小于等于一个chunksize的数据
 	recvsize := tmpPkt.MessageLength - uint32(tmpPkt.BodyReaded)
-	if recvsize > this.RecvChunkSize {
-		recvsize = this.RecvChunkSize
+	if recvsize > rtmp.RecvChunkSize {
+		recvsize = rtmp.RecvChunkSize
 	}
-	tmpBody, err := this.rtmpSocketRead(int(recvsize))
+	tmpBody, err := rtmp.rtmpSocketRead(int(recvsize))
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
@@ -318,22 +322,22 @@ func (this *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 	return
 }
 
-func (this *RTMP) rtmpSocketRead(size int) (data []byte, err error) {
-	data, err = wssAPI.TCPRead(this.Conn, size)
+func (rtmp *RTMP) rtmpSocketRead(size int) (data []byte, err error) {
+	data, err = wssAPI.TCPRead(rtmp.Conn, size)
 	if err != nil {
 		return
 	}
-	if this.AcknowledgementWindowSize > 0 {
-		this.BytesIn += int64(len(data))
-		if this.BytesIn > int64(this.AcknowledgementWindowSize/10)+this.BytesInLast {
-			this.BytesInLast = this.BytesIn
-			this.sendAcknowledgement()
+	if rtmp.AcknowledgementWindowSize > 0 {
+		rtmp.BytesIn += int64(len(data))
+		if rtmp.BytesIn > int64(rtmp.AcknowledgementWindowSize/10)+rtmp.BytesInLast {
+			rtmp.BytesInLast = rtmp.BytesIn
+			rtmp.sendAcknowledgement()
 		}
 	}
 	return
 }
 
-func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
+func (rtmp *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 	//基本头
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -351,7 +355,7 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		encoder.AppendByte(byte(packet.ChunkStreamID-64) & 0xff)
 		encoder.AppendByte(byte(packet.ChunkStreamID-64) >> 8)
 	} else {
-		return errors.New(fmt.Sprintf("chunk stream id:%d invalid", packet.ChunkStreamID))
+		return fmt.Errorf("chunk stream id:%d invalid", packet.ChunkStreamID)
 	}
 	//消息头
 	if packet.Fmt <= 2 {
@@ -365,11 +369,11 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 	if packet.Fmt <= 1 {
 		//有长度，类型
 		encoder.EncodeInt24(int32(packet.MessageLength))
-		encoder.AppendByte(byte(packet.MessageTypeId))
+		encoder.AppendByte(byte(packet.MessageTypeID))
 	}
 	if packet.Fmt == 0 {
 		//有流id
-		encoder.EncodeInt32LittleEndian(int32(packet.MessageStreamId))
+		encoder.EncodeInt32LittleEndian(int32(packet.MessageStreamID))
 	}
 	//时间扩展
 	if packet.TimeStamp >= 0xffffff {
@@ -379,8 +383,8 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 	var bodySended uint32
 	bodySended = 0
 	sendSize := packet.MessageLength
-	if sendSize > this.SendChunkSize {
-		sendSize = this.SendChunkSize
+	if sendSize > rtmp.SendChunkSize {
+		sendSize = rtmp.SendChunkSize
 	}
 	encoder.AppendByteArray(packet.Body[:sendSize])
 	buf, err := encoder.GetData()
@@ -388,7 +392,7 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		return
 	}
 
-	_, err = wssAPI.TCPWrite(this.Conn, buf)
+	_, err = wssAPI.TCPWrite(rtmp.Conn, buf)
 	if err != nil {
 		return
 	}
@@ -412,63 +416,63 @@ func (this *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 			encoder3.AppendByte(byte(packet.ChunkStreamID-64) >> 8)
 		}
 		sendSize = packet.MessageLength - bodySended
-		if sendSize > this.SendChunkSize {
-			sendSize = this.SendChunkSize
+		if sendSize > rtmp.SendChunkSize {
+			sendSize = rtmp.SendChunkSize
 		}
 		encoder3.AppendByteArray(packet.Body[bodySended : bodySended+sendSize])
 		buf, err := encoder3.GetData()
 		if err != nil {
 			return err
 		}
-		_, err = wssAPI.TCPWrite(this.Conn, buf)
+		_, err = wssAPI.TCPWrite(rtmp.Conn, buf)
 		if err != nil {
 			return err
 		}
 		bodySended += sendSize
 	}
-	if RTMP_PACKET_TYPE_INVOKE == packet.MessageTypeId && queue {
+	if RTMP_PACKET_TYPE_INVOKE == packet.MessageTypeID && queue {
 		cmdName, err := AMF0DecodeString(packet.Body[1:])
 		if err != nil {
 			return err
 		}
-		transactionId, err := AMF0DecodeNumber(packet.Body[4+len(cmdName):])
+		transactionID, err := AMF0DecodeNumber(packet.Body[4+len(cmdName):])
 		if err != nil {
 			return err
 		}
-		this.mutexMethod.Lock()
-		this.methodCache[int32(transactionId)] = cmdName
-		this.mutexMethod.Unlock()
+		rtmp.mutexMethod.Lock()
+		rtmp.methodCache[int32(transactionID)] = cmdName
+		rtmp.mutexMethod.Unlock()
 	}
 	return
 }
 
-func (this *RTMP) HandleControl(pkt *RTMPPacket) (err error) {
+func (rtmp *RTMP) HandleControl(pkt *RTMPPacket) (err error) {
 	ctype, err := AMF0DecodeInt16(pkt.Body)
 	if err != nil {
 		return
 	}
 	switch ctype {
 	case RTMP_CTRL_streamBegin:
-		streamId, _ := AMF0DecodeInt32(pkt.Body[2:])
-		logger.LOGT(fmt.Sprintf("stream begin:%d", streamId))
+		streamID, _ := AMF0DecodeInt32(pkt.Body[2:])
+		logger.LOGT(fmt.Sprintf("stream begin:%d", streamID))
 	case RTMP_CTRL_streamEof:
-		streamId, _ := AMF0DecodeInt32(pkt.Body[2:])
-		logger.LOGT(fmt.Sprintf("stream eof:%d", streamId))
+		streamID, _ := AMF0DecodeInt32(pkt.Body[2:])
+		logger.LOGT(fmt.Sprintf("stream eof:%d", streamID))
 	case RTMP_CTRL_streamDry:
-		streamId, _ := AMF0DecodeInt32(pkt.Body[2:])
-		logger.LOGT(fmt.Sprintf("stream dry:%d", streamId))
+		streamID, _ := AMF0DecodeInt32(pkt.Body[2:])
+		logger.LOGT(fmt.Sprintf("stream dry:%d", streamID))
 	case RTMP_CTRL_setBufferLength:
-		streamId, _ := AMF0DecodeInt32(pkt.Body[2:])
+		streamID, _ := AMF0DecodeInt32(pkt.Body[2:])
 		buffMS, _ := AMF0DecodeInt32(pkt.Body[6:])
-		this.buffMS = uint32(buffMS)
-		this.StreamId = uint32(streamId)
-		//logger.LOGI(fmt.Sprintf("set buffer length --streamid:%d--buffer length:%d", this.StreamId, this.buffMS))
+		rtmp.buffMS = uint32(buffMS)
+		rtmp.StreamID = uint32(streamID)
+		//logger.LOGI(fmt.Sprintf("set buffer length --streamid:%d--buffer length:%d", rtmp.StreamID, rtmp.buffMS))
 	case RTMP_CTRL_streamIsRecorded:
-		streamId, _ := AMF0DecodeInt32(pkt.Body[2:])
-		logger.LOGT(fmt.Sprintf("stream %d is recorded", streamId))
+		streamID, _ := AMF0DecodeInt32(pkt.Body[2:])
+		logger.LOGT(fmt.Sprintf("stream %d is recorded", streamID))
 	case RTMP_CTRL_pingRequest:
 		timestamp, _ := AMF0DecodeInt32(pkt.Body[2:])
-		this.pingResponse(timestamp)
+		rtmp.pingResponse(timestamp)
 		logger.LOGT(fmt.Sprintf("ping :%d", timestamp))
 	case RTMP_CTRL_pingResponse:
 		timestamp, _ := AMF0DecodeInt32(pkt.Body[2:])
@@ -483,13 +487,13 @@ func (this *RTMP) HandleControl(pkt *RTMPPacket) (err error) {
 	return
 }
 
-func (this *RTMP) pingResponse(timestamp uint32) (err error) {
+func (rtmp *RTMP) pingResponse(timestamp uint32) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_CONTROL
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_CONTROL
 	pkt.TimeStamp = 0
-	pkt.MessageStreamId = 0
+	pkt.MessageStreamID = 0
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -501,20 +505,20 @@ func (this *RTMP) pingResponse(timestamp uint32) (err error) {
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
 
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) sendAcknowledgement() (err error) {
+func (rtmp *RTMP) sendAcknowledgement() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_BYTES_READ_REPORT
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_BYTES_READ_REPORT
 	pkt.TimeStamp = 0
-	pkt.MessageStreamId = 0
+	pkt.MessageStreamID = 0
 	encoder := &AMF0Encoder{}
 	encoder.Init()
-	param := int32(this.BytesIn & 0xffffffff)
+	param := int32(rtmp.BytesIn & 0xffffffff)
 	encoder.EncodeInt32(param)
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -522,77 +526,77 @@ func (this *RTMP) sendAcknowledgement() (err error) {
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
 	//logger.LOGT(pkt.Body)
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) AcknowledgementBW() (err error) {
+func (rtmp *RTMP) AcknowledgementBW() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_SERVER_BW
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_SERVER_BW
 	pkt.TimeStamp = 0
-	pkt.MessageStreamId = 0
+	pkt.MessageStreamID = 0
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
-	encoder.EncodeInt32(int32(this.TargetBW))
+	encoder.EncodeInt32(int32(rtmp.TargetBW))
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
 
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) SetPeerBW() (err error) {
+func (rtmp *RTMP) SetPeerBW() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_CLIENT_BW
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_CLIENT_BW
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
-	encoder.EncodeInt32(int32(this.SelfBW))
-	encoder.AppendByte(byte(this.LimitType))
+	encoder.EncodeInt32(int32(rtmp.SelfBW))
+	encoder.AppendByte(byte(rtmp.LimitType))
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
 
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 
 	return
 }
 
-func (this *RTMP) SetChunkSize(chunkSize uint32) (err error) {
+func (rtmp *RTMP) SetChunkSize(chunkSize uint32) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_CHUNK_SIZE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_CHUNK_SIZE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeInt32(int32(chunkSize))
-	this.SendChunkSize = chunkSize
-	logger.LOGT(fmt.Sprintf("set chunk size %d", this.SendChunkSize))
+	rtmp.SendChunkSize = chunkSize
+	logger.LOGT(fmt.Sprintf("set chunk size %d", rtmp.SendChunkSize))
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) ConnectResult(obj *AMF0Object) (err error) {
+func (rtmp *RTMP) ConnectResult(obj *AMF0Object) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -636,15 +640,15 @@ func (this *RTMP) ConnectResult(obj *AMF0Object) (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) CmdError(level string, code string, description string, idx float64) (err error) {
+func (rtmp *RTMP) CmdError(level string, code string, description string, idx float64) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -662,15 +666,15 @@ func (this *RTMP) CmdError(level string, code string, description string, idx fl
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) CmdStatus(level, code, description, details string, clientID float64, channel int) (err error) {
+func (rtmp *RTMP) CmdStatus(level, code, description, details string, clientID float64, channel int) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = int32(channel)
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
-	pkt.MessageStreamId = 1
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageStreamID = 1
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("onStatus")
@@ -689,15 +693,15 @@ func (this *RTMP) CmdStatus(level, code, description, details string, clientID f
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) CmdNumberResult(idx float64, numValue float64) (err error) {
+func (rtmp *RTMP) CmdNumberResult(idx float64, numValue float64) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -710,14 +714,14 @@ func (this *RTMP) CmdNumberResult(idx float64, numValue float64) (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) SendCtrl(ctype int, obj uint32, time uint32) (err error) {
+func (rtmp *RTMP) SendCtrl(ctype int, obj uint32, time uint32) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_control
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_CONTROL
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_CONTROL
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	if ctype == RTMP_CTRL_setBufferLength {
@@ -734,15 +738,15 @@ func (this *RTMP) SendCtrl(ctype int, obj uint32, time uint32) (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) OnBWDone() (err error) {
+func (rtmp *RTMP) OnBWDone() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -755,15 +759,15 @@ func (this *RTMP) OnBWDone() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) OnBWCheck() (err error) {
+func (rtmp *RTMP) OnBWCheck() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -784,15 +788,15 @@ func (this *RTMP) OnBWCheck() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 	return
 }
 
-func (this *RTMP) _OnBWDone() (err error) {
+func (rtmp *RTMP) _OnBWDone() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
@@ -807,22 +811,22 @@ func (this *RTMP) _OnBWDone() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) FCUnpublish() (err error) {
+func (rtmp *RTMP) FCUnpublish() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("FCUnpbulish")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
-	encoder.EncodeString(this.Link.Path)
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
+	encoder.EncodeString(rtmp.Link.Path)
 	encoder.AppendByte(AMF0_null)
 	pkt.Body, err = encoder.GetData()
 
@@ -830,15 +834,15 @@ func (this *RTMP) FCUnpublish() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 	return
 }
 
-func (this *RTMP) OnMetadata(data []byte) {
+func (rtmp *RTMP) OnMetadata(data []byte) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INFO
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INFO
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("onMetaData")
@@ -846,29 +850,29 @@ func (this *RTMP) OnMetadata(data []byte) {
 	pkt.Body, _ = encoder.GetData()
 
 	pkt.MessageLength = uint32(len(pkt.Body))
-	this.SendPacket(pkt, false)
+	rtmp.SendPacket(pkt, false)
 }
 
-func (this *RTMP) Connect(publish bool) (err error) {
+func (rtmp *RTMP) Connect(publish bool) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("connect")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_object)
-	encoder.EncodeNamedString("app", this.Link.App)
+	encoder.EncodeNamedString("app", rtmp.Link.App)
 	encoder.EncodeNamedString("flashver", "WIN 18,0,0,232")
-	encoder.EncodeNamedString("tcUrl", this.Link.TcUrl)
+	encoder.EncodeNamedString("tcUrl", rtmp.Link.TcUrl)
 
 	if false == publish {
 		encoder.EncodeNamedBool("fpad", false)
 		encoder.EncodeNamedNumber("capabilities", 239)
-		encoder.EncodeNamedNumber("audioCodecs", float64(this.AudioCodecs))
-		encoder.EncodeNamedNumber("videoCodecs", float64(this.VideoCodecs))
+		encoder.EncodeNamedNumber("audioCodecs", float64(rtmp.AudioCodecs))
+		encoder.EncodeNamedNumber("videoCodecs", float64(rtmp.VideoCodecs))
 		encoder.EncodeNamedNumber("videoFunction", 1.0)
 		encoder.EncodeNamedNumber("objectEncoding", 3.0)
 	}
@@ -881,20 +885,20 @@ func (this *RTMP) Connect(publish bool) (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 	return
 }
 
-func (this *RTMP) CreateStream() (err error) {
+func (rtmp *RTMP) CreateStream() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("createStream")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_null)
 	pkt.Body, err = encoder.GetData()
 
@@ -902,21 +906,21 @@ func (this *RTMP) CreateStream() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 
 	return
 }
 
-func (this *RTMP) SendCheckBW() (err error) {
+func (rtmp *RTMP) SendCheckBW() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("_checkbw")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_null)
 	pkt.Body, err = encoder.GetData()
 
@@ -924,77 +928,77 @@ func (this *RTMP) SendCheckBW() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 
 	return
 }
 
-func (this *RTMP) SendReleaseStream() (err error) {
+func (rtmp *RTMP) SendReleaseStream() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("releaseStream")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_null)
-	encoder.EncodeString(this.Link.Path)
+	encoder.EncodeString(rtmp.Link.Path)
 	pkt.Body, err = encoder.GetData()
 
 	if err != nil {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 
 	return
 }
 
-func (this *RTMP) SendFCPublish() (err error) {
+func (rtmp *RTMP) SendFCPublish() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("FCPublish")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_null)
-	encoder.EncodeString(this.Link.Path)
+	encoder.EncodeString(rtmp.Link.Path)
 	pkt.Body, err = encoder.GetData()
 
 	if err != nil {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 
 	return
 }
 
-func (this *RTMP) SendPlay() (err error) {
+func (rtmp *RTMP) SendPlay() (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_AV
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
-	pkt.MessageStreamId = this.StreamId
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageStreamID = rtmp.StreamID
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("play")
-	this.NumInvokes++
-	encoder.EncodeNumber(float64(this.NumInvokes))
+	rtmp.NumInvokes++
+	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.AppendByte(AMF0_null)
-	encoder.EncodeString(this.Link.Path)
-	if this.Link.SeekTime > 0 {
-		encoder.EncodeNumber(float64(this.Link.SeekTime))
+	encoder.EncodeString(rtmp.Link.Path)
+	if rtmp.Link.SeekTime > 0 {
+		encoder.EncodeNumber(float64(rtmp.Link.SeekTime))
 	} else {
 		encoder.EncodeNumber(-2.0)
 	}
-	if this.Link.StopTime != 0 {
-		encoder.EncodeNumber(float64(this.Link.StopTime - this.Link.SeekTime))
+	if rtmp.Link.StopTime != 0 {
+		encoder.EncodeNumber(float64(rtmp.Link.StopTime - rtmp.Link.SeekTime))
 	}
 	pkt.Body, err = encoder.GetData()
 
@@ -1002,20 +1006,20 @@ func (this *RTMP) SendPlay() (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, true)
+	err = rtmp.SendPacket(pkt, true)
 
 	return
 }
 
-func (this *RTMP) SendCheckBWResult(transactionId float64) (err error) {
+func (rtmp *RTMP) SendCheckBWResult(transactionID float64) (err error) {
 	pkt := &RTMPPacket{}
 	pkt.ChunkStreamID = RTMP_channel_Invoke
 	pkt.Fmt = 0
-	pkt.MessageTypeId = RTMP_PACKET_TYPE_INVOKE
+	pkt.MessageTypeID = RTMP_PACKET_TYPE_INVOKE
 	encoder := &AMF0Encoder{}
 	encoder.Init()
 	encoder.EncodeString("_result")
-	encoder.EncodeNumber(transactionId)
+	encoder.EncodeNumber(transactionID)
 	encoder.AppendByte(AMF0_null)
 	encoder.EncodeNumber(0.0)
 	pkt.Body, err = encoder.GetData()
@@ -1024,7 +1028,7 @@ func (this *RTMP) SendCheckBWResult(transactionId float64) (err error) {
 		return
 	}
 	pkt.MessageLength = uint32(len(pkt.Body))
-	err = this.SendPacket(pkt, false)
+	err = rtmp.SendPacket(pkt, false)
 
 	return
 }
