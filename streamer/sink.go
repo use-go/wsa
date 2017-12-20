@@ -29,7 +29,7 @@ func (sink *streamSink) Start(msg *wssAPI.Msg) (err error) {
 		return errors.New("no sinker to start")
 	}
 	msg = &wssAPI.Msg{}
-	msg.Type = wssAPI.MSG_PLAY_START
+	msg.Type = wssAPI.MsgPlayStart
 	logger.LOGT("start sink")
 	//go sink.sinker.ProcessMessage(msg)
 	sink.sinker.ProcessMessage(msg)
@@ -43,7 +43,7 @@ func (sink *streamSink) Stop(msg *wssAPI.Msg) (err error) {
 		return errors.New("no sinker to stop")
 	}
 	msg = &wssAPI.Msg{}
-	msg.Type = wssAPI.MSG_PLAY_STOP
+	msg.Type = wssAPI.MsgPlayStop
 	//go sink.sinker.ProcessMessage(msg)
 	sink.sinker.ProcessMessage(msg)
 	return
@@ -59,7 +59,7 @@ func (sink *streamSink) HandleTask(task *wssAPI.Task) (err error) {
 
 func (sink *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
 
-	if sink.sinker != nil && msg.Type == wssAPI.MSG_FLV_TAG {
+	if sink.sinker != nil && msg.Type == wssAPI.MsgFlvTag {
 		return sink.sinker.ProcessMessage(msg)
 	}
 	return

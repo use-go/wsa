@@ -139,7 +139,7 @@ func (hlsSource *HLSSource) HandleTask(task wssAPI.Task) (err error) {
 
 func (hlsSource *HLSSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
-	case wssAPI.MSG_GetSource_NOTIFY:
+	case wssAPI.MsgGetSourceNotify:
 		//对端还没有监听 所以写不进去
 		if hlsSource.chValid {
 			hlsSource.chSvr <- true
@@ -148,15 +148,15 @@ func (hlsSource *HLSSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 		}
 		hlsSource.sinkAdded = true
 		logger.LOGD("get source by notify")
-	case wssAPI.MSG_GetSource_Failed:
+	case wssAPI.MsgGetSourceFailed:
 		hlsSource.Stop(nil)
-	case wssAPI.MSG_PLAY_START:
+	case wssAPI.MsgPlayStart:
 		hlsSource.sinkAdded = true
 		logger.LOGD("get source by start play")
-	case wssAPI.MSG_PLAY_STOP:
+	case wssAPI.MsgPlayStop:
 		//hls 停止就结束移除，不像RTMP等待
 		hlsSource.Stop(nil)
-	case wssAPI.MSG_FLV_TAG:
+	case wssAPI.MsgFlvTag:
 		tag := msg.Param1.(*flv.FlvTag)
 		hlsSource.AddFlvTag(tag)
 	default:

@@ -45,3 +45,27 @@ func HandleTask(task Task) error {
 	}
 	return errors.New("service process not ready")
 }
+
+// Server Type
+const (
+	OBJProcess         = "HostProcess"
+	OBJRTMPServer      = "RTMPServer"
+	OBJWebSocketServer = "WebsocketServer"
+	OBJBackendServer   = "BackendServer"
+	OBJStreamerServer  = "StreamerServer"
+	OBJRTSPServer      = "RTSPServer"
+	OBJHLSServer       = "HLSServer"
+	OBJDASHServer      = `DASHServer`
+)
+
+// MSG Event Notify Type
+const (
+	MsgFlvTag            = "FLVTag"
+	MsgGetSourceNotify   = "MSG.GetSource.Notify.Async"
+	MsgGetSourceFailed   = "MSG.GetSource.Failed"
+	MsgSourceClosedForce = "MSG.SourceClosed.Force"
+	MsgPublishStart      = "NetStream.Publish.Start"
+	MsgPublishStop       = "NetStream.Publish.Stop"
+	MsgPlayStart         = "NetStream.Play.Start"
+	MsgPlayStop          = "NetStream.Play.Stop"
+)

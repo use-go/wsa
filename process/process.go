@@ -277,7 +277,7 @@ func (srvBus *LaunchedServices) Stop(msg *wssAPI.Msg) (err error) {
 
 //GetType for process
 func (srvBus *LaunchedServices) GetType() string {
-	return wssAPI.OBJServerBus
+	return wssAPI.OBJProcess
 }
 
 //HandleTask for process

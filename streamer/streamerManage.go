@@ -335,18 +335,18 @@ func (streamerService *StreamerService) pullStream(app, streamName, sinkId strin
 			if true == ok {
 				logger.LOGD("add sink")
 				msg := &wssAPI.Msg{}
-				msg.Type = wssAPI.MSG_GetSource_NOTIFY
+				msg.Type = wssAPI.MsgGetSourceNotify
 				sinker.ProcessMessage(msg)
 				source.AddSink(sinkId, sinker)
 			} else {
 				logger.LOGE("add sink failed", source, ok)
-				msg := &wssAPI.Msg{Type: wssAPI.MSG_GetSource_Failed}
+				msg := &wssAPI.Msg{Type: wssAPI.MsgGetSourceFailed}
 				sinker.ProcessMessage(msg)
 			}
 		} else {
 			logger.LOGE("bad add", ok, src)
 			logger.LOGD(reflect.TypeOf(src))
-			msg := &wssAPI.Msg{Type: wssAPI.MSG_GetSource_Failed}
+			msg := &wssAPI.Msg{Type: wssAPI.MsgGetSourceFailed}
 			sinker.ProcessMessage(msg)
 		}
 

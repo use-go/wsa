@@ -51,7 +51,7 @@ func (source *streamSource) HandleTask(task wssAPI.Task) (err error) {
 
 func (source *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
-	case wssAPI.MSG_FLV_TAG:
+	case wssAPI.MsgFlvTag:
 		if false == source.bProducer {
 			return errors.New("src may closed or invalid")
 		}
@@ -108,7 +108,7 @@ func (source *streamSource) SetProducer(status bool) (remove bool) {
 		logger.LOGD(source.dataProducer)
 		if wssAPI.InterfaceValid(source.dataProducer) {
 			logger.LOGD("force closed")
-			msg := &wssAPI.Msg{Type: wssAPI.MSG_SourceClosed_Force}
+			msg := &wssAPI.Msg{Type: wssAPI.MsgSourceClosedForce}
 			source.dataProducer.ProcessMessage(msg)
 			source.dataProducer = nil
 		}
@@ -158,22 +158,22 @@ func (source *streamSource) AddSink(id string, sinker wssAPI.MsgHandler) (err er
 		err = sink.Start(nil)
 		if source.metadata != nil {
 			msg.Param1 = source.metadata
-			msg.Type = wssAPI.MSG_FLV_TAG
+			msg.Type = wssAPI.MsgFlvTag
 			sink.ProcessMessage(msg)
 		}
 		if source.audioHeader != nil {
 			msg.Param1 = source.audioHeader
-			msg.Type = wssAPI.MSG_FLV_TAG
+			msg.Type = wssAPI.MsgFlvTag
 			sink.ProcessMessage(msg)
 		}
 		if source.videoHeader != nil {
 			msg.Param1 = source.videoHeader
-			msg.Type = wssAPI.MSG_FLV_TAG
+			msg.Type = wssAPI.MsgFlvTag
 			sink.ProcessMessage(msg)
 		}
 		if source.lastKeyFrame != nil {
 			msg.Param1 = source.lastKeyFrame
-			msg.Type = wssAPI.MSG_FLV_TAG
+			msg.Type = wssAPI.MsgFlvTag
 			logger.LOGD("not send last keyframe")
 			//			sink.ProcessMessage(msg)
 		}

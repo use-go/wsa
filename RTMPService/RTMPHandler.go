@@ -98,27 +98,27 @@ func (rtmpHandler *RTMPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 		return errors.New("nil message")
 	}
 	switch msg.Type {
-	case wssAPI.MSG_GetSource_NOTIFY:
+	case wssAPI.MsgGetSourceNotify:
 		rtmpHandler.sinkAdded = true
-	case wssAPI.MSG_GetSource_Failed:
+	case wssAPI.MsgGetSourceFailed:
 		//发送404
 		rtmpHandler.rtmpInstance.CmdStatus("error", "NetStream.Play.StreamNotFound",
 			"paly failed", rtmpHandler.streamName, 0, RTMP_channel_Invoke)
-	case wssAPI.MSG_SourceClosed_Force:
+	case wssAPI.MsgSourceClosedForce:
 		rtmpHandler.srcAdded = false
-	case wssAPI.MSG_FLV_TAG:
+	case wssAPI.MsgFlvTag:
 		tag := msg.Param1.(*flv.FlvTag)
 		err = rtmpHandler.player.appendFlvTag(tag)
 
-	case wssAPI.MSG_PLAY_START:
+	case wssAPI.MsgPlayStart:
 		rtmpHandler.player.startPlay()
 		return
-	case wssAPI.MSG_PLAY_STOP:
+	case wssAPI.MsgPlayStop:
 		rtmpHandler.mutexStatus.Lock()
 		defer rtmpHandler.mutexStatus.Unlock()
 		rtmpHandler.sourceInvalid()
 		return
-	case wssAPI.MSG_PUBLISH_START:
+	case wssAPI.MsgPublishStart:
 		rtmpHandler.mutexStatus.Lock()
 		defer rtmpHandler.mutexStatus.Unlock()
 		if err != nil {
@@ -135,7 +135,7 @@ func (rtmpHandler *RTMPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 			}
 		}
 		return
-	case wssAPI.MSG_PUBLISH_STOP:
+	case wssAPI.MsgPublishStop:
 		rtmpHandler.mutexStatus.Lock()
 		defer rtmpHandler.mutexStatus.Unlock()
 		if err != nil {
@@ -197,7 +197,7 @@ func (rtmpHandler *RTMPHandler) HandleRTMPPacket(packet *RTMPPacket) (err error)
 func (rtmpHandler *RTMPHandler) sendFlvToSrc(pkt *RTMPPacket) (err error) {
 	if rtmpHandler.publisher.isPublishing() && wssAPI.InterfaceValid(rtmpHandler.source) {
 		msg := &wssAPI.Msg{}
-		msg.Type = wssAPI.MSG_FLV_TAG
+		msg.Type = wssAPI.MsgFlvTag
 		msg.Param1 = pkt.ToFLVTag()
 		err = rtmpHandler.source.ProcessMessage(msg)
 		if err != nil {

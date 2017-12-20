@@ -166,7 +166,7 @@ func (dashSource *DASHSource) HandleTask(task wssAPI.Task) (err error) {
 
 func (dashSource *DASHSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
-	case wssAPI.MSG_GetSource_NOTIFY:
+	case wssAPI.MsgGetSourceNotify:
 		if dashSource.chValid {
 			dashSource.chSvr <- true
 			dashSource.inSvr = true
@@ -174,13 +174,13 @@ func (dashSource *DASHSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 			dashSource.chValid = false
 		}
 		dashSource.sinkAdded = true
-	case wssAPI.MSG_GetSource_Failed:
+	case wssAPI.MsgGetSourceFailed:
 		dashSource.Stop(nil)
-	case wssAPI.MSG_PLAY_START:
+	case wssAPI.MsgPlayStart:
 		dashSource.sinkAdded = true
-	case wssAPI.MSG_PLAY_STOP:
+	case wssAPI.MsgPlayStop:
 		dashSource.Stop(nil)
-	case wssAPI.MSG_FLV_TAG:
+	case wssAPI.MsgFlvTag:
 		dashSource.addFlvTag(msg.Param1.(*flv.FlvTag))
 	}
 	return

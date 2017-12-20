@@ -319,7 +319,7 @@ func (streamerService *StreamerService) addSink(sinkInfo *eStreamerEvent.EveAddS
 		if err == nil {
 			sinkInfo.Added = true
 			msg := &wssAPI.Msg{}
-			msg.Type = wssAPI.MSG_GetSource_NOTIFY
+			msg.Type = wssAPI.MsgGetSourceNotify
 			sinker.ProcessMessage(msg)
 		}
 	}

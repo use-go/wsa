@@ -124,12 +124,12 @@ func (this *RTSPHandler) HandleTask(task wssAPI.Task) (err error) {
 
 func (this *RTSPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
-	case wssAPI.MSG_FLV_TAG:
+	case wssAPI.MsgFlvTag:
 		return this.appendFlvTag(msg)
-	case wssAPI.MSG_PLAY_START:
+	case wssAPI.MsgPlayStart:
 		//这个状态下，rtsp 可以play
 		this.sinkRunning = true
-	case wssAPI.MSG_PLAY_STOP:
+	case wssAPI.MsgPlayStop:
 		//如果在play,停止
 		this.sinkRunning = false
 	default:

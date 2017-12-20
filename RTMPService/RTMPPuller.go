@@ -206,7 +206,7 @@ func (rtmppuller *RTMPPuller) HandleTask(task wssAPI.Task) (err error) {
 
 func (rtmppuller *RTMPPuller) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
-	case wssAPI.MSG_SourceClosed_Force:
+	case wssAPI.MsgSourceClosedForce:
 		logger.LOGT("rtmp rtmppuller data sink closed")
 		rtmppuller.src = nil
 		rtmppuller.reading = false
@@ -323,7 +323,7 @@ func (rtmppuller *RTMPPuller) sendFlvToSrc(pkt *RTMPPacket) (err error) {
 		if rtmppuller.metaDatas.Len() > 0 {
 			for e := rtmppuller.metaDatas.Front(); e != nil; e = e.Next() {
 				metaDataPkt := e.Value.(*RTMPPacket).ToFLVTag()
-				msg := &wssAPI.Msg{Type: wssAPI.MSG_FLV_TAG, Param1: metaDataPkt}
+				msg := &wssAPI.Msg{Type: wssAPI.MsgFlvTag, Param1: metaDataPkt}
 				err = rtmppuller.src.ProcessMessage(msg)
 				if err != nil {
 					logger.LOGE(err.Error())
@@ -333,7 +333,7 @@ func (rtmppuller *RTMPPuller) sendFlvToSrc(pkt *RTMPPacket) (err error) {
 			rtmppuller.metaDatas = list.New()
 		}
 		msg := &wssAPI.Msg{}
-		msg.Type = wssAPI.MSG_FLV_TAG
+		msg.Type = wssAPI.MsgFlvTag
 		msg.Param1 = pkt.ToFLVTag()
 		err = rtmppuller.src.ProcessMessage(msg)
 		if err != nil {
@@ -368,7 +368,7 @@ func (rtmppuller *RTMPPuller) processAggregation(pkt *RTMPPacket) (err error) {
 		copy(flvPkt.Data, pkt.Body[cur+11:cur+11+int(pktLength)])
 		cur += 11 + int(pktLength) + 4
 		msg := &wssAPI.Msg{}
-		msg.Type = wssAPI.MSG_FLV_TAG
+		msg.Type = wssAPI.MsgFlvTag
 		msg.Param1 = flvPkt
 		err = rtmppuller.src.ProcessMessage(msg)
 		if err != nil {
