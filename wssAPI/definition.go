@@ -5,13 +5,13 @@ import (
 	"errors"
 )
 
-//task
+//Task type of the msg
 type Task interface {
 	Receiver() string
 	Type() string
 }
 
-//msg
+//Msg content of the websocket
 type Msg struct {
 	Type    string
 	Version string
@@ -20,27 +20,28 @@ type Msg struct {
 	Params  *list.List
 }
 
-//obj
-type Obj interface {
+//MsgHandler : interface for websocket msg
+type MsgHandler interface {
 	Init(msg *Msg) error
 	Start(msg *Msg) error
 	Stop(msg *Msg) error
 	GetType() string
 	HandleTask(task Task) error
 	ProcessMessage(msg *Msg) error
-	//	SetParent(parent Obj)
+	//	SetParent(parent MsgHandler)
 }
 
-var svrbus Obj
+var svrbus MsgHandler
 
-func SetBus(bus Obj) {
+//SetBus to associate the action handler
+func SetBus(bus MsgHandler) {
 	svrbus = bus
 }
 
-//Handle Task
+//HandleTask to deal Task from service bus
 func HandleTask(task Task) error {
 	if svrbus != nil {
 		return svrbus.HandleTask(task)
 	}
-	return errors.New("bus not ready")
+	return errors.New("service bus not ready")
 }

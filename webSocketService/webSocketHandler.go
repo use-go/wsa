@@ -23,7 +23,7 @@ const (
 )
 
 type websocketHandler struct {
-	parent       wssAPI.Obj
+	parent       wssAPI.MsgHandler
 	conn         *websocket.Conn
 	app          string
 	streamName   string
@@ -40,7 +40,7 @@ type websocketHandler struct {
 	mutexbSink   sync.RWMutex
 	hasSource    bool
 	mutexbSource sync.RWMutex
-	source       wssAPI.Obj
+	source       wssAPI.MsgHandler
 	sourceIdx    int
 	lastCmd      int
 	mutexWs      sync.Mutex
@@ -220,11 +220,11 @@ func (websockHandler *websocketHandler) sendSlice(slice *mp4.FMP4Slice) (err err
 	return websockHandler.conn.WriteMessage(websocket.BinaryMessage, dataSend)
 }
 
-func (websockHandler *websocketHandler) SetParent(parent wssAPI.Obj) {
+func (websockHandler *websocketHandler) SetParent(parent wssAPI.MsgHandler) {
 	websockHandler.parent = parent
 }
 
-func (websockHandler *websocketHandler) addSource(streamName string) (id int, src wssAPI.Obj, err error) {
+func (websockHandler *websocketHandler) addSource(streamName string) (id int, src wssAPI.MsgHandler, err error) {
 	taskAddSrc := &eStreamerEvent.EveAddSource{StreamName: streamName}
 	taskAddSrc.RemoteIp = websockHandler.conn.RemoteAddr()
 	err = wssAPI.HandleTask(taskAddSrc)
@@ -247,7 +247,7 @@ func (websockHandler *websocketHandler) delSource(streamName string, id int) (er
 	return
 }
 
-func (websockHandler *websocketHandler) addSink(streamName, clientId string, sinker wssAPI.Obj) (err error) {
+func (websockHandler *websocketHandler) addSink(streamName, clientId string, sinker wssAPI.MsgHandler) (err error) {
 	taskAddsink := &eStreamerEvent.EveAddSink{StreamName: streamName, SinkId: clientId, Sinker: sinker}
 	err = wssAPI.HandleTask(taskAddsink)
 	if err != nil {

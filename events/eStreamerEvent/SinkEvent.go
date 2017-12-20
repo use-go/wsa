@@ -12,7 +12,7 @@ const (
 type EveAddSink struct {
 	StreamName string     //in
 	SinkId     string     //in
-	Sinker     wssAPI.Obj //in
+	Sinker     wssAPI.MsgHandler //in
 	Added      bool       //out
 }
 

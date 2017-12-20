@@ -9,8 +9,8 @@ import (
 
 type streamSink struct {
 	id     string
-	sinker wssAPI.Obj
-	parent wssAPI.Obj
+	sinker wssAPI.MsgHandler
+	parent wssAPI.MsgHandler
 }
 
 func (sink *streamSink) Init(msg *wssAPI.Msg) (err error) {
@@ -18,7 +18,7 @@ func (sink *streamSink) Init(msg *wssAPI.Msg) (err error) {
 		return errors.New("invalid init stream sink")
 	}
 	sink.id = msg.Param1.(string)
-	sink.sinker = msg.Param2.(wssAPI.Obj)
+	sink.sinker = msg.Param2.(wssAPI.MsgHandler)
 	return
 }
 
@@ -69,6 +69,6 @@ func (sink *streamSink) Id() string {
 	return sink.id
 }
 
-func (sink *streamSink) SetParent(parent wssAPI.Obj) {
+func (sink *streamSink) SetParent(parent wssAPI.MsgHandler) {
 	sink.parent = parent
 }

@@ -17,18 +17,21 @@ func NewSet() *Set {
 	}
 }
 
+// Add to  Set item true
 func (set *Set) Add(item interface{}) {
 	set.Lock()
 	defer set.Unlock()
 	set.m[item] = true
 }
 
+// Del to remove
 func (set *Set) Del(item interface{}) {
 	set.Lock()
 	defer set.Unlock()
 	delete(set.m, item)
 }
 
+// Has to retrive item
 func (set *Set) Has(item interface{}) bool {
 	set.RLock()
 	defer set.RUnlock()

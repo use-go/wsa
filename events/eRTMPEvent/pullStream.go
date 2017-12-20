@@ -16,7 +16,7 @@ type EvePullRTMPStream struct {
 	Address    string
 	Port       int
 	StreamName string
-	Src        chan wssAPI.Obj
+	Src        chan wssAPI.MsgHandler
 }
 
 func (this *EvePullRTMPStream) Receiver() string {
@@ -35,7 +35,7 @@ func (this *EvePullRTMPStream) Init(protocol, app, instance, addr, streamName, s
 	this.Port = port
 	this.StreamName = streamName
 	this.SourceName = sourceName
-	this.Src = make(chan wssAPI.Obj)
+	this.Src = make(chan wssAPI.MsgHandler)
 }
 
 func (this *EvePullRTMPStream) Copy() (out *EvePullRTMPStream) {

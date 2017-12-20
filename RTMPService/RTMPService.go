@@ -24,7 +24,7 @@ const (
 
 type RTMPService struct {
 	listener *net.TCPListener
-	parent   wssAPI.Obj
+	parent   wssAPI.MsgHandler
 }
 
 func init() {
@@ -202,6 +202,6 @@ func (this *RTMPService) readPacket(rtmp *RTMP, playing bool) (packet *RTMPPacke
 	return
 }
 
-func (this *RTMPService) SetParent(parent wssAPI.Obj) {
+func (this *RTMPService) SetParent(parent wssAPI.MsgHandler) {
 	this.parent = parent
 }

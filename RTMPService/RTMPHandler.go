@@ -14,11 +14,11 @@ import (
 )
 
 type RTMPHandler struct {
-	parent       wssAPI.Obj
+	parent       wssAPI.MsgHandler
 	mutexStatus  sync.RWMutex
 	rtmpInstance *RTMP
-	source       wssAPI.Obj
-	sinke        wssAPI.Obj
+	source       wssAPI.MsgHandler
+	sinke        wssAPI.MsgHandler
 	srcAdded     bool
 	sinkAdded    bool
 	streamName   string
@@ -443,6 +443,6 @@ func (this *RTMPHandler) isPlaying() bool {
 	return this.player.IsPlaying()
 }
 
-func (this *RTMPHandler) SetParent(parent wssAPI.Obj) {
+func (this *RTMPHandler) SetParent(parent wssAPI.MsgHandler) {
 	this.parent = parent
 }

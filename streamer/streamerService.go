@@ -22,7 +22,7 @@ const (
 
 // StreamerService for Datatranformation
 type StreamerService struct {
-	parent         wssAPI.Obj
+	parent         wssAPI.MsgHandler
 	mutexSources   sync.RWMutex
 	sources        map[string]*streamSource
 	mutexBlackList sync.RWMutex
@@ -221,7 +221,7 @@ func (streamerService *StreamerService) ProcessMessage(msg *wssAPI.Msg) (err err
 //src control sink
 //add source:not start src,start sinks
 //del source:not stop src,stop sinks
-func (streamerService *StreamerService) addsource(path string, producer wssAPI.Obj, addr net.Addr) (src wssAPI.Obj, id int64, err error) {
+func (streamerService *StreamerService) addsource(path string, producer wssAPI.MsgHandler, addr net.Addr) (src wssAPI.MsgHandler, id int64, err error) {
 
 	if false == streamerService.checkStreamAddAble(path) {
 		return nil, -1, errors.New("bad name")

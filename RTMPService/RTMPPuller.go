@@ -21,8 +21,8 @@ import (
 
 type RTMPPuller struct {
 	rtmp       RTMP
-	parent     wssAPI.Obj
-	src        wssAPI.Obj
+	parent     wssAPI.MsgHandler
+	src        wssAPI.MsgHandler
 	pullParams *eRTMPEvent.EvePullRTMPStream
 	waitRead   *sync.WaitGroup
 	reading    bool
@@ -211,7 +211,7 @@ func (this *RTMPPuller) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTMPPuller) SetParent(parent wssAPI.Obj) {
+func (this *RTMPPuller) SetParent(parent wssAPI.MsgHandler) {
 	this.parent = parent
 }
 

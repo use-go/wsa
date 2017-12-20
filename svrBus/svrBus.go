@@ -35,7 +35,7 @@ type serviceBusConfig struct {
 //ServiceBus : ServiceBus holding all the Service that will be launched in Process
 type ServiceBus struct {
 	mutexServices sync.RWMutex
-	services      map[string]wssAPI.Obj
+	services      map[string]wssAPI.MsgHandler
 }
 
 var serviceBus *ServiceBus
@@ -56,7 +56,7 @@ func Start() {
 
 // Init the configed service such as hls/dash/rtsp
 func (srvBus *ServiceBus) Init(msg *wssAPI.Msg) (err error) {
-	srvBus.services = make(map[string]wssAPI.Obj)
+	srvBus.services = make(map[string]wssAPI.MsgHandler)
 	err = srvBus.loadConfig()
 	if err != nil {
 		logger.LOGE("svr bus load config failed")
@@ -288,10 +288,10 @@ func (srvBus *ServiceBus) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return nil
 }
 
-func (srvBus *ServiceBus) SetParent(arent wssAPI.Obj) {
+func (srvBus *ServiceBus) SetParent(arent wssAPI.MsgHandler) {
 
 }
 
-func AddSvr(svr wssAPI.Obj) {
+func AddSvr(svr wssAPI.MsgHandler) {
 	logger.LOGE("add svr")
 }

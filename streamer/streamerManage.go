@@ -220,7 +220,7 @@ func (streamerService *StreamerService) delUpstream(app *eLiveListCtrl.EveSetUpS
 	return errors.New("del up app: " + app.Id + " not existed")
 }
 
-func (streamerService *StreamerService) SetParent(parent wssAPI.Obj) {
+func (streamerService *StreamerService) SetParent(parent wssAPI.MsgHandler) {
 	streamerService.parent = parent
 }
 
@@ -274,8 +274,8 @@ func (streamerService *StreamerService) getUpAddrCopy() (addrs *list.List) {
 	return
 }
 
-func (streamerService *StreamerService) pullStreamExec(app, streamName string, addr *eLiveListCtrl.EveSetUpStreamApp) (src wssAPI.Obj, ok bool) {
-	chRet := make(chan wssAPI.Obj) //这个ch由任务执行者来关闭
+func (streamerService *StreamerService) pullStreamExec(app, streamName string, addr *eLiveListCtrl.EveSetUpStreamApp) (src wssAPI.MsgHandler, ok bool) {
+	chRet := make(chan wssAPI.MsgHandler) //这个ch由任务执行者来关闭
 	protocol := strings.ToLower(addr.Protocol)
 	switch protocol {
 	case "rtmp":
@@ -321,7 +321,7 @@ func (streamerService *StreamerService) pullStreamExec(app, streamName string, a
 	return
 }
 
-func (streamerService *StreamerService) pullStream(app, streamName, sinkId string, sinker wssAPI.Obj) {
+func (streamerService *StreamerService) pullStream(app, streamName, sinkId string, sinker wssAPI.MsgHandler) {
 	//按权重随机一个
 	addr := streamerService.getUpAddrAuto()
 	if nil == addr {

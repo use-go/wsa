@@ -12,7 +12,7 @@ import (
 )
 
 type streamSource struct {
-	parent       wssAPI.Obj
+	parent       wssAPI.MsgHandler
 	addr         net.Addr
 	bProducer    bool
 	mutexSink    sync.RWMutex
@@ -24,7 +24,7 @@ type streamSource struct {
 	lastKeyFrame *flv.FlvTag
 	createId     int64
 	mutexId      sync.RWMutex
-	dataProducer wssAPI.Obj
+	dataProducer wssAPI.MsgHandler
 }
 
 func (source *streamSource) Init(msg *wssAPI.Msg) (err error) {
@@ -135,7 +135,7 @@ func (source *streamSource) SetProducer(status bool) (remove bool) {
 	}
 }
 
-func (source *streamSource) AddSink(id string, sinker wssAPI.Obj) (err error) {
+func (source *streamSource) AddSink(id string, sinker wssAPI.MsgHandler) (err error) {
 	source.mutexSink.Lock()
 	defer source.mutexSink.Unlock()
 	logger.LOGT(source.streamName + " add sink:" + id)
@@ -189,6 +189,6 @@ func (source *streamSource) clearCache() {
 	source.lastKeyFrame = nil
 }
 
-func (source *streamSource) SetParent(parent wssAPI.Obj) {
+func (source *streamSource) SetParent(parent wssAPI.MsgHandler) {
 	source.parent = parent
 }

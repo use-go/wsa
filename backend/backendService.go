@@ -90,7 +90,7 @@ func (backendService *BackendService) ProcessMessage(msg *wssAPI.Msg) (err error
 	return
 }
 
-func (backendService *BackendService) SetParent(parent wssAPI.Obj) {
+func (backendService *BackendService) SetParent(parent wssAPI.MsgHandler) {
 	return
 }
 

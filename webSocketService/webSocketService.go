@@ -17,7 +17,7 @@ import (
 
 // WebSocketService to handle webservice business
 type WebSocketService struct {
-	parent wssAPI.Obj
+	parent wssAPI.MsgHandler
 }
 
 // WebSocketConfig to store webservice configinfo
@@ -165,6 +165,6 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 	}
 }
 
-func (websockService *WebSocketService) SetParent(parent wssAPI.Obj) {
+func (websockService *WebSocketService) SetParent(parent wssAPI.MsgHandler) {
 	websockService.parent = parent
 }
