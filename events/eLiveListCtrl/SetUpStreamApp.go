@@ -4,6 +4,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+// EveSetUpStreamApp struct
 type EveSetUpStreamApp struct {
 	Id       string `json:"Id"`
 	Add      bool
@@ -19,7 +20,7 @@ func (eveSetUpStreamApp *EveSetUpStreamApp) Receiver() string {
 	return wssAPI.OBJStreamerServer
 }
 
-func (eveSetUpStreamAppthis *EveSetUpStreamApp) Type() string {
+func (eveSetUpStreamApp *EveSetUpStreamApp) Type() string {
 	return SetUpStreamApp
 }
 

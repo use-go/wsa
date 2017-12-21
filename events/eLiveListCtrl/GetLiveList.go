@@ -9,7 +9,7 @@ import (
 type LiveInfo struct {
 	StreamName  string
 	PlayerCount int
-	Ip          string
+	IP          string
 }
 
 type EveGetLiveList struct {
