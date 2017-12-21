@@ -83,16 +83,16 @@ func (hlsService *HLSService) loadConfigFile(fileName string) (err error) {
 
 func (hlsService *HLSService) Start(msg *wssAPI.Msg) (err error) {
 
-	go func() {
-		//strPort := ":" + strconv.Itoa(serviceConfig.Port)
-		//mux := http.NewServeMux()
-		//mux.Handle(serviceConfig.Route, hlsService)
-		//err = http.ListenAndServe(strPort, mux)
-		//if err != nil {
-		//	logger.LOGE("start websocket failed:" + err.Error())
-		//}
-		//HTTPMUX.AddRoute(strPort,serviceConfig.Route,hlsService.ServeHTTP)
-	}()
+	//	go func() {
+	//strPort := ":" + strconv.Itoa(serviceConfig.Port)
+	//mux := http.NewServeMux()
+	//mux.Handle(serviceConfig.Route, hlsService)
+	//err = http.ListenAndServe(strPort, mux)
+	//if err != nil {
+	//	logger.LOGE("start websocket failed:" + err.Error())
+	//}
+	//HTTPMUX.AddRoute(strPort,serviceConfig.Route,hlsService.ServeHTTP)
+	//	}()
 	return
 }
 

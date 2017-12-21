@@ -14,7 +14,7 @@ import (
 
 func main() {
 	initLogger()
-	startServers()
+	runServer()
 }
 
 func initLogger() {
@@ -23,8 +23,8 @@ func initLogger() {
 	logger.OutputInCmd(true)
 }
 
-func startServers() {
-	process.Start()
+func runServer() {
+	process.Run()
 
 	ch := make(chan int)
 	<-ch

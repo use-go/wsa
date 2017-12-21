@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/gorilla/websocket"
 
+	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/webSocketService"
 	"github.com/use-go/websocket-streamserver/wssAPI"
-
-	"github.com/gorilla/websocket"
 )
 
 func main() {
@@ -85,11 +84,11 @@ func readResult(conn *websocket.Conn) (err error) {
 		logger.LOGT(data)
 		pktType := data[0]
 		switch pktType {
-		case webSocketService. WSPktAudio:
+		case webSocketService.WSPktAudio:
 			logger.LOGT("audio")
-		case webSocketService. WSPktVideo:
+		case webSocketService.WSPktVideo:
 			logger.LOGT("video")
-		case webSocketService. WSPktControl:
+		case webSocketService.WSPktControl:
 			logger.LOGT(data)
 		}
 	}

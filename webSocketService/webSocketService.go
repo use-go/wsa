@@ -28,41 +28,45 @@ type WebSocketConfig struct {
 
 var wsService *WebSocketService
 var serviceConfig WebSocketConfig
+var serviceAddrWithPort string
 
-// Init  interface implemention
+// Init interface implemention to init current webSocketService
 func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 
 	if msg == nil || msg.Param1 == nil {
-		logger.LOGE("init Websocket service failed")
+		logger.LOGE("init Websocket service failed,param from json file :nil")
 		return errors.New("invalid param")
 	}
-
 	fileName := msg.Param1.(string)
+	// Fill the serviceConfig from config file
 	err = websockService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return errors.New("load websocket config failed")
 	}
 	wsService = websockService
-	strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	HTTPMUX.AddRoute(strPort, serviceConfig.Route, websockService.ServeHTTP)
-	//go func() {
-	//	if true {
-	//		strPort := ":" + strconv.Itoa(serviceConfig.Port)
-	//		//http.Handle("/", websockService)
-	//		mux := http.NewServeMux()
-	//		mux.Handle("/", websockService)
-	//		err = http.ListenAndServe(strPort, mux)
-	//		if err != nil {
-	//			logger.LOGE("start websocket failed:" + err.Error())
-	//		}
-	//	}
-	//}()
+	serviceAddrWithPort = ":" + strconv.Itoa(serviceConfig.Port)
+	HTTPMUX.AddRoute(serviceAddrWithPort, serviceConfig.Route, websockService.ServeHTTP)
+
 	return
 }
 
 // Start interface implemention
 func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
+
+	serverMux, err := HTTPMUX.GetPortServe()
+	if err != nil {
+		logger.LOGE(err.Error())
+		return errors.New("Somthing error when retrive httpMux of websocket")
+	}
+
+	go func(addr string, handler http.Handler) {
+		err := http.ListenAndServe(addr, handler)
+		if err != nil {
+			logger.LOGE(err.Error())
+		}
+	}(serviceAddrWithPort, serverMux)
+
 	return
 }
 
@@ -86,6 +90,7 @@ func (websockService *WebSocketService) ProcessMessage(msg *wssAPI.Msg) (err err
 	return
 }
 
+//loadConfigFile from FS to config Current Service
 func (websockService *WebSocketService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {

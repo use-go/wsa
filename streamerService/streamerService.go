@@ -20,8 +20,8 @@ const (
 	streamTypeSink   = "streamSink"
 )
 
-// ServiceContext for Datatranformation
-type ServiceContext struct {
+// StreamerService for Datatranformation
+type StreamerService struct {
 	parent         wssAPI.MsgHandler
 	mutexSources   sync.RWMutex
 	sources        map[string]*streamSource
@@ -36,18 +36,18 @@ type ServiceContext struct {
 	upAppIdx       int
 }
 
-// ServiceContextConfig for ServiceContext
-type ServiceContextConfig struct {
+// StreamerConfig for StreamerService
+type StreamerConfig struct {
 	Upstreams           []eLiveListCtrl.EveSetUpStreamApp `json:"upstreams"`
 	UpstreamTimeoutSec  int                               `json:"upstreamsTimeoutSec"`
 	MediaDataTimeoutSec int                               `json:"mediaDataTimeoutSec"`
 }
 
-var service *ServiceContext
-var serviceConfig ServiceContextConfig
+var service *StreamerService
+var serviceConfig StreamerConfig
 
 //Init Streamer
-func (streamerService *ServiceContext) Init(msg *wssAPI.Msg) (err error) {
+func (streamerService *StreamerService) Init(msg *wssAPI.Msg) (err error) {
 	streamerService.sources = make(map[string]*streamSource)
 	streamerService.blacks = make(map[string]string)
 	streamerService.whites = make(map[string]string)
@@ -69,7 +69,7 @@ func (streamerService *ServiceContext) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (streamerService *ServiceContext) loadConfigFile(fileName string) (err error) {
+func (streamerService *StreamerService) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -84,22 +84,22 @@ func (streamerService *ServiceContext) loadConfigFile(fileName string) (err erro
 }
 
 //Start func
-func (streamerService *ServiceContext) Start(msg *wssAPI.Msg) (err error) {
+func (streamerService *StreamerService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
 //Stop func
-func (streamerService *ServiceContext) Stop(msg *wssAPI.Msg) (err error) {
+func (streamerService *StreamerService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
 //GetType : Get current Server Type to Identity which server it is
-func (streamerService *ServiceContext) GetType() string {
+func (streamerService *StreamerService) GetType() string {
 	return wssAPI.OBJStreamerServer
 }
 
 //HandleTask func
-func (streamerService *ServiceContext) HandleTask(task wssAPI.Task) (err error) {
+func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error) {
 
 	if task == nil || task.Receiver() != streamerService.GetType() {
 		logger.LOGE("bad stask")
@@ -220,14 +220,14 @@ func (streamerService *ServiceContext) HandleTask(task wssAPI.Task) (err error) 
 }
 
 //ProcessMessage of streamerService
-func (streamerService *ServiceContext) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (streamerService *StreamerService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
 //src control sink
 //add source:not start src,start sinks
 //del source:not stop src,stop sinks
-func (streamerService *ServiceContext) addsource(path string, producer wssAPI.MsgHandler, addr net.Addr) (src wssAPI.MsgHandler, id int64, err error) {
+func (streamerService *StreamerService) addsource(path string, producer wssAPI.MsgHandler, addr net.Addr) (src wssAPI.MsgHandler, id int64, err error) {
 
 	if false == streamerService.checkStreamAddAble(path) {
 		return nil, -1, errors.New("bad name")
@@ -268,7 +268,7 @@ func (streamerService *ServiceContext) addsource(path string, producer wssAPI.Ms
 
 }
 
-func (streamerService *ServiceContext) delSource(path string, id int64) (err error) {
+func (streamerService *StreamerService) delSource(path string, id int64) (err error) {
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
 	logger.LOGT("del source:" + path)
@@ -295,7 +295,7 @@ func (streamerService *ServiceContext) delSource(path string, id int64) (err err
 //add sink:auto start sink by src
 //del sink:not stop sink,stop by sink itself
 //将add sink 改成异步
-func (streamerService *ServiceContext) addSink(sinkInfo *eStreamerEvent.EveAddSink) (err error) {
+func (streamerService *StreamerService) addSink(sinkInfo *eStreamerEvent.EveAddSink) (err error) {
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
 	path := sinkInfo.StreamName
@@ -329,7 +329,7 @@ func (streamerService *ServiceContext) addSink(sinkInfo *eStreamerEvent.EveAddSi
 	return
 }
 
-func (streamerService *ServiceContext) delSink(path, sinkID string) (err error) {
+func (streamerService *StreamerService) delSink(path, sinkID string) (err error) {
 
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
