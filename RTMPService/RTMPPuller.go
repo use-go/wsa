@@ -129,7 +129,7 @@ func (rtmppuller *RTMPPuller) Stop(msg *wssAPI.Msg) (err error) {
 	if wssAPI.InterfaceValid(rtmppuller.src) {
 		taskDelSrc := &eStreamerEvent.EveDelSource{}
 		taskDelSrc.StreamName = rtmppuller.pullParams.SourceName
-		taskDelSrc.Id = rtmppuller.srcID
+		taskDelSrc.ID = rtmppuller.srcID
 		err = wssAPI.HandleTask(taskDelSrc)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -564,7 +564,7 @@ func (rtmppuller *RTMPPuller) CreatePlaySRC() {
 			return
 		}
 		rtmppuller.src = taskAdd.SrcObj
-		rtmppuller.srcID = taskAdd.Id
+		rtmppuller.srcID = taskAdd.ID
 		rtmppuller.pullParams.Src <- rtmppuller.src
 		go rtmppuller.checkPlayerCounts()
 		logger.LOGT("add src ok..")

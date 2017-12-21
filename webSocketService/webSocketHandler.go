@@ -236,7 +236,7 @@ func (websockHandler *websocketHandler) addSource(streamName string) (id int, sr
 }
 
 func (websockHandler *websocketHandler) delSource(streamName string, id int) (err error) {
-	taskDelSrc := &eStreamerEvent.EveDelSource{StreamName: streamName, Id: int64(id)}
+	taskDelSrc := &eStreamerEvent.EveDelSource{StreamName: streamName, ID: int64(id)}
 	err = wssAPI.HandleTask(taskDelSrc)
 	websockHandler.hasSource = false
 	if err != nil {

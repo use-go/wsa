@@ -106,7 +106,7 @@ func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error)
 		if false == ok {
 			return errors.New("invalid param")
 		}
-		taskAddsrc.SrcObj, taskAddsrc.Id, err = streamerService.addsource(taskAddsrc.StreamName, taskAddsrc.Producer, taskAddsrc.RemoteIp)
+		taskAddsrc.SrcObj, taskAddsrc.ID, err = streamerService.addsource(taskAddsrc.StreamName, taskAddsrc.Producer, taskAddsrc.RemoteIp)
 
 		return
 	case eStreamerEvent.GetSource:
@@ -132,7 +132,7 @@ func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error)
 			return errors.New("invalid param")
 		}
 		taskDelSrc.StreamName = taskDelSrc.StreamName
-		err = streamerService.delSource(taskDelSrc.StreamName, taskDelSrc.Id)
+		err = streamerService.delSource(taskDelSrc.StreamName, taskDelSrc.ID)
 		return
 	case eStreamerEvent.AddSink:
 		taskAddSink, ok := task.(*eStreamerEvent.EveAddSink)

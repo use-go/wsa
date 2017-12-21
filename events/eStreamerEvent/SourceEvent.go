@@ -16,7 +16,7 @@ type EveAddSource struct {
 	StreamName string
 	RemoteIp   net.Addr
 	Producer   wssAPI.MsgHandler
-	Id         int64      //outPut
+	ID         int64      //outPut
 	SrcObj     wssAPI.MsgHandler //out
 }
 
@@ -30,7 +30,7 @@ func (eveAddsource *EveAddSource) Type() string {
 
 type EveDelSource struct {
 	StreamName string //in
-	Id         int64  //in
+	ID         int64  //in
 }
 
 func (eveAddsource *EveDelSource) Receiver() string {

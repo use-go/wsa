@@ -34,7 +34,7 @@ const (
 
 // MPD Struct
 type MPD struct {
-	Id                        string      `xml:"id,attr"`
+	ID                        string      `xml:"id,attr"`
 	Profiles                  string      `xml:"profiles,attr"`
 	Type                      string      `xml:"type,attr"`
 	AvailabilityStartTime     string      `xml:"availabilityStartTime,attr"`
@@ -47,7 +47,7 @@ type MPD struct {
 }
 
 type PeriodXML struct {
-	Id            string             `xml:"id,attr"`
+	ID            string             `xml:"id,attr"`
 	AdaptationSet []AdaptationSetXML `xml:"AdaptationSet"`
 }
 
@@ -83,7 +83,7 @@ type SegmentTimelineDesc struct {
 
 //RepresentationXML file
 type RepresentationXML struct {
-	Id                string `xml:"id,attr"`
+	ID                string `xml:"id,attr"`
 	Bandwidth         string `xml:"bandwidth,attr"`
 	Width             string `xml:"width,attr,omitempty"`
 	Height            string `xml:"height,attr,omitempty"`
@@ -117,7 +117,7 @@ func generatePTime(year, month, day, hour, minute, sec, mill int) string {
 }
 
 func (dashMpdCreater *mpdCreater) GetXML(id string, startNumber int) (buf []byte) {
-	mpd := &MPD{Id: id,
+	mpd := &MPD{ID: id,
 		Profiles: ProfileISOLive,
 		Type:     dynamicMPD,
 		AvailabilityStartTime: dashMpdCreater.avaStartTime}
@@ -147,13 +147,13 @@ func (dashMpdCreater *mpdCreater) createPeriod(startNumber int) (period []Period
 	period = make([]PeriodXML, 0, 2)
 
 	if dashMpdCreater.videoHeader != nil {
-		videPeroid := PeriodXML{Id: wssAPI.GenerateGUID()}
+		videPeroid := PeriodXML{ID: wssAPI.GenerateGUID()}
 		dashMpdCreater.createVidePeroid(startNumber, &videPeroid)
 		period = append(period, videPeroid)
 	}
 
 	if dashMpdCreater.audioHeader != nil {
-		audioPeriod := PeriodXML{Id: wssAPI.GenerateGUID()}
+		audioPeriod := PeriodXML{ID: wssAPI.GenerateGUID()}
 		dashMpdCreater.createAudioPeroid(startNumber, &audioPeriod)
 		period = append(period, audioPeriod)
 	}
@@ -198,7 +198,7 @@ func (dashMpdCreater *mpdCreater) createVidePeroid(startNumber int, period *Peri
 	ada[0].SegmentTemplate.SegmentTimeline = dashMpdCreater.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
-	ada[0].Representation[0].Id = strconv.Itoa(width) + "_" + strconv.Itoa(height)
+	ada[0].Representation[0].ID = strconv.Itoa(width) + "_" + strconv.Itoa(height)
 	ada[0].Representation[0].Bandwidth = strconv.Itoa(width * 1000)
 	ada[0].Representation[0].Width = strconv.Itoa(width)
 	ada[0].Representation[0].Height = strconv.Itoa(height)
@@ -233,7 +233,7 @@ func (dashMpdCreater *mpdCreater) createAudioPeroid(startNumber int, period *Per
 	ada[0].SegmentTemplate.SegmentTimeline = dashMpdCreater.createSegmentTimeLine()
 
 	ada[0].Representation = make([]RepresentationXML, 1)
-	ada[0].Representation[0].Id = "1_stereo"
+	ada[0].Representation[0].ID = "1_stereo"
 	ada[0].Representation[0].Bandwidth = "12800"
 	ada[0].Representation[0].AudioSamplingRate = strconv.Itoa(sampleFreq)
 

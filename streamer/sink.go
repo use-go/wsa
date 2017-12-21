@@ -65,7 +65,7 @@ func (sink *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (sink *streamSink) Id() string {
+func (sink *streamSink) ID() string {
 	return sink.id
 }
 

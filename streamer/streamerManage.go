@@ -132,7 +132,7 @@ func getLiveList() (liveList *list.List, err error) {
 		info.StreamName = k
 		v.mutexSink.RLock()
 		info.PlayerCount = len(v.sinks)
-		info.Ip = v.addr.String()
+		info.IP = v.addr.String()
 		v.mutexSink.RUnlock()
 		liveList.PushBack(info)
 	}
@@ -190,7 +190,7 @@ func (streamerService *StreamerService) addUpstream(app *eLiveListCtrl.EveSetUpS
 	if app.Weight < 1 {
 		app.Weight = 1
 	}
-	logger.LOGD(app.Id)
+	logger.LOGD(app.ID)
 	for e := streamerService.upApps.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*eLiveListCtrl.EveSetUpStreamApp)
 		if v.Equal(app) {
@@ -200,7 +200,7 @@ func (streamerService *StreamerService) addUpstream(app *eLiveListCtrl.EveSetUpS
 	}
 
 	if exist {
-		return errors.New("add up app:" + app.Id + " existed")
+		return errors.New("add up app:" + app.ID + " existed")
 	}
 	streamerService.upApps.PushBack(app.Copy())
 
@@ -217,7 +217,7 @@ func (streamerService *StreamerService) delUpstream(app *eLiveListCtrl.EveSetUpS
 			return
 		}
 	}
-	return errors.New("del up app: " + app.Id + " not existed")
+	return errors.New("del up app: " + app.ID + " not existed")
 }
 
 func (streamerService *StreamerService) SetParent(parent wssAPI.MsgHandler) {

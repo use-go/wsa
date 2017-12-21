@@ -1,6 +1,6 @@
 {
     "upstreams": [{
-            "Id": "hk",
+            "ID": "hk",
             "app": "live",
             "protocol": "rtmp",
             "port": 1935,
@@ -8,7 +8,7 @@
             "weight": 10
         },
         {
-            "Id": "ams",
+            "ID": "ams",
             "app": "live",
             "protocol": "rtmp",
             "port": 1935,
@@ -16,7 +16,7 @@
             "weight": 1
         },
         {
-            "Id": "taotao",
+            "ID": "taotao",
             "app": "live",
             "protocol": "rtmp",
             "port": 3935,
