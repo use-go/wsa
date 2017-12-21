@@ -1,4 +1,4 @@
-package streamer
+package streamerService
 
 import (
 	"container/list"
@@ -20,8 +20,8 @@ const (
 	streamTypeSink   = "streamSink"
 )
 
-// StreamerService for Datatranformation
-type StreamerService struct {
+// ServiceContext for Datatranformation
+type ServiceContext struct {
 	parent         wssAPI.MsgHandler
 	mutexSources   sync.RWMutex
 	sources        map[string]*streamSource
@@ -36,16 +36,18 @@ type StreamerService struct {
 	upAppIdx       int
 }
 
-type StreamerConfig struct {
+// ServiceContextConfig for ServiceContext
+type ServiceContextConfig struct {
 	Upstreams           []eLiveListCtrl.EveSetUpStreamApp `json:"upstreams"`
 	UpstreamTimeoutSec  int                               `json:"upstreamsTimeoutSec"`
 	MediaDataTimeoutSec int                               `json:"mediaDataTimeoutSec"`
 }
 
-var service *StreamerService
-var serviceConfig StreamerConfig
+var service *ServiceContext
+var serviceConfig ServiceContextConfig
 
-func (streamerService *StreamerService) Init(msg *wssAPI.Msg) (err error) {
+//Init Streamer
+func (streamerService *ServiceContext) Init(msg *wssAPI.Msg) (err error) {
 	streamerService.sources = make(map[string]*streamSource)
 	streamerService.blacks = make(map[string]string)
 	streamerService.whites = make(map[string]string)
@@ -67,7 +69,7 @@ func (streamerService *StreamerService) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (streamerService *StreamerService) loadConfigFile(fileName string) (err error) {
+func (streamerService *ServiceContext) loadConfigFile(fileName string) (err error) {
 	data, err := wssAPI.ReadFileAll(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
@@ -81,20 +83,23 @@ func (streamerService *StreamerService) loadConfigFile(fileName string) (err err
 	return
 }
 
-func (streamerService *StreamerService) Start(msg *wssAPI.Msg) (err error) {
+//Start func
+func (streamerService *ServiceContext) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (streamerService *StreamerService) Stop(msg *wssAPI.Msg) (err error) {
+//Stop func
+func (streamerService *ServiceContext) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
 //GetType : Get current Server Type to Identity which server it is
-func (streamerService *StreamerService) GetType() string {
+func (streamerService *ServiceContext) GetType() string {
 	return wssAPI.OBJStreamerServer
 }
 
-func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error) {
+//HandleTask func
+func (streamerService *ServiceContext) HandleTask(task wssAPI.Task) (err error) {
 
 	if task == nil || task.Receiver() != streamerService.GetType() {
 		logger.LOGE("bad stask")
@@ -120,9 +125,9 @@ func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error)
 		taskGetSrc.SrcObj, ok = streamerService.sources[taskGetSrc.StreamName]
 		if false == ok {
 			return errors.New("not found:" + taskGetSrc.StreamName)
-		} else {
-			taskGetSrc.HasProducer = streamerService.sources[taskGetSrc.StreamName].bProducer
 		}
+		taskGetSrc.HasProducer = streamerService.sources[taskGetSrc.StreamName].bProducer
+
 		logger.LOGT(taskGetSrc.StreamName)
 		//id zero
 		return
@@ -131,7 +136,7 @@ func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error)
 		if false == ok {
 			return errors.New("invalid param")
 		}
-		taskDelSrc.StreamName = taskDelSrc.StreamName
+		//		taskDelSrc.StreamName = taskDelSrc.StreamName
 		err = streamerService.delSource(taskDelSrc.StreamName, taskDelSrc.ID)
 		return
 	case eStreamerEvent.AddSink:
@@ -214,14 +219,15 @@ func (streamerService *StreamerService) HandleTask(task wssAPI.Task) (err error)
 	return
 }
 
-func (streamerService *StreamerService) ProcessMessage(msg *wssAPI.Msg) (err error) {
+//ProcessMessage of streamerService
+func (streamerService *ServiceContext) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
 //src control sink
 //add source:not start src,start sinks
 //del source:not stop src,stop sinks
-func (streamerService *StreamerService) addsource(path string, producer wssAPI.MsgHandler, addr net.Addr) (src wssAPI.MsgHandler, id int64, err error) {
+func (streamerService *ServiceContext) addsource(path string, producer wssAPI.MsgHandler, addr net.Addr) (src wssAPI.MsgHandler, id int64, err error) {
 
 	if false == streamerService.checkStreamAddAble(path) {
 		return nil, -1, errors.New("bad name")
@@ -238,33 +244,31 @@ func (streamerService *StreamerService) addsource(path string, producer wssAPI.M
 		oldSrc.SetProducer(true)
 		streamerService.sources[path] = oldSrc
 		src = oldSrc
-		oldSrc.mutexId.Lock()
-		oldSrc.createId++
-		id = oldSrc.createId
+		oldSrc.mutexID.Lock()
+		oldSrc.createID++
+		id = oldSrc.createID
 		oldSrc.dataProducer = producer
 		oldSrc.addr = addr
-		oldSrc.mutexId.Unlock()
+		oldSrc.mutexID.Unlock()
 		return
-	} else {
-		if oldSrc.HasProducer() {
-			err = errors.New("bad name")
-			return
-		} else {
-			logger.LOGT("source:" + path + " is idle")
-			oldSrc.SetProducer(true)
-			src = oldSrc
-			oldSrc.mutexId.Lock()
-			oldSrc.createId++
-			id = oldSrc.createId
-			oldSrc.dataProducer = producer
-			oldSrc.mutexId.Unlock()
-			return
-		}
 	}
+	if oldSrc.HasProducer() {
+		err = errors.New("bad name")
+		return
+	}
+	logger.LOGT("source:" + path + " is idle")
+	oldSrc.SetProducer(true)
+	src = oldSrc
+	oldSrc.mutexID.Lock()
+	oldSrc.createID++
+	id = oldSrc.createID
+	oldSrc.dataProducer = producer
+	oldSrc.mutexID.Unlock()
 	return
+
 }
 
-func (streamerService *StreamerService) delSource(path string, id int64) (err error) {
+func (streamerService *ServiceContext) delSource(path string, id int64) (err error) {
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
 	logger.LOGT("del source:" + path)
@@ -272,31 +276,30 @@ func (streamerService *StreamerService) delSource(path string, id int64) (err er
 
 	if exist == false {
 		return errors.New(path + " not found")
-	} else {
-		if id < oldSrc.createId {
-			logger.LOGW("delete with id:" + strconv.Itoa(int(id)) + " failed")
-			logger.LOGD(oldSrc.createId)
-			return errors.New(path + "is old id:" + strconv.Itoa(int(id)) + " can not delete")
-		}
-		/*remove := */ oldSrc.SetProducer(false)
-		//if remove == true {
-		if 0 == len(oldSrc.sinks) {
-			delete(streamerService.sources, path)
-		}
-		//}
-		return
 	}
+	if id < oldSrc.createID {
+		logger.LOGW("delete with id:" + strconv.Itoa(int(id)) + " failed")
+		logger.LOGD(oldSrc.createID)
+		return errors.New(path + "is old id:" + strconv.Itoa(int(id)) + " can not delete")
+	}
+	/*remove := */ oldSrc.SetProducer(false)
+	//if remove == true {
+	if 0 == len(oldSrc.sinks) {
+		delete(streamerService.sources, path)
+	}
+	//}
 	return
+
 }
 
 //add sink:auto start sink by src
 //del sink:not stop sink,stop by sink itself
 //将add sink 改成异步
-func (streamerService *StreamerService) addSink(sinkInfo *eStreamerEvent.EveAddSink) (err error) {
+func (streamerService *ServiceContext) addSink(sinkInfo *eStreamerEvent.EveAddSink) (err error) {
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
 	path := sinkInfo.StreamName
-	sinkId := sinkInfo.SinkId
+	sinkID := sinkInfo.SinkId
 	sinker := sinkInfo.Sinker
 	sinkInfo.Added = false
 	src, exist := streamerService.sources[path]
@@ -313,9 +316,9 @@ func (streamerService *StreamerService) addSink(sinkInfo *eStreamerEvent.EveAddS
 		app = strings.TrimSuffix(app, "/")
 		streamName := tmpStrings[len(tmpStrings)-1]
 		logger.LOGT("create upstream:" + path)
-		go streamerService.pullStream(app, streamName, sinkId, sinkInfo.Sinker)
+		go streamerService.pullStream(app, streamName, sinkID, sinkInfo.Sinker)
 	} else {
-		err = src.AddSink(sinkId, sinker)
+		err = src.AddSink(sinkID, sinker)
 		if err == nil {
 			sinkInfo.Added = true
 			msg := &wssAPI.Msg{}
@@ -326,21 +329,21 @@ func (streamerService *StreamerService) addSink(sinkInfo *eStreamerEvent.EveAddS
 	return
 }
 
-func (streamerService *StreamerService) delSink(path, sinkId string) (err error) {
+func (streamerService *ServiceContext) delSink(path, sinkID string) (err error) {
 
 	streamerService.mutexSources.Lock()
 	defer streamerService.mutexSources.Unlock()
 	src, exist := streamerService.sources[path]
 	if false == exist {
 		return errors.New("source not found in del sink")
-	} else {
-		logger.LOGD("delete sinker:" + path + " " + sinkId)
-		src.mutexSink.Lock()
-		defer src.mutexSink.Unlock()
-		delete(src.sinks, sinkId)
-		if 0 == len(src.sinks) && src.bProducer == false {
-			delete(streamerService.sources, path)
-		}
 	}
+	logger.LOGD("delete sinker:" + path + " " + sinkID)
+	src.mutexSink.Lock()
+	defer src.mutexSink.Unlock()
+	delete(src.sinks, sinkID)
+	if 0 == len(src.sinks) && src.bProducer == false {
+		delete(streamerService.sources, path)
+	}
+
 	return
 }

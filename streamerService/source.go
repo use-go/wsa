@@ -1,4 +1,4 @@
-package streamer
+package streamerService
 
 import (
 	"errors"
@@ -22,8 +22,8 @@ type streamSource struct {
 	audioHeader  *flv.FlvTag
 	videoHeader  *flv.FlvTag
 	lastKeyFrame *flv.FlvTag
-	createId     int64
-	mutexId      sync.RWMutex
+	createID     int64
+	mutexID      sync.RWMutex
 	dataProducer wssAPI.MsgHandler
 }
 
@@ -89,7 +89,7 @@ func (source *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 		}
 		return
 	default:
-		logger.LOGW(fmt.Sprintf("msg type %d not processed", msg.Type))
+		logger.LOGW(fmt.Sprintf("msg type %s not processed", msg.Type))
 	}
 	return
 }
@@ -124,15 +124,14 @@ func (source *streamSource) SetProducer(status bool) (remove bool) {
 			v.Stop(nil)
 		}
 		return
-	} else {
-		//notify sinks start
-		source.mutexSink.RLock()
-		defer source.mutexSink.RUnlock()
-		for _, v := range source.sinks {
-			v.Start(nil)
-		}
-		return
 	}
+	//notify sinks start
+	source.mutexSink.RLock()
+	defer source.mutexSink.RUnlock()
+	for _, v := range source.sinks {
+		v.Start(nil)
+	}
+	return
 }
 
 func (source *streamSource) AddSink(id string, sinker wssAPI.MsgHandler) (err error) {

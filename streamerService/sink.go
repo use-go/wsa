@@ -1,4 +1,4 @@
-package streamer
+package streamerService
 
 import (
 	"errors"
@@ -13,6 +13,7 @@ type streamSink struct {
 	parent wssAPI.MsgHandler
 }
 
+//Init Of Sink
 func (sink *streamSink) Init(msg *wssAPI.Msg) (err error) {
 	if nil == msg || msg.Param1 == nil || msg.Param2 == nil {
 		return errors.New("invalid init stream sink")
@@ -22,6 +23,7 @@ func (sink *streamSink) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Start of sink
 func (sink *streamSink) Start(msg *wssAPI.Msg) (err error) {
 	//notify sinker stream start
 	if sink.sinker == nil {
@@ -36,6 +38,7 @@ func (sink *streamSink) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Stop of Sink
 func (sink *streamSink) Stop(msg *wssAPI.Msg) (err error) {
 	//notify sinker stream stop
 	if sink.sinker == nil {
@@ -49,14 +52,17 @@ func (sink *streamSink) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+// GetType of sink
 func (sink *streamSink) GetType() string {
 	return streamTypeSink
 }
 
+//HandleTask of Sink
 func (sink *streamSink) HandleTask(task *wssAPI.Task) (err error) {
 	return
 }
 
+//ProcessMessage of sink
 func (sink *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
 
 	if sink.sinker != nil && msg.Type == wssAPI.MsgFlvTag {
@@ -65,10 +71,12 @@ func (sink *streamSink) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//ID of sink
 func (sink *streamSink) ID() string {
 	return sink.id
 }
 
+//SetParent of the handler
 func (sink *streamSink) SetParent(parent wssAPI.MsgHandler) {
 	sink.parent = parent
 }

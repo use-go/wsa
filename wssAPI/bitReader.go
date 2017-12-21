@@ -47,6 +47,7 @@ func (bitReader *BitReader) Read32Bits() uint32 {
 
 	return r
 }
+
 // ReadExponentialGolombCode from stream
 func (bitReader *BitReader) ReadExponentialGolombCode() int {
 	r := 0
@@ -69,6 +70,7 @@ func (bitReader *BitReader) ReadSE() int {
 	}
 	return r
 }
+
 //CopyBits function
 func (bitReader *BitReader) CopyBits(num int) int {
 	cur := bitReader.curBit
@@ -87,6 +89,7 @@ func (bitReader *BitReader) copyBit(cur int) int {
 	offset := cur%8 + 1
 	return int(bitReader.buf[idx]>>uint(8-offset)) & 0x01
 }
+
 //BitsLeft to get left Bits
 func (bitReader *BitReader) BitsLeft() int {
 	return (len(bitReader.buf) << 3) - bitReader.curBit

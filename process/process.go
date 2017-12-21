@@ -20,7 +20,7 @@ import (
 	"github.com/use-go/websocket-streamserver/RTSPService"
 	"github.com/use-go/websocket-streamserver/backendService"
 	"github.com/use-go/websocket-streamserver/logger"
-	"github.com/use-go/websocket-streamserver/streamer"
+	"github.com/use-go/websocket-streamserver/streamerService"
 	"github.com/use-go/websocket-streamserver/webSocketService"
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
@@ -64,7 +64,7 @@ func Start() {
 	processContext.Start(nil)
 }
 
-// Init the configed service such as hls/dash/rtsp
+// Init the service Configuration from json file such as hls/dash/rtsp
 func (processCtx *context) Init(msg *wssAPI.Msg) (err error) {
 	processCtx.services = make(map[string]wssAPI.MsgHandler)
 	err = processCtx.loadConfig()
@@ -75,10 +75,11 @@ func (processCtx *context) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Create the needed Service Instance
 func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 
 	if true {
-		livingSvr := &streamer.StreamerService{}
+		livingSvr := &streamerService.ServiceContext{}
 		msg := &wssAPI.Msg{}
 		if len(processConfig.StreamManagerConfigName) > 0 {
 			msg.Param1 = processConfig.StreamManagerConfigName
@@ -210,6 +211,7 @@ func (processCtx *context) loadConfig() (err error) {
 	return
 }
 
+//Log info
 func (processCtx *context) createLogFile(logPath string) {
 	if strings.HasSuffix(logPath, "/") {
 		logPath = strings.TrimSuffix(logPath, "/")
