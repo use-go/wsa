@@ -21,13 +21,14 @@ type adminLoginData struct {
 	password string
 }
 
+//LoginHandler for user
 var LoginHandler *adminLoginHandler
 var loginData *adminLoginData
 
 func (alh *adminLoginHandler) init(data *wssAPI.Msg) (err error) {
 	lgdata := data.Param1.(adminLoginData)
 	if len(lgdata.username) == 0 || len(lgdata.password) == 0 {
-		return errors.New("invalid param!")
+		return errors.New("invalid param")
 	}
 	loginData = &lgdata
 	alh.route = "/admin/login"
@@ -43,14 +44,14 @@ func (alh *adminLoginHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	if req.RequestURI == alh.route {
 		alh.handleLoginRequest(w, req)
 	} else {
-		badrequestResponse, err := BadRequest(WSS_SeverError, "server error in login")
+		badrequestResponse, err := BadRequest(WSSSeverError, "server error in login")
 		SendResponse(badrequestResponse, err, w)
 	}
 }
 
 func (alh *adminLoginHandler) handleLoginRequest(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
-		result, err := BadRequest(WSS_RequestMethodError, "bad request in login ")
+		result, err := BadRequest(WSSRequestMethodError, "bad request in login ")
 		SendResponse(result, err, w)
 	} else {
 		username := req.PostFormValue("username")
@@ -63,11 +64,11 @@ func (alh *adminLoginHandler) handleLoginRequest(w http.ResponseWriter, req *htt
 				responseData, err := passAuthResponseData(authToken)
 				SendResponse(responseData, err, w)
 			} else {
-				responseData, err := BadRequest(WSS_UserAuthError, "login auth error")
+				responseData, err := BadRequest(WSSUserAuthError, "login auth error")
 				SendResponse(responseData, err, w)
 			}
 		} else {
-			responseData, err := BadRequest(WSS_ParamError, "login auth error")
+			responseData, err := BadRequest(WSSParamError, "login auth error")
 			SendResponse(responseData, err, w)
 		}
 	}
@@ -76,7 +77,7 @@ func (alh *adminLoginHandler) handleLoginRequest(w http.ResponseWriter, req *htt
 //login sucess response
 func passAuthResponseData(authToken string) ([]byte, error) {
 	result := &LoginResponseData{}
-	result.Code = WSS_RequestOK
+	result.Code = WSSRequestOK
 	result.Msg = "ok"
 	result.Data.UserData.Token = authToken
 	result.Data.UserData.Usrname = loginData.username
@@ -92,7 +93,7 @@ func compAuth(username, password string) (ispass bool, authToken string) {
 		md5data := hash.Sum(nil)
 		md5str := hex.EncodeToString(md5data)
 		return true, md5str
-	} else {
-		return false, ""
 	}
+	return false, ""
+
 }

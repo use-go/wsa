@@ -5,21 +5,24 @@ import (
 	"net/http"
 )
 
+//Error String
 const (
-	WSS_RequestMethodError = 1
-	WSS_UserAuthError      = 101
-	WSS_ParamError         = 102
-	WSS_NotLogin           = 103
-	WSS_RequestOK          = 200
-	WSS_SeverHandleError   = 501
-	WSS_SeverError         = 500
+	WSSRequestMethodError = 1
+	WSSUserAuthError      = 101
+	WSSParamError         = 102
+	WSSNotLogin           = 103
+	WSSRequestOK          = 200
+	WSSSeverHandleError   = 501
+	WSSSeverError         = 500
 )
 
+// BadRequestData struct
 type BadRequestData struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 }
 
+// SendResponse To Usr
 func SendResponse(responseData []byte, err error, w http.ResponseWriter) {
 	if err != nil {
 		w.Write([]byte("{\"code\":500,\"msg\":\"sevr error!\"}"))
@@ -28,6 +31,7 @@ func SendResponse(responseData []byte, err error, w http.ResponseWriter) {
 	}
 }
 
+// BadRequest func
 func BadRequest(code int, msg string) ([]byte, error) {
 	result := &BadRequestData{}
 	result.Code = code

@@ -10,14 +10,16 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-type backendHander interface {
+type backendServiceHander interface {
 	init(msg *wssAPI.Msg) error
 	getRoute() string
 }
 
+//BackendService for web
 type BackendService struct {
 }
 
+//BackendConfig for web
 type BackendConfig struct {
 	Port     int    `json:"Port"`
 	RootName string `json:"Usr"`
@@ -26,10 +28,11 @@ type BackendConfig struct {
 
 var serviceConfig BackendConfig
 
+//Init BackendService
 func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 	if msg == nil || msg.Param1 == nil {
 		logger.LOGE("init backend service failed")
-		return errors.New("invalid param!")
+		return errors.New("invalid param")
 	}
 
 	fileName := msg.Param1.(string)
@@ -44,7 +47,7 @@ func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 		handlers := backendHandlerInit()
 		mux := http.NewServeMux()
 		for _, item := range handlers {
-			backHandler := item.(backendHander)
+			backHandler := item.(backendServiceHander)
 			logger.LOGD(backHandler.getRoute())
 			//http.Handle(backHandler.GetRoute(), http.StripPrefix(backHandler.GetRoute(), backHandler.(http.Handler)))
 			mux.Handle(backHandler.getRoute(), http.StripPrefix(backHandler.getRoute(), backHandler.(http.Handler)))
@@ -70,32 +73,38 @@ func (backendService *BackendService) loadConfigFile(fileName string) (err error
 	return
 }
 
+//Start Service
 func (backendService *BackendService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Stop Service
 func (backendService *BackendService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//GetType of backend Service
 func (backendService *BackendService) GetType() string {
 	return wssAPI.OBJBackendServer
 }
 
+//HandleTask of Service
 func (backendService *BackendService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
+//ProcessMessage of Service
 func (backendService *BackendService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//SetParent handler for Service
 func (backendService *BackendService) SetParent(parent wssAPI.MsgHandler) {
 	return
 }
 
-func backendHandlerInit() []backendHander {
-	handers := make([]backendHander, 0)
+func backendHandlerInit() []backendServiceHander {
+	handers := make([]backendServiceHander, 0)
 	adminLoginHandle := &adminLoginHandler{}
 	lgData := &wssAPI.Msg{}
 	loginData := adminLoginData{}

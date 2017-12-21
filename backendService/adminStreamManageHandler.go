@@ -37,7 +37,7 @@ func (asmh *adminStreamManageHandler) ServeHTTP(w http.ResponseWriter, req *http
 	if req.RequestURI == asmh.Route {
 		asmh.handleStreamManageRequest(w, req)
 	} else {
-		badrequestResponse, err := BadRequest(WSS_SeverError, "server error in login")
+		badrequestResponse, err := BadRequest(WSSSeverError, "server error in login")
 		SendResponse(badrequestResponse, err, w)
 	}
 }
@@ -45,19 +45,18 @@ func (asmh *adminStreamManageHandler) ServeHTTP(w http.ResponseWriter, req *http
 func (asmh *adminStreamManageHandler) handleStreamManageRequest(w http.ResponseWriter, req *http.Request) {
 	if !LoginHandler.isLogin {
 		doManage(w, req)
-		//response, err := BadRequest(WSS_NotLogin, "please login")
+		//response, err := BadRequest(WSSNotLogin, "please login")
 		//SendResponse(response, err, w)
 		return
-	} else {
-		requestData := getRequestData(req)
-		if requestData.Action.ActionToken != LoginHandler.AuthToken {
-			response, err := BadRequest(WSS_UserAuthError, "Auth error")
-			SendResponse(response, err, w)
-			return
-		} else { //do manage
-			doManage(w, req)
-		}
 	}
+	requestData := getRequestData(req)
+	if requestData.Action.ActionToken != LoginHandler.AuthToken {
+		response, err := BadRequest(WSSUserAuthError, "Auth error")
+		SendResponse(response, err, w)
+		return
+	}
+	doManage(w, req)
+
 }
 
 func getRequestData(req *http.Request) streamManageRequestData {
@@ -77,7 +76,7 @@ func doManage(w http.ResponseWriter, req *http.Request) {
 	err := parseActionEvent(w, req)
 	if err != nil {
 		logger.LOGI("parseActionEvent error ", err)
-		sendBadResponse(w, "action code error", WSS_ParamError)
+		sendBadResponse(w, "action code error", WSSParamError)
 	}
 }
 
@@ -92,31 +91,31 @@ func parseActionEvent(w http.ResponseWriter, req *http.Request) error {
 		return errors.New("action code is error")
 	}
 	switch intCode {
-	case WS_SHOW_ALL_STREAM:
+	case WSShowAllSream:
 		doShowAllStream(w)
-	case WS_GET_LIVE_PLAYER_COUNT:
+	case WSGetLivePlayerCount:
 		doGetLivePlayerCount(w, req)
-	case WS_ENABLE_BLACK_LIST:
+	case WSEventBlackList:
 		doEnableBlackList(w, req)
-	case WS_SET_BLACK_LIST:
+	case WSSetBlackList:
 		doSetBlackList(w, req)
-	case WS_ENABLE_WHITE_LIST:
+	case WSEnableWhiteList:
 		doEnableWhiteList(w, req)
-	case WS_SET_WHITE_LIST:
+	case WSSetWhiteList:
 		doSetWhiteList(w, req)
-	case WS_SET_UP_STREAM_APP:
+	case WSSetUpStreamApp:
 		doSetUpStreamApp(w, req)
-	case WS_PULL_RTMP_STREAM:
+	case WSPullRtmpStream:
 		task = &eRTMPEvent.EvePullRTMPStream{}
-	case WS_ADD_SINK:
+	case WSAddSink:
 		task = &eStreamerEvent.EveAddSink{}
-	case WS_DEL_SINK:
+	case WSDelSink:
 		task = &eStreamerEvent.EveDelSink{}
-	case WS_ADD_SOURCE:
+	case WSAddSource:
 		task = &eStreamerEvent.EveAddSource{}
-	case WS_DEL_SOURCE:
+	case WSDelSource:
 		task = &eStreamerEvent.EveDelSource{}
-	case WS_GET_SOURCE:
+	case WSGetSource:
 		task = &eStreamerEvent.EveGetSource{}
 	default:
 		return errors.New("no function")
@@ -146,7 +145,7 @@ func doShowAllStream(w http.ResponseWriter) {
 func doGetLivePlayerCount(w http.ResponseWriter, req *http.Request) {
 	liveName := req.FormValue("live_name")
 	if len(liveName) <= 0 {
-		sendBadResponse(w, "need live_name", WSS_ParamError)
+		sendBadResponse(w, "need live_name", WSSParamError)
 		return
 	}
 	eve := eLiveListCtrl.EveGetLivePlayerCount{}
@@ -207,7 +206,7 @@ func enableBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request
 	} else if code == "0" {
 		eve.Enable = false
 	} else {
-		sendBadResponse(w, "opcode error", WSS_ParamError)
+		sendBadResponse(w, "opcode error", WSSParamError)
 		return
 	}
 
@@ -220,12 +219,12 @@ func enableBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request
 		task.Enable = eve.Enable
 		err = wssAPI.HandleTask(task)
 	} else {
-		sendBadResponse(w, "bwcode error", WSS_SeverError)
+		sendBadResponse(w, "bwcode error", WSSSeverError)
 		return
 	}
 
 	if err != nil {
-		sendBadResponse(w, "error in service ", WSS_ParamError)
+		sendBadResponse(w, "error in service ", WSSParamError)
 		return
 	}
 	sendSuccessResponse("op success", nil, w)
@@ -241,7 +240,7 @@ func setBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request) {
 	str := req.FormValue("list")
 	opcode := req.FormValue("opcode")
 	if str == "" || opcode == "" {
-		sendBadResponse(w, "need list data,it is look like 'list=xxx|xxx|xxx|xxx'", WSS_ParamError)
+		sendBadResponse(w, "need list data,it is look like 'list=xxx|xxx|xxx|xxx'", WSSParamError)
 		return
 	}
 
@@ -252,7 +251,7 @@ func setBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request) {
 	} else if opcode == "1" {
 		eve.Add = true
 	} else {
-		sendBadResponse(w, "opcode error , 0 for del 1 for add", WSS_ParamError)
+		sendBadResponse(w, "opcode error , 0 for del 1 for add", WSSParamError)
 		return
 	}
 
@@ -271,11 +270,11 @@ func setBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request) {
 		task.Names = eve.Names
 		err = wssAPI.HandleTask(task)
 	} else {
-		sendBadResponse(w, "bwcode error", WSS_SeverError)
+		sendBadResponse(w, "bwcode error", WSSSeverError)
 		return
 	}
 	if err != nil {
-		sendBadResponse(w, "error in service ", WSS_ParamError)
+		sendBadResponse(w, "error in service ", WSSParamError)
 		return
 	}
 
@@ -284,7 +283,7 @@ func setBlackOrWhiteList(bwcode int, w http.ResponseWriter, req *http.Request) {
 
 func sendSuccessResponse(data object, datas []object, w http.ResponseWriter) {
 	responseData := ActionResponseData{}
-	responseData.Code = WSS_RequestOK
+	responseData.Code = WSSRequestOK
 	responseData.Msg = "ok"
 	responseData.Data = data
 	responseData.Datas = datas
