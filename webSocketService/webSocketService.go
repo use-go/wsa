@@ -54,7 +54,7 @@ func (websockService *WebSocketService) Init(msg *wssAPI.Msg) (err error) {
 // Start interface implemention
 func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
 
-	serverMux, err := HTTPMUX.GetPortServe()
+	serverMux, err := HTTPMUX.GetPortServe(serviceAddrWithPort)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return errors.New("Somthing error when retrive httpMux of websocket")

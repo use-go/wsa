@@ -1,4 +1,4 @@
-package fragmentMP4
+package fmp4
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package fragmentMP4
+package fmp4
 
 const (
 	TRACK_VIDEO=iota+1

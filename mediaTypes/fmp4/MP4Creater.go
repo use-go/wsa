@@ -1,4 +1,4 @@
-package fragmentMP4
+package fmp4
 
 import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"

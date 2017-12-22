@@ -4,7 +4,10 @@ package HTTPMUX
 the mutex struct
 */
 import (
+	"errors"
 	"net/http"
+
+	"github.com/use-go/websocket-streamserver/logger"
 )
 
 //one kind service one catalog Mutex
@@ -27,11 +30,17 @@ func AddRoute(port, route string, handler func(w http.ResponseWriter, req *http.
 // GetPortServe retrive the *http.ServeMux for the spec port
 func GetPortServe(port string) (serveMux *http.ServeMux, err error) {
 
+	if len(port) < 1 {
+		logger.LOGE("port param error in HttpMux")
+		return nil, errors.New("port param Not Found")
+	}
+
 	mux, exist := portsServe[port]
 	if exist {
-		return mux,nil
+		return mux, nil
 	}
-	return
+
+	return nil, errors.New("serveMux Not Found")
 }
 
 // // Start differnt http Service binded to ports
