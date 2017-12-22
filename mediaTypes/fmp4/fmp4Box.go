@@ -6,7 +6,7 @@ import (
 )
 
 //not support large box now
-type MP4Box struct {
+type Box struct {
 	boxType      []byte
 	version      uint8
 	flag         int
@@ -16,17 +16,17 @@ type MP4Box struct {
 	boxLargeSize uint64
 }
 
-func (box *MP4Box) Init(boxType []byte) {
+func (box *Box) Init(boxType []byte) {
 	box.boxType = boxType
 }
 
-func (box *MP4Box) SetVersionFlags(version uint8, flag int) {
+func (box *Box) SetVersionFlags(version uint8, flag int) {
 	box.version = version
 	box.flag = flag
 	box.fullBox = true
 }
 
-func (box *MP4Box) Flush() []byte {
+func (box *Box) Flush() []byte {
 	defer func() {
 		box.writer.Reset()
 		box.fullBox = false
@@ -63,27 +63,27 @@ func (box *MP4Box) Flush() []byte {
 	return writer.Bytes()
 }
 
-func (box *MP4Box) Push8Bytes(data uint64) {
+func (box *Box) Push8Bytes(data uint64) {
 	binary.Write(box.writer, binary.BigEndian, data)
 }
 
-func (box *MP4Box) Push4Bytes(data uint32) {
+func (box *Box) Push4Bytes(data uint32) {
 	binary.Write(box.writer, binary.BigEndian, data)
 }
 
-func (box *MP4Box) Push2Bytes(data uint16) {
+func (box *Box) Push2Bytes(data uint16) {
 	binary.Write(box.writer, binary.BigEndian, data)
 }
 
-func (box *MP4Box) PushByte(data byte) {
+func (box *Box) PushByte(data byte) {
 	box.writer.WriteByte(data)
 }
 
-func (box *MP4Box) PushBytes(data []byte) {
+func (box *Box) PushBytes(data []byte) {
 	box.writer.Write(data)
 }
 
-func (box *MP4Box)PushBox(inBox *MP4Box){
+func (box *Box)PushBox(inBox *Box){
 	data:=inBox.Flush()
 	box.writer.Write(data)
 }

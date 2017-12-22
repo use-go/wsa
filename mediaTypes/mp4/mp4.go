@@ -9,7 +9,7 @@ const (
 
 //CodecID
 const (
-	CodecIDMOV_TEXT          = 0x08
+	CodecIDMovText          = 0x08
 	CodecIDMPEG4             = 0x20
 	CodecIDH264              = 0x21
 	CodecIDAAC               = 0x40
@@ -35,7 +35,7 @@ const (
 	CodecIDAC3               = 0xA5
 	CodecIDDTS               = 0xA9 /* mp4ra.org */
 	CodecIDVORBIS            = 0xDD /* non standard= gpac uses it */
-	CodecIDDVD_SUBTITLE      = 0xE0 /* non standard= see unsupported-embedded-subs-2.mp4 */
+	CodecIDDVDSubtitle       = 0xE0 /* non standard= see unsupported-embedded-subs-2.mp4 */
 	CodecIDQCELP             = 0xE1
 	CodecIDMPEG4SYSTEMS1     = 0x01
 	CodecIDMPEG4SYSTEMS2     = 0x02

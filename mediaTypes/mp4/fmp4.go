@@ -15,38 +15,45 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-const save_to_file = false
+const saveToFile = false
 const (
-	video_trak = 1
-	audio_trak = 2
-)
-const (
-	PCM_Platform_endian         = 0
-	ADPCM                       = 1
-	MP3                         = 2
-	PCM_little_endian           = 3
-	Nellymoser_16_mono          = 4
-	Nellymoser_8_mono           = 5
-	Nellymoser                  = 6
-	G711_A_law_logarithmic_PCM  = 7
-	G711_mu_law_logarithmic_PCM = 8
-	AAC                         = 10
-	Speex                       = 11
-	Mp38                        = 14
-	Device_specific_sound       = 15
+	videoTrack = 1
+	audioTrack = 2
 )
 
+// audio Type
 const (
-	UserAgent_FireFox = "firefox"
-	UserAgent_Android = "android"
+	PCMPlatformEndian       = 0
+	ADPCM                   = 1
+	MP3                     = 2
+	PCMlittleEndian         = 3
+	Nellymoser16Mono        = 4
+	Nellymoser8Mono         = 5
+	Nellymoser              = 6
+	G711ALawLogarithmicPCM  = 7
+	G711MuLawLogarithmicPCM = 8
+	AAC                     = 10
+	Speex                   = 11
+	Mp38                    = 14
+	DeviceSpecificSound     = 15
 )
 
+//useragent
+const (
+	UserAgentFireFox = "firefox"
+	UserAgentAndroid = "android"
+	UserAgentIOS     = "ios"
+	UserAgentChrome  = "chrome"
+)
+
+//FMP4Slice struct
 type FMP4Slice struct {
 	Data []byte
 	Idx  int //-1 for init,0 base
 	Type int //8 audio,9 video
 }
 
+// FMP4Creater struct
 type FMP4Creater struct {
 	videoIdx      int
 	videoInited   bool
@@ -54,7 +61,7 @@ type FMP4Creater struct {
 	audioIdx      int
 	audioInited   bool
 	audioLastTime uint32
-	audioCodecId  int
+	audioCodecID  int
 
 	width               int
 	height              int
@@ -68,6 +75,7 @@ type FMP4Creater struct {
 	keyframeGeted       bool
 }
 
+//FMP4Flags struct
 type FMP4Flags struct {
 	IsLeading           uint32
 	SampleDependsOn     uint32
@@ -76,6 +84,7 @@ type FMP4Flags struct {
 	IsAsync             uint32
 }
 
+//AddFlvTag for Data Package
 func (fmp4Creater *FMP4Creater) AddFlvTag(tag *flv.FlvTag) (slice *FMP4Slice) {
 
 	if 0 == fmp4Creater.firstNoZeroTime && tag.Timestamp != 0 {
@@ -102,10 +111,9 @@ func (fmp4Creater *FMP4Creater) handleAudioTag(tag *flv.FlvTag) (slice *FMP4Slic
 	if fmp4Creater.audioInited == false {
 		fmp4Creater.audioInited = true
 		return fmp4Creater.createAudioInitSeg(tag)
-	} else {
-		return fmp4Creater.createAudioSeg(tag)
 	}
-	return
+	return fmp4Creater.createAudioSeg(tag)
+
 }
 
 func (fmp4Creater *FMP4Creater) handleVideoTag(tag *flv.FlvTag) (slice *FMP4Slice) {
@@ -121,16 +129,15 @@ func (fmp4Creater *FMP4Creater) handleVideoTag(tag *flv.FlvTag) (slice *FMP4Slic
 		}
 		fmp4Creater.videoInited = true
 		return fmp4Creater.createVideoInitSeg(tag)
-	} else {
-		if fmp4Creater.keyframeGeted {
-			return fmp4Creater.createVideoSeg(tag)
-		} else {
-			if tag.Data[0] == 0x17 && tag.Data[1] == 0x1 {
-				fmp4Creater.keyframeGeted = true
-				return fmp4Creater.createVideoSeg(tag)
-			}
-		}
 	}
+	if fmp4Creater.keyframeGeted {
+		return fmp4Creater.createVideoSeg(tag)
+	}
+	if tag.Data[0] == 0x17 && tag.Data[1] == 0x1 {
+		fmp4Creater.keyframeGeted = true
+		return fmp4Creater.createVideoSeg(tag)
+	}
+
 	return
 }
 
@@ -148,11 +155,11 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 		//mp3Header.Bitrate
 		switch mp3Header.Version {
 		case mp3.MPEG_2_5:
-			fmp4Creater.audioCodecId = CodecIDMp3MPEG2
+			fmp4Creater.audioCodecID = CodecIDMp3MPEG2
 		case mp3.MPEG_2:
-			fmp4Creater.audioCodecId = CodecIDMp3MPEG2
+			fmp4Creater.audioCodecID = CodecIDMp3MPEG2
 		case mp3.MPEG_1:
-			fmp4Creater.audioCodecId = CodecIDMp3MPEG1
+			fmp4Creater.audioCodecID = CodecIDMp3MPEG1
 		}
 	case AAC:
 		fmp4Creater.audioSampleSize = 1024
@@ -185,29 +192,29 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 			fmp4Creater.ascData = tag.Data[2:]
 			switch mpeg4Asc.Object_type {
 			case aac.AAC_Main:
-				fmp4Creater.audioCodecId = CodecIDAACMAIN
+				fmp4Creater.audioCodecID = CodecIDAACMAIN
 			case aac.AAC_LC:
-				fmp4Creater.audioCodecId = CodecIDAACLC
+				fmp4Creater.audioCodecID = CodecIDAACLC
 			case aac.AAC_SSR:
-				fmp4Creater.audioCodecId = CodecIDAACSSR
+				fmp4Creater.audioCodecID = CodecIDAACSSR
 			default:
-				fmp4Creater.audioCodecId = CodecIDAAC
+				fmp4Creater.audioCodecID = CodecIDAAC
 			}
-			fmp4Creater.audioCodecId = CodecIDAAC
+			fmp4Creater.audioCodecID = CodecIDAAC
 		} else {
-			fmp4Creater.ascData = fmp4Creater.aacForHttp(tag, "")
+			fmp4Creater.ascData = fmp4Creater.aacForHTTP(tag, "")
 			objType := (tag.Data[2] & 0xf8) >> 3
 			switch objType {
 			case aac.AAC_Main:
-				fmp4Creater.audioCodecId = CodecIDAACMAIN
+				fmp4Creater.audioCodecID = CodecIDAACMAIN
 			case aac.AAC_LC:
-				fmp4Creater.audioCodecId = CodecIDAACLC
+				fmp4Creater.audioCodecID = CodecIDAACLC
 			case aac.AAC_SSR:
-				fmp4Creater.audioCodecId = CodecIDAACSSR
+				fmp4Creater.audioCodecID = CodecIDAACSSR
 			default:
-				fmp4Creater.audioCodecId = CodecIDAAC
+				fmp4Creater.audioCodecID = CodecIDAAC
 			}
-			fmp4Creater.audioCodecId = CodecIDAAC
+			fmp4Creater.audioCodecID = CodecIDAAC
 		}
 
 	default:
@@ -220,7 +227,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 	segEncoder := &amf.AMF0Encoder{}
 	segEncoder.Init()
 	//ftyp
-	ftyp := &MP4Box{}
+	ftyp := &Box{}
 	ftyp.Push([]byte("ftyp"))
 	ftyp.PushBytes([]byte("isom"))
 	ftyp.Push4Bytes(1)
@@ -234,7 +241,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 	}
 	duration := uint32(0)
 	//moov
-	moovBox := &MP4Box{}
+	moovBox := &Box{}
 	moovBox.Push([]byte("moov"))
 	//mvhd
 	moovBox.Push([]byte("mvhd"))
@@ -274,7 +281,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 	moovBox.Push4Bytes(0x07) //version and flag
 	moovBox.Push4Bytes(0)
 	moovBox.Push4Bytes(0)
-	moovBox.Push4Bytes(audio_trak) //track id
+	moovBox.Push4Bytes(audioTrack) //track id
 	moovBox.Push4Bytes(0)          //reserved
 	moovBox.Push4Bytes(duration)   //duration
 	//log.Println("duration 0xffffffff")
@@ -392,7 +399,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 	//trex
 	moovBox.Push([]byte("trex"))
 	moovBox.Push4Bytes(0)          //version and flag
-	moovBox.Push4Bytes(audio_trak) //track id
+	moovBox.Push4Bytes(audioTrack) //track id
 	moovBox.Push4Bytes(1)          //default_sample_description_index
 	moovBox.Push4Bytes(0)          //default_sample_duration
 	moovBox.Push4Bytes(0)          //default_sample_size
@@ -414,7 +421,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 		logger.LOGE(err.Error())
 		return
 	}
-	if save_to_file {
+	if saveToFile {
 
 		wssAPI.CreateDirectory("audio")
 		fp, err := os.Create("audio/init.mp4")
@@ -437,7 +444,7 @@ func (fmp4Creater *FMP4Creater) createAudioSeg(tag *flv.FlvTag) (slice *FMP4Slic
 	segEncoder := amf.AMF0Encoder{}
 	segEncoder.Init()
 
-	sounBox := &MP4Box{}
+	sounBox := &Box{}
 	//moof
 	sounBox.Push([]byte("moof"))
 	//mfhd
@@ -451,7 +458,7 @@ func (fmp4Creater *FMP4Creater) createAudioSeg(tag *flv.FlvTag) (slice *FMP4Slic
 	//tfhd
 	sounBox.Push([]byte("tfhd"))
 	sounBox.Push4Bytes(0)          //version and flags,no default-base-is-moof
-	sounBox.Push4Bytes(audio_trak) //track
+	sounBox.Push4Bytes(audioTrack) //track
 	//!tfhd
 	sounBox.Pop()
 	//tfdt
@@ -530,7 +537,7 @@ func (fmp4Creater *FMP4Creater) createAudioSeg(tag *flv.FlvTag) (slice *FMP4Slic
 		return
 	}
 
-	if save_to_file {
+	if saveToFile {
 		fileName := "audio/segment_" + strconv.Itoa(slice.Idx) + ".m4s"
 		fp, err := os.Create(fileName)
 		if err != nil {
@@ -551,7 +558,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 	segEncoder := amf.AMF0Encoder{}
 	segEncoder.Init()
 	//ftyp
-	ftyp := &MP4Box{}
+	ftyp := &Box{}
 	ftyp.Push([]byte("ftyp"))
 	ftyp.PushBytes([]byte("isom"))
 	ftyp.Push4Bytes(1)
@@ -564,7 +571,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 		return
 	}
 	//moov
-	moovBox := &MP4Box{}
+	moovBox := &Box{}
 	moovBox.Push([]byte("moov"))
 	//mvhd
 	duration := uint32(0)
@@ -605,7 +612,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 	moovBox.Push4Bytes(0x07) //version and flag
 	moovBox.Push4Bytes(0)
 	moovBox.Push4Bytes(0)
-	moovBox.Push4Bytes(video_trak) //track id
+	moovBox.Push4Bytes(videoTrack) //track id
 	moovBox.Push4Bytes(0)          //reserved
 	moovBox.Push4Bytes(duration)   //duration
 	//log.Println("duration 0xffffffff")
@@ -723,7 +730,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 	//trex
 	moovBox.Push([]byte("trex"))
 	moovBox.Push4Bytes(0)          //version and flag
-	moovBox.Push4Bytes(video_trak) //track id
+	moovBox.Push4Bytes(videoTrack) //track id
 	moovBox.Push4Bytes(1)          //default_sample_description_index
 	moovBox.Push4Bytes(0)          //default_sample_duration
 	moovBox.Push4Bytes(0)          //default_sample_size
@@ -746,7 +753,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 		return
 	}
 
-	if save_to_file {
+	if saveToFile {
 
 		wssAPI.CreateDirectory("video")
 		fp, err := os.OpenFile("video/init.mp4", os.O_WRONLY|os.O_CREATE, 0666)
@@ -785,7 +792,7 @@ func (fmp4Creater *FMP4Creater) createVideoSeg(tag *flv.FlvTag) (slice *FMP4Slic
 		return
 	}
 
-	videBox := &MP4Box{}
+	videBox := &Box{}
 	//moof
 	videBox.Push([]byte("moof"))
 	//mfhd
@@ -799,7 +806,7 @@ func (fmp4Creater *FMP4Creater) createVideoSeg(tag *flv.FlvTag) (slice *FMP4Slic
 	//tfhd
 	videBox.Push([]byte("tfhd"))
 	videBox.Push4Bytes(0)          //version and flags,no default-base-is-moof
-	videBox.Push4Bytes(video_trak) //track
+	videBox.Push4Bytes(videoTrack) //track
 	//!tfhd
 	videBox.Pop()
 	//tfdt
@@ -866,7 +873,7 @@ func (fmp4Creater *FMP4Creater) createVideoSeg(tag *flv.FlvTag) (slice *FMP4Slic
 		logger.LOGE(err.Error())
 		return
 	}
-	if save_to_file {
+	if saveToFile {
 		fileName := "video/segment_" + strconv.Itoa(slice.Idx) + ".m4s"
 		fp, err := os.Create(fileName)
 		if err != nil {
@@ -879,7 +886,7 @@ func (fmp4Creater *FMP4Creater) createVideoSeg(tag *flv.FlvTag) (slice *FMP4Slic
 	return
 }
 
-func (fmp4Creater *FMP4Creater) stsdV(box *MP4Box, tag *flv.FlvTag) {
+func (fmp4Creater *FMP4Creater) stsdV(box *Box, tag *flv.FlvTag) {
 	//stsd
 	box.Push([]byte("stsd"))
 	box.Push4Bytes(0)
@@ -918,7 +925,7 @@ func (fmp4Creater *FMP4Creater) stsdV(box *MP4Box, tag *flv.FlvTag) {
 	return
 }
 
-func (fmp4Creater *FMP4Creater) stsdA(box *MP4Box, tag *flv.FlvTag) {
+func (fmp4Creater *FMP4Creater) stsdA(box *Box, tag *flv.FlvTag) {
 	//stsd
 	box.Push([]byte("stsd"))
 	box.Push4Bytes(0)
@@ -939,17 +946,17 @@ func (fmp4Creater *FMP4Creater) stsdA(box *MP4Box, tag *flv.FlvTag) {
 	box.Push([]byte("esds"))
 	box.Push4Bytes(0)           //version and flag
 	box.PushByte(MP4ESDescrTag) //tag MP4ESDescrTag
-	esd := &MP4Box{}
+	esd := &Box{}
 	esd.Push2Bytes(1) //ES ID
 	esd.PushByte(0)   // stream priority (0-32)
 
 	esd.PushByte(MP4DecConfigDescrTag) //MP4DecConfigDescrTag tag
-	esdDesc := &MP4Box{}
+	esdDesc := &Box{}
 	switch fmp4Creater.audioType { //object type indication
 	case MP3:
-		esdDesc.PushByte(byte(fmp4Creater.audioCodecId))
+		esdDesc.PushByte(byte(fmp4Creater.audioCodecID))
 	case AAC:
-		esdDesc.PushByte(byte(fmp4Creater.audioCodecId))
+		esdDesc.PushByte(byte(fmp4Creater.audioCodecID))
 	default:
 		esdDesc.PushByte(0x40)
 		logger.LOGT(fmt.Sprintf("audio type %d not support", fmp4Creater.audioType))
@@ -964,7 +971,7 @@ func (fmp4Creater *FMP4Creater) stsdA(box *MP4Box, tag *flv.FlvTag) {
 		if len(tag.Data) >= 2 {
 			//esdDesc.PushByte(byte(len(tag.Data) - 2))
 			//esdDesc.PushBytes(tag.Data[2:])
-			//ascData := fmp4Creater.aacForHttp(tag, "")
+			//ascData := fmp4Creater.aacForHTTP(tag, "")
 			//log.Println(ascData)
 			//esdDesc.PushByte(byte(len(ascData)))
 			//esdDesc.PushBytes(ascData)
@@ -992,14 +999,14 @@ func (fmp4Creater *FMP4Creater) stsdA(box *MP4Box, tag *flv.FlvTag) {
 	return
 }
 
-func (fmp4Creater *FMP4Creater) aacForHttp(tag *flv.FlvTag, useragent string) (cfg []byte) {
+func (fmp4Creater *FMP4Creater) aacForHTTP(tag *flv.FlvTag, useragent string) (cfg []byte) {
 	asc := aac.GenerateAudioSpecificConfig(tag.Data[2:])
 
 	if len(useragent) > 0 {
 		useragent = strings.ToLower(useragent)
 	}
 	switch useragent {
-	case UserAgent_FireFox:
+	case UserAgentFireFox:
 		if asc.SamplingFrequencyIndex >= aac.AAC_SCALABLE {
 			asc.AudioObjectType = aac.AAC_HE_OR_SBR
 			asc.ExtensionSamplingIndex = asc.SamplingFrequencyIndex - 3
@@ -1009,7 +1016,7 @@ func (fmp4Creater *FMP4Creater) aacForHttp(tag *flv.FlvTag, useragent string) (c
 			asc.ExtensionSamplingIndex = asc.SamplingFrequencyIndex
 			cfg = make([]byte, 2)
 		}
-	case UserAgent_Android:
+	case UserAgentAndroid:
 		asc.AudioObjectType = aac.AAC_LC
 		asc.ExtensionSamplingIndex = asc.SamplingFrequencyIndex
 		cfg = make([]byte, 2)
@@ -1038,7 +1045,7 @@ func (fmp4Creater *FMP4Creater) aacForHttp(tag *flv.FlvTag, useragent string) (c
 	return
 }
 
-func (fmp4Creater *FMP4Creater) stsdA1(box *MP4Box, tag *flv.FlvTag) {
+func (fmp4Creater *FMP4Creater) stsdA1(box *Box, tag *flv.FlvTag) {
 	//stsd
 	box.Push([]byte("stsd"))
 	box.Push4Bytes(0)
@@ -1062,14 +1069,14 @@ func (fmp4Creater *FMP4Creater) stsdA1(box *MP4Box, tag *flv.FlvTag) {
 	box.PushByte(0x80)
 	box.PushByte(0x80)
 	box.PushByte(0x80)
-	esd := &MP4Box{}
+	esd := &Box{}
 	esd.Push2Bytes(0x02) //ES ID
 	esd.PushByte(0)      //1:streamDependenceFlag=0  1:URL_Flag=0 1:OCRstreamFlag=0 5:streamPrority=0
 	esd.PushByte(4)      //DecoderConfigDescriptor tag
 	box.PushByte(0x80)
 	box.PushByte(0x80)
 	box.PushByte(0x80)
-	esdDesc := &MP4Box{}
+	esdDesc := &Box{}
 	switch fmp4Creater.audioType { //object type indication
 	case MP3:
 		esdDesc.PushByte(0x6b)
@@ -1089,7 +1096,7 @@ func (fmp4Creater *FMP4Creater) stsdA1(box *MP4Box, tag *flv.FlvTag) {
 		if len(tag.Data) >= 2 {
 			//esdDesc.PushByte(byte(len(tag.Data) - 2))
 			//esdDesc.PushBytes(tag.Data[2:])
-			//ascData := fmp4Creater.aacForHttp(tag, "")
+			//ascData := fmp4Creater.aacForHTTP(tag, "")
 			//log.Println(ascData)
 			//esdDesc.PushByte(byte(len(ascData)))
 			//esdDesc.PushBytes(ascData)
