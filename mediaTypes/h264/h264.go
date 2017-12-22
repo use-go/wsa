@@ -5,18 +5,18 @@ import (
 )
 
 const (
-	Nal_type_slice    = 1
-	Nal_type_dpa      = 2
-	Nal_type_dpb      = 3
-	Nal_type_dpc      = 4
-	Nal_type_idr      = 5
-	Nal_type_sei      = 6
-	Nal_type_sps      = 7
-	Nal_type_pps      = 8
-	Nal_type_aud      = 9
-	Nal_type_eoseq    = 10
-	Nal_type_eostream = 11
-	Nal_type_fill     = 12
+	NalType_slice    = 1
+	NalType_dpa      = 2
+	NalType_dpb      = 3
+	NalType_dpc      = 4
+	NalType_idr      = 5
+	NalType_sei      = 6
+	NalType_sps      = 7
+	NalType_pps      = 8
+	NalType_aud      = 9
+	NalType_eoseq    = 10
+	NalType_eostream = 11
+	NalType_fill     = 12
 )
 
 func ParseSPS(sps []byte) (width, height, fps int) {
@@ -121,8 +121,8 @@ func ParseSPS(sps []byte) (width, height, fps int) {
 		if 0 != overscan_info_present_flag {
 			bit.ReadBit()
 		}
-		video_signal_type_present_flag := bit.ReadBit()
-		if video_signal_type_present_flag != 0 {
+		video_sigNalType_present_flag := bit.ReadBit()
+		if video_sigNalType_present_flag != 0 {
 			bit.ReadBits(3)
 			bit.ReadBit()
 			colour_description_present_flag := bit.ReadBit()

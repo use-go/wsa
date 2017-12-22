@@ -6,14 +6,14 @@ import (
 )
 
 const (
-	NAL_TYPE_SINGLE_NAL_MIN = 1
-	NAL_TYPE_SINGLE_NAL_MAX = 23
-	NAL_TYPE_STAP_A         = 24
-	NAL_TYPE_STAP_B         = 25
-	NAL_TYPE_MTAP16         = 26
-	NAL_TYPE_MTAP24         = 27
-	NAL_TYPE_FU_A           = 28
-	NAL_TYPE_FU_B           = 29
+	NalType_SINGLE_NAL_MIN = 1
+	NalType_SINGLE_NAL_MAX = 23
+	NalType_STAP_A         = 24
+	NalType_STAP_B         = 25
+	NalType_MTAP16         = 26
+	NalType_MTAP24         = 27
+	NalType_FU_A           = 28
+	NalType_FU_B           = 29
 	Payload_h264            = 96
 	Payload_MPA             = 14 //mp3 freq 90000
 	RTP_H264_freq           = 90000

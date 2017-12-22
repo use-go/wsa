@@ -12,56 +12,56 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
 )
 
-func (this *RTSPHandler) sendErrorReply(lines []string, code int) (err error) {
+func (rtspHandler *RTSPHandler) sendErrorReply(lines []string, code int) (err error) {
 	cseq := getCSeq(lines)
 	strOut := RTSP_VER + " " + strconv.Itoa(code) + " " + getRTSPStatusByCode(code) + RTSP_EL
 	strOut += "CSeq: " + strconv.Itoa(cseq) + RTSP_EL
 	strOut += RTSP_EL
-	err = this.send([]byte(strOut))
+	err = rtspHandler.send([]byte(strOut))
 	return
 }
 
-func (this *RTSPHandler) serveOptions(lines []string) (err error) {
+func (rtspHandler *RTSPHandler) serveOptions(lines []string) (err error) {
 	cseq := getCSeq(lines)
-	cliSession := this.getSession(lines)
+	cliSession := rtspHandler.getSession(lines)
 	hasSession := false
-	if len(cliSession) > 0 && cliSession != this.session {
+	if len(cliSession) > 0 && cliSession != rtspHandler.session {
 		hasSession = true
 	}
 	str := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
 	str += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
 	if hasSession {
-		str += "Session: " + this.session + RTSP_EL
+		str += "Session: " + rtspHandler.session + RTSP_EL
 	}
 	str += "Public: OPTIONS,DESCRIBE,SETUP,PLAY,PAUSE,TEARDOWN " + RTSP_EL + RTSP_EL
-	err = this.send([]byte(str))
+	err = rtspHandler.send([]byte(str))
 
-	if this.tcpTimeout {
+	if rtspHandler.tcpTimeout {
 		userAgent := getHeaderByName(lines, "User-Agent:", true)
 		if len(userAgent) > 0 {
-			this.tcpTimeout = !strings.Contains(userAgent, "LibVLC")
+			rtspHandler.tcpTimeout = !strings.Contains(userAgent, "LibVLC")
 		}
 	}
 	return
 }
 
-func (this *RTSPHandler) serveDescribe(lines []string) (err error) {
+func (rtspHandler *RTSPHandler) serveDescribe(lines []string) (err error) {
 	cseq := getCSeq(lines)
 	str := removeSpace(lines[0])
 	strSpaces := strings.Split(str, " ")
 	if len(strSpaces) < 2 {
-		return this.sendErrorReply(lines, 455)
+		return rtspHandler.sendErrorReply(lines, 455)
 	}
 
-	_, this.streamName, err = this.parseUrl(strSpaces[1])
+	_, rtspHandler.streamName, err = rtspHandler.parseUrl(strSpaces[1])
 	if err != nil {
 		logger.LOGE(err.Error())
-		return this.sendErrorReply(lines, 455)
+		return rtspHandler.sendErrorReply(lines, 455)
 	}
 
 	//添加槽
-	if false == this.addSink() {
-		err = errors.New("add sink failed:" + this.streamName)
+	if false == rtspHandler.addSink() {
+		err = errors.New("add sink failed:" + rtspHandler.streamName)
 		return
 	}
 	//看是否需要sdp
@@ -81,17 +81,17 @@ func (this *RTSPHandler) serveDescribe(lines []string) (err error) {
 			if counts > 200 {
 				break
 			}
-			if this.audioHeader != nil && this.videoHeader != nil {
+			if rtspHandler.audioHeader != nil && rtspHandler.videoHeader != nil {
 				needSdp = true
 				break
 			}
-			this.mutexVideo.RLock()
-			if nil != this.videoCache && this.videoCache.Len() > 0 {
-				this.mutexVideo.RUnlock()
+			rtspHandler.mutexVideo.RLock()
+			if nil != rtspHandler.videoCache && rtspHandler.videoCache.Len() > 0 {
+				rtspHandler.mutexVideo.RUnlock()
 				needSdp = true
 				break
 			}
-			this.mutexVideo.RUnlock()
+			rtspHandler.mutexVideo.RUnlock()
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
@@ -99,7 +99,7 @@ func (this *RTSPHandler) serveDescribe(lines []string) (err error) {
 	if needSdp {
 		//生成sdp
 		ok := false
-		sdp, ok = generateSDP(this.videoHeader.Copy(), this.audioHeader.Copy())
+		sdp, ok = generateSDP(rtspHandler.videoHeader.Copy(), rtspHandler.audioHeader.Copy())
 		if false == ok {
 			logger.LOGE("generate sdp failed")
 			needSdp = false
@@ -116,15 +116,15 @@ func (this *RTSPHandler) serveDescribe(lines []string) (err error) {
 	} else {
 		//strOut += RTSP_EL
 		logger.LOGE("can not generate sdp")
-		err = this.sendErrorReply(lines, 415)
+		err = rtspHandler.sendErrorReply(lines, 415)
 		return
 	}
 
-	err = this.send([]byte(strOut))
+	err = rtspHandler.send([]byte(strOut))
 	return
 }
 
-func (this *RTSPHandler) parseUrl(url string) (port int, streamName string, err error) {
+func (rtspHandler *RTSPHandler) parseUrl(url string) (port int, streamName string, err error) {
 	if false == strings.HasPrefix(url, "rtsp://") {
 		err = errors.New("bad rtsp url:" + url)
 		logger.LOGE(err.Error())
@@ -153,7 +153,7 @@ func (this *RTSPHandler) parseUrl(url string) (port int, streamName string, err 
 	return
 }
 
-func (this *RTSPHandler) getSession(lines []string) (cliSession string) {
+func (rtspHandler *RTSPHandler) getSession(lines []string) (cliSession string) {
 	tmp := getHeaderByName(lines, "Session:", true)
 	if len(tmp) > 0 {
 		tmp = strings.Replace(tmp, " ", "", -1)
@@ -166,16 +166,16 @@ func (this *RTSPHandler) getSession(lines []string) (cliSession string) {
 	return
 }
 
-func (this *RTSPHandler) serveSetup(lines []string) (err error) {
+func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 	cseq := getCSeq(lines)
-	if this.isPlaying {
-		return this.sendErrorReply(lines, 405)
+	if rtspHandler.isPlaying {
+		return rtspHandler.sendErrorReply(lines, 405)
 	}
-	cliSession := this.getSession(lines)
-	if len(cliSession) > 0 && strings.Compare(cliSession, this.session) != 0 {
+	cliSession := rtspHandler.getSession(lines)
+	if len(cliSession) > 0 && strings.Compare(cliSession, rtspHandler.session) != 0 {
 		//session错误
 		logger.LOGE("session wrong")
-		return this.sendErrorReply(lines, 454)
+		return rtspHandler.sendErrorReply(lines, 454)
 	}
 	//取出track
 	trackName := ""
@@ -184,7 +184,7 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 		subs := strings.Split(strLine, " ")
 		if len(subs) < 2 {
 			logger.LOGE("setup failed")
-			return this.sendErrorReply(lines, 400)
+			return rtspHandler.sendErrorReply(lines, 400)
 		}
 		logger.LOGD(subs)
 		subs = strings.Split(subs[1], "/")
@@ -192,29 +192,29 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 	}
 	if strings.Compare(trackName, ctrl_track_audio) != 0 && strings.Compare(trackName, ctrl_track_video) != 0 {
 		logger.LOGE("track :" + trackName + " not found")
-		return this.sendErrorReply(lines, 404)
+		return rtspHandler.sendErrorReply(lines, 404)
 	}
 
-	this.mutexTracks.RLock()
-	track, exist := this.tracks[trackName]
+	rtspHandler.mutexTracks.RLock()
+	track, exist := rtspHandler.tracks[trackName]
 	if exist {
 		logger.LOGE("track :" + trackName + " has setuped,sotp play ")
-		this.stopPlayThread()
+		rtspHandler.stopPlayThread()
 	} else {
 		track = &trackInfo{}
 	}
-	this.mutexTracks.RUnlock()
+	rtspHandler.mutexTracks.RUnlock()
 	logger.LOGD("lok track")
-	this.mutexTracks.Lock()
+	rtspHandler.mutexTracks.Lock()
 	logger.LOGD("unlock track")
-	defer this.mutexTracks.Unlock()
+	defer rtspHandler.mutexTracks.Unlock()
 	//取出协议类型和端口号
 	{
 
 		//video 90000
 		if strings.Compare(trackName, ctrl_track_audio) == 0 {
-			if this.audioHeader != nil {
-				asc := aac.GenerateAudioSpecificConfig(this.audioHeader.Data[2:])
+			if rtspHandler.audioHeader != nil {
+				asc := aac.GenerateAudioSpecificConfig(rtspHandler.audioHeader.Data[2:])
 				track.clockRate = uint32(asc.SamplingFrequency)
 			}
 		}
@@ -225,7 +225,7 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 		strTransport := getHeaderByName(lines, HDR_TRANSPORT, true)
 		if len(strTransport) == 0 {
 			logger.LOGE("setup failed,no transport")
-			return this.sendErrorReply(lines, 400)
+			return rtspHandler.sendErrorReply(lines, 400)
 		}
 		strTransport = removeSpace(strTransport)
 		strTransport = strings.TrimPrefix(strTransport, HDR_TRANSPORT)
@@ -237,7 +237,7 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 		if len(subs) != 3 {
 			logger.LOGT(len(subs))
 			logger.LOGE("setup failed,parse transport failed")
-			return this.sendErrorReply(lines, 400)
+			return rtspHandler.sendErrorReply(lines, 400)
 		}
 		track.transPort = subs[0]
 		if strings.Compare(subs[1], "unicast") == 0 {
@@ -249,68 +249,68 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 			track.transPort = "udp"
 			if false == strings.HasPrefix(subs[2], "client_port=") {
 				logger.LOGE("udp not found client port")
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			cliports := strings.TrimPrefix(subs[2], "client_port=")
 			ports := strings.Split(cliports, "-")
 			if len(ports) != 2 {
 				logger.LOGE("udp not found client port")
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			track.RTPCliPort, err = strconv.Atoi(ports[0])
 
 			if err != nil {
 				logger.LOGE(err.Error())
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			track.RTCPCliPort, err = strconv.Atoi(ports[1])
 			if err != nil {
 				logger.LOGE(err.Error())
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			ok := false
 
 			track.RTPSvrPort, track.RTCPSvrPort, track.RTPSvrConn, track.RTCPSvrConn, ok = genRTPRTCP()
 			if false == ok {
 				logger.LOGE(err.Error())
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 
 		} else if subs[0] == RTSP_RTP_AVP_TCP {
 			track.transPort = "tcp"
 			if false == strings.Contains(strTransport, "interleaved=") {
 				logger.LOGE("not found tcp interleaved")
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			strsubs := strings.Split(strTransport, "interleaved=")
 			if len(strsubs) != 2 {
 				logger.LOGE("not found tcp interleaved")
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 
 			strsubs = strings.Split(strsubs[1], "-")
 			if len(strsubs) != 2 {
 				logger.LOGE("not found tcp interleaved")
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			track.RTPChannel, err = strconv.Atoi(strsubs[0])
 			if err != nil {
 				logger.LOGE(err.Error())
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			track.RTCPChannel, err = strconv.Atoi(strsubs[1])
 			if err != nil {
 				logger.LOGE(err.Error())
-				return this.sendErrorReply(lines, 461)
+				return rtspHandler.sendErrorReply(lines, 461)
 			}
 			logger.LOGT(track.RTCPChannel)
 		} else {
 			logger.LOGE(subs[0] + " not support now")
-			return this.sendErrorReply(lines, 551)
+			return rtspHandler.sendErrorReply(lines, 551)
 		}
 	}
-	track.trackId = trackName
-	this.tracks[trackName] = track
+	track.trackID = trackName
+	rtspHandler.tracks[trackName] = track
 	track.firstSeq = rand.Intn(0xffff)
 	track.mark = true
 	track.ssrc = uint32(rand.Intn(0xffff))
@@ -319,7 +319,7 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
 	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
 	strOut += "Server: " + RTSPServerName + RTSP_EL
-	strOut += "Session: " + this.session + ";timeout=" + strconv.Itoa(serviceConfig.TimeoutSec) + RTSP_EL
+	strOut += "Session: " + rtspHandler.session + ";timeout=" + strconv.Itoa(serviceConfig.TimeoutSec) + RTSP_EL
 	if track.transPort == "udp" {
 		strOut += "Transport: RTP/AVP;unicast;"
 		strOut += "client_port=" + strconv.Itoa(track.RTPCliPort) + "-" + strconv.Itoa(track.RTCPCliPort) + ";"
@@ -333,26 +333,26 @@ func (this *RTSPHandler) serveSetup(lines []string) (err error) {
 	}
 	strOut += RTSP_EL
 
-	return this.send([]byte(strOut))
+	return rtspHandler.send([]byte(strOut))
 }
 
-func (this *RTSPHandler) servePlay(lines []string) (err error) {
+func (rtspHandler *RTSPHandler) servePlay(lines []string) (err error) {
 	errCode := 0
 	defer func() {
 		if err != nil {
 			logger.LOGE(err.Error())
 		}
 		if errCode != 0 {
-			this.sendErrorReply(lines, errCode)
+			rtspHandler.sendErrorReply(lines, errCode)
 		}
 	}()
 	//状态
-	if len(this.tracks) == 0 {
+	if len(rtspHandler.tracks) == 0 {
 		err = errors.New("play a playing stream")
 		errCode = 405
 		return
 	}
-	if this.isPlaying || len(this.tracks) == 0 {
+	if rtspHandler.isPlaying || len(rtspHandler.tracks) == 0 {
 		err = errors.New("play a playing stream")
 		errCode = 405
 		return
@@ -360,8 +360,8 @@ func (this *RTSPHandler) servePlay(lines []string) (err error) {
 	//cseq
 	cseq := getCSeq(lines)
 	//session
-	cliSession := this.getSession(lines)
-	if cliSession != this.session {
+	cliSession := rtspHandler.getSession(lines)
+	if cliSession != rtspHandler.session {
 		logger.LOGD(cliSession)
 		err = errors.New("session wrong")
 		errCode = 454
@@ -372,7 +372,7 @@ func (this *RTSPHandler) servePlay(lines []string) (err error) {
 
 	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
 	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += "Session: " + this.session + RTSP_EL
+	strOut += "Session: " + rtspHandler.session + RTSP_EL
 	strOut += "Range: npt=0.0-" + RTSP_EL
 	strOut += "RTP-Info: "
 	addCmma := false
@@ -384,26 +384,26 @@ func (this *RTSPHandler) servePlay(lines []string) (err error) {
 		return
 	}
 	url := subs[1]
-	this.mutexTracks.RLock()
-	for _, v := range this.tracks {
+	rtspHandler.mutexTracks.RLock()
+	for _, v := range rtspHandler.tracks {
 		if addCmma {
 			strOut += ","
 		}
 		addCmma = true
-		strOut += url + "/" + v.trackId + ";"
+		strOut += url + "/" + v.trackID + ";"
 		strOut += "seq=" + strconv.Itoa(v.firstSeq) + ";"
 		strOut += "rtptime=" + strconv.Itoa(int(v.RTPStartTime))
 	}
 	strOut += RTSP_EL
 	strOut += RTSP_EL
-	this.mutexTracks.RUnlock()
+	rtspHandler.mutexTracks.RUnlock()
 
-	err = this.send([]byte(strOut))
-	go this.threadPlay()
+	err = rtspHandler.send([]byte(strOut))
+	go rtspHandler.threadPlay()
 	return
 }
 
-func (this *RTSPHandler) servePause(lines []string) (err error) {
+func (rtspHandler *RTSPHandler) servePause(lines []string) (err error) {
 	cseq := getCSeq(lines)
 	errCode := 0
 	defer func() {
@@ -411,29 +411,29 @@ func (this *RTSPHandler) servePause(lines []string) (err error) {
 			logger.LOGE(err.Error())
 		}
 		if errCode != 0 {
-			this.sendErrorReply(lines, errCode)
+			rtspHandler.sendErrorReply(lines, errCode)
 		}
 	}()
 	//session
-	cliSession := this.getSession(lines)
-	if cliSession != this.session {
+	cliSession := rtspHandler.getSession(lines)
+	if cliSession != rtspHandler.session {
 		logger.LOGD(cliSession)
 		err = errors.New("session wrong")
 		errCode = 454
 		return
 	}
-	if this.isPlaying == false {
+	if rtspHandler.isPlaying == false {
 		err = errors.New("pause not playing")
 		errCode = 455
 		return
 	} else {
 		//停止播放
-		this.stopPlayThread()
+		rtspHandler.stopPlayThread()
 	}
 	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
 	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += "Session: " + this.session + RTSP_EL
+	strOut += "Session: " + rtspHandler.session + RTSP_EL
 	strOut += RTSP_EL
-	err = this.send([]byte(strOut))
+	err = rtspHandler.send([]byte(strOut))
 	return
 }

@@ -3,8 +3,9 @@ package RTSPService
 import (
 	"container/list"
 	"errors"
-	"github.com/use-go/websocket-streamserver/logger"
 	"net"
+
+	"github.com/use-go/websocket-streamserver/logger"
 
 	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
@@ -45,7 +46,7 @@ type trackInfo struct {
 	seq          int
 	mark         bool
 	RTPStartTime uint32
-	trackId      string
+	trackID      string
 	ssrc         uint32
 	clockRate    uint32
 	byteSend     int64
@@ -62,133 +63,133 @@ type trackInfo struct {
 	RTCPSvrConn  *net.UDPConn //
 }
 
-func (this *trackInfo) reset() {
-	this.unicast = false
-	this.transPort = "udp"
-	this.firstSeq = 0
-	this.seq = 0
-	this.RTPStartTime = 0
-	this.trackId = ""
-	this.ssrc = 0
-	this.clockRate = 0
-	this.byteSend = 0
-	this.pktSend = 0
-	this.RTPChannel = 0
-	this.RTPCliPort = 0
-	this.RTPSvrPort = 0
-	this.RTCPChannel = 0
-	this.RTCPCliPort = 0
-	this.RTCPSvrPort = 0
-	if nil != this.RTPCliConn {
-		this.RTPCliConn.Close()
+func (trackinfo *trackInfo) reset() {
+	trackinfo.unicast = false
+	trackinfo.transPort = "udp"
+	trackinfo.firstSeq = 0
+	trackinfo.seq = 0
+	trackinfo.RTPStartTime = 0
+	trackinfo.trackID = ""
+	trackinfo.ssrc = 0
+	trackinfo.clockRate = 0
+	trackinfo.byteSend = 0
+	trackinfo.pktSend = 0
+	trackinfo.RTPChannel = 0
+	trackinfo.RTPCliPort = 0
+	trackinfo.RTPSvrPort = 0
+	trackinfo.RTCPChannel = 0
+	trackinfo.RTCPCliPort = 0
+	trackinfo.RTCPSvrPort = 0
+	if nil != trackinfo.RTPCliConn {
+		trackinfo.RTPCliConn.Close()
 	}
-	if nil != this.RTCPCliConn {
-		this.RTCPCliConn.Close()
+	if nil != trackinfo.RTCPCliConn {
+		trackinfo.RTCPCliConn.Close()
 	}
-	if nil != this.RTPSvrConn {
-		this.RTPSvrConn.Close()
+	if nil != trackinfo.RTPSvrConn {
+		trackinfo.RTPSvrConn.Close()
 
 	}
-	if nil != this.RTCPSvrConn {
-		this.RTCPSvrConn.Close()
+	if nil != trackinfo.RTCPSvrConn {
+		trackinfo.RTCPSvrConn.Close()
 	}
 }
 
-func (this *RTSPHandler) Init(msg *wssAPI.Msg) (err error) {
-	this.session = wssAPI.GenerateGUID()
-	this.sinkAdded = false
-	this.tracks = make(map[string]*trackInfo)
-	this.waitPlaying = new(sync.WaitGroup)
-	this.tcpTimeout = true
+func (rtspHandler *RTSPHandler) Init(msg *wssAPI.Msg) (err error) {
+	rtspHandler.session = wssAPI.GenerateGUID()
+	rtspHandler.sinkAdded = false
+	rtspHandler.tracks = make(map[string]*trackInfo)
+	rtspHandler.waitPlaying = new(sync.WaitGroup)
+	rtspHandler.tcpTimeout = true
 	return
 }
 
-func (this *RTSPHandler) Start(msg *wssAPI.Msg) (err error) {
+func (rtspHandler *RTSPHandler) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
-func (this *RTSPHandler) Stop(msg *wssAPI.Msg) (err error) {
-	this.isPlaying = false
-	this.waitPlaying.Wait()
-	this.delSink()
+func (rtspHandler *RTSPHandler) Stop(msg *wssAPI.Msg) (err error) {
+	rtspHandler.isPlaying = false
+	rtspHandler.waitPlaying.Wait()
+	rtspHandler.delSink()
 	return
 }
 
-func (this *RTSPHandler) GetType() string {
+func (rtspHandler *RTSPHandler) GetType() string {
 	return "RTSPHandler"
 }
 
-func (this *RTSPHandler) HandleTask(task wssAPI.Task) (err error) {
+func (rtspHandler *RTSPHandler) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
-func (this *RTSPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (rtspHandler *RTSPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
 	case wssAPI.MsgFlvTag:
-		return this.appendFlvTag(msg)
+		return rtspHandler.appendFlvTag(msg)
 	case wssAPI.MsgPlayStart:
 		//这个状态下，rtsp 可以play
-		this.sinkRunning = true
+		rtspHandler.sinkRunning = true
 	case wssAPI.MsgPlayStop:
 		//如果在play,停止
-		this.sinkRunning = false
+		rtspHandler.sinkRunning = false
 	default:
 		logger.LOGE("msg not processed")
 	}
 	return
 }
 
-func (this *RTSPHandler) appendFlvTag(msg *wssAPI.Msg) (err error) {
+func (rtspHandler *RTSPHandler) appendFlvTag(msg *wssAPI.Msg) (err error) {
 	tag := msg.Param1.(*flv.FlvTag)
 
-	if this.audioHeader == nil && tag.TagType == flv.FlvTagAudio {
-		this.audioHeader = tag.Copy()
+	if rtspHandler.audioHeader == nil && tag.TagType == flv.FlvTagAudio {
+		rtspHandler.audioHeader = tag.Copy()
 		return
 	}
-	if this.videoHeader == nil && tag.TagType == flv.FlvTagVideo {
-		this.videoHeader = tag.Copy()
+	if rtspHandler.videoHeader == nil && tag.TagType == flv.FlvTagVideo {
+		rtspHandler.videoHeader = tag.Copy()
 		return
 	}
 
 	if tag.TagType == flv.FlvTagVideo {
-		this.mutexVideo.Lock()
-		if this.videoCache == nil || this.videoCache.Len() > 0xff {
-			this.videoCache = list.New()
+		rtspHandler.mutexVideo.Lock()
+		if rtspHandler.videoCache == nil || rtspHandler.videoCache.Len() > 0xff {
+			rtspHandler.videoCache = list.New()
 		}
-		this.videoCache.PushBack(tag.Copy())
-		this.mutexVideo.Unlock()
+		rtspHandler.videoCache.PushBack(tag.Copy())
+		rtspHandler.mutexVideo.Unlock()
 	}
 
 	if flv.FlvTagAudio == tag.TagType {
-		this.mutexAudio.Lock()
-		if this.audioCache == nil || this.audioCache.Len() > 0xff {
-			this.audioCache = list.New()
+		rtspHandler.mutexAudio.Lock()
+		if rtspHandler.audioCache == nil || rtspHandler.audioCache.Len() > 0xff {
+			rtspHandler.audioCache = list.New()
 		}
-		this.audioCache.PushBack(tag.Copy())
-		this.mutexAudio.Unlock()
+		rtspHandler.audioCache.PushBack(tag.Copy())
+		rtspHandler.mutexAudio.Unlock()
 	}
 
 	return
 }
 
-func (this *RTSPHandler) handlePacket(data []byte) (err error) {
+func (rtspHandler *RTSPHandler) handlePacket(data []byte) (err error) {
 	//连接关闭
 	if nil == data {
-		return this.Stop(nil)
+		return rtspHandler.Stop(nil)
 	}
 	if '$' == data[0] {
-		return this.handleRTPRTCP(data[1:])
+		return rtspHandler.handleRTPRTCP(data[1:])
 	}
 
-	return this.handleRTSP(data)
+	return rtspHandler.handleRTSP(data)
 }
 
-func (this *RTSPHandler) handleRTPRTCP(data []byte) (err error) {
+func (rtspHandler *RTSPHandler) handleRTPRTCP(data []byte) (err error) {
 	logger.LOGT("RTP RTCP not processed")
 	return
 }
 
-func (this *RTSPHandler) handleRTSP(data []byte) (err error) {
+func (rtspHandler *RTSPHandler) handleRTSP(data []byte) (err error) {
 	lines := strings.Split(string(data), RTSP_EL)
 
 	//取出方法
@@ -209,78 +210,78 @@ func (this *RTSPHandler) handleRTSP(data []byte) (err error) {
 	//处理每个方法
 	switch cmd {
 	case RTSP_METHOD_OPTIONS:
-		return this.serveOptions(lines)
+		return rtspHandler.serveOptions(lines)
 	case RTSP_METHOD_DESCRIBE:
-		return this.serveDescribe(lines)
+		return rtspHandler.serveDescribe(lines)
 	case RTSP_METHOD_SETUP:
-		return this.serveSetup(lines)
+		return rtspHandler.serveSetup(lines)
 	case RTSP_METHOD_PLAY:
-		return this.servePlay(lines)
+		return rtspHandler.servePlay(lines)
 	case RTSP_METHOD_PAUSE:
-		return this.servePause(lines)
+		return rtspHandler.servePause(lines)
 	default:
 		logger.LOGE("method " + cmd + " not support now")
-		return this.sendErrorReply(lines, 551)
+		return rtspHandler.sendErrorReply(lines, 551)
 	}
 	return
 }
 
-func (this *RTSPHandler) send(data []byte) (err error) {
-	this.mutexConn.Lock()
-	defer this.mutexConn.Unlock()
-	_, err = wssAPI.TCPWriteTimeOut(this.conn, data, serviceConfig.TimeoutSec)
+func (rtspHandler *RTSPHandler) send(data []byte) (err error) {
+	rtspHandler.mutexConn.Lock()
+	defer rtspHandler.mutexConn.Unlock()
+	_, err = wssAPI.TCPWriteTimeOut(rtspHandler.conn, data, serviceConfig.TimeoutSec)
 	return
 }
 
-func (this *RTSPHandler) addSink() bool {
-	if true == this.sinkAdded {
+func (rtspHandler *RTSPHandler) addSink() bool {
+	if true == rtspHandler.sinkAdded {
 		logger.LOGE("sink not deleted")
 		return false
 	}
 	taskAddSink := &eStreamerEvent.EveAddSink{}
-	taskAddSink.StreamName = this.streamName
-	taskAddSink.SinkId = this.session
-	taskAddSink.Sinker = this
+	taskAddSink.StreamName = rtspHandler.streamName
+	taskAddSink.SinkId = rtspHandler.session
+	taskAddSink.Sinker = rtspHandler
 	err := wssAPI.HandleTask(taskAddSink)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return false
 	}
-	this.sinkAdded = true
+	rtspHandler.sinkAdded = true
 	return true
 }
 
-func (this *RTSPHandler) delSink() {
-	if false == this.sinkAdded {
+func (rtspHandler *RTSPHandler) delSink() {
+	if false == rtspHandler.sinkAdded {
 		return
 	}
 	taskDelSink := &eStreamerEvent.EveDelSink{}
-	taskDelSink.StreamName = this.streamName
-	taskDelSink.SinkId = this.session
+	taskDelSink.StreamName = rtspHandler.streamName
+	taskDelSink.SinkId = rtspHandler.session
 	wssAPI.HandleTask(taskDelSink)
-	this.sinkAdded = false
+	rtspHandler.sinkAdded = false
 }
 
-func (this *RTSPHandler) threadPlay() {
-	this.isPlaying = true
-	this.mutexTracks.RLock()
-	defer this.mutexTracks.RUnlock()
-	this.waitPlaying.Add(1)
+func (rtspHandler *RTSPHandler) threadPlay() {
+	rtspHandler.isPlaying = true
+	rtspHandler.mutexTracks.RLock()
+	defer rtspHandler.mutexTracks.RUnlock()
+	rtspHandler.waitPlaying.Add(1)
 	defer func() {
 		logger.LOGT("set play to false")
-		this.isPlaying = false
-		for _, v := range this.tracks {
+		rtspHandler.isPlaying = false
+		for _, v := range rtspHandler.tracks {
 			v.reset()
 		}
-		this.waitPlaying.Done()
+		rtspHandler.waitPlaying.Done()
 	}()
 	chList := list.New()
-	for _, v := range this.tracks {
+	for _, v := range rtspHandler.tracks {
 		ch := make(chan int)
 		if v.transPort == "udp" {
-			go this.threadUdp(ch, v)
+			go rtspHandler.threadUdp(ch, v)
 		} else {
-			go this.threadTCP(ch, v)
+			go rtspHandler.threadTCP(ch, v)
 		}
 		chList.PushBack(ch)
 	}
@@ -292,7 +293,7 @@ func (this *RTSPHandler) threadPlay() {
 	logger.LOGT("all ch end")
 }
 
-func (this *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
+func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 	waitRTP := new(sync.WaitGroup)
 	waitRTCP := new(sync.WaitGroup)
 	defer func() {
@@ -310,8 +311,8 @@ func (this *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 		close(chRtpCli)
 		close(chRtcpCli)
 	}()
-	go listenRTP(track, this, waitRTP, chRtpCli)
-	go listenRTCP(track, this, waitRTCP, chRtcpCli)
+	go listenRTP(track, rtspHandler, waitRTP, chRtpCli)
+	go listenRTCP(track, rtspHandler, waitRTCP, chRtcpCli)
 	//rtp
 	select {
 	case addr := <-chRtpCli:
@@ -349,192 +350,192 @@ func (this *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 	}()
 	//发送数据
 	beginSend := false
-	if track.trackId == ctrl_track_video {
+	if track.trackID == ctrl_track_video {
 
 		//清空之前累计的亢余数据
-		this.mutexVideo.Lock()
-		this.videoCache = list.New()
-		this.mutexVideo.Unlock()
-	} else if track.trackId == ctrl_track_audio {
-		this.mutexAudio.Lock()
-		this.audioCache = list.New()
-		this.mutexAudio.Unlock()
+		rtspHandler.mutexVideo.Lock()
+		rtspHandler.videoCache = list.New()
+		rtspHandler.mutexVideo.Unlock()
+	} else if track.trackID == ctrl_track_audio {
+		rtspHandler.mutexAudio.Lock()
+		rtspHandler.audioCache = list.New()
+		rtspHandler.mutexAudio.Unlock()
 	}
 	beginTime := uint32(0)
 	audioBeginTime := uint32(0)
-	logger.LOGT(track.trackId)
+	logger.LOGT(track.trackID)
 	track.seq = track.firstSeq
 	lastRTCPTime := time.Now().Second()
-	for this.isPlaying {
+	for rtspHandler.isPlaying {
 		if time.Now().Second()-lastRTCPTime > 10 {
 			lastRTCPTime = time.Now().Second()
 
-			this.mutexVideo.Lock()
-			if this.videoCache == nil || this.videoCache.Len() == 0 {
-				this.mutexVideo.Unlock()
+			rtspHandler.mutexVideo.Lock()
+			if rtspHandler.videoCache == nil || rtspHandler.videoCache.Len() == 0 {
+				rtspHandler.mutexVideo.Unlock()
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
-			tag := this.videoCache.Front().Value.(*flv.FlvTag).Copy()
-			this.mutexVideo.Unlock()
+			tag := rtspHandler.videoCache.Front().Value.(*flv.FlvTag).Copy()
+			rtspHandler.mutexVideo.Unlock()
 			timestamp := tag.Timestamp - beginTime
 			if tag.Timestamp < beginTime {
 				timestamp = 0
 			}
 			tmp64 := int64(track.clockRate / 1000)
 			timestamp = uint32((tmp64 * int64(timestamp)) & 0xffffffff)
-			this.sendRTCP(track, timestamp)
+			rtspHandler.sendRTCP(track, timestamp)
 		}
 		//如果是视频 等到有关键帧时开始发送，如果是音频，直接发送
-		if ctrl_track_video == track.trackId {
+		if ctrl_track_video == track.trackID {
 			if false == beginSend {
 				//等待关键帧
-				beginSend, beginTime = getH264Keyframe(this.videoCache, this.mutexVideo)
+				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, rtspHandler.mutexVideo)
 				if false == beginSend {
 					time.Sleep(30 * time.Millisecond)
 					continue
 				}
 				//把头加回去
-				//				if this.videoHeader != nil {
-				//					this.mutexVideo.Lock()
-				//					this.videoCache.PushFront(this.videoHeader)
-				//					this.mutexVideo.Unlock()
+				//				if rtspHandler.videoHeader != nil {
+				//					rtspHandler.mutexVideo.Lock()
+				//					rtspHandler.videoCache.PushFront(rtspHandler.videoHeader)
+				//					rtspHandler.mutexVideo.Unlock()
 				//				}
 			}
 			//发送数据
-			this.mutexVideo.Lock()
-			if this.videoCache == nil || this.videoCache.Len() == 0 {
-				this.mutexVideo.Unlock()
+			rtspHandler.mutexVideo.Lock()
+			if rtspHandler.videoCache == nil || rtspHandler.videoCache.Len() == 0 {
+				rtspHandler.mutexVideo.Unlock()
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
-			tag := this.videoCache.Front().Value.(*flv.FlvTag).Copy()
-			this.videoCache.Remove(this.videoCache.Front())
-			this.mutexVideo.Unlock()
-			err := this.sendFlvH264(track, tag, beginTime)
+			tag := rtspHandler.videoCache.Front().Value.(*flv.FlvTag).Copy()
+			rtspHandler.videoCache.Remove(rtspHandler.videoCache.Front())
+			rtspHandler.mutexVideo.Unlock()
+			err := rtspHandler.sendFlvH264(track, tag, beginTime)
 			if err != nil {
 				logger.LOGE(err.Error())
 				return
 			}
-		} else if ctrl_track_audio == track.trackId {
+		} else if ctrl_track_audio == track.trackID {
 			//			logger.LOGT("audio not processed now")
-			this.mutexAudio.Lock()
-			if this.audioCache == nil || this.audioCache.Len() == 0 {
-				this.mutexAudio.Unlock()
+			rtspHandler.mutexAudio.Lock()
+			if rtspHandler.audioCache == nil || rtspHandler.audioCache.Len() == 0 {
+				rtspHandler.mutexAudio.Unlock()
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
-			tag := this.audioCache.Front().Value.(*flv.FlvTag).Copy()
-			this.audioCache.Remove(this.audioCache.Front())
-			this.mutexAudio.Unlock()
+			tag := rtspHandler.audioCache.Front().Value.(*flv.FlvTag).Copy()
+			rtspHandler.audioCache.Remove(rtspHandler.audioCache.Front())
+			rtspHandler.mutexAudio.Unlock()
 			if audioBeginTime == 0 {
 				audioBeginTime = tag.Timestamp
 			}
 			if false == beginSend {
 				beginSend = true
-				err := this.sendFlvAudio(track, this.audioHeader, audioBeginTime)
+				err := rtspHandler.sendFlvAudio(track, rtspHandler.audioHeader, audioBeginTime)
 				if err != nil {
 					logger.LOGE(err.Error())
 					return
 				}
 			}
-			err := this.sendFlvAudio(track, tag, audioBeginTime)
+			err := rtspHandler.sendFlvAudio(track, tag, audioBeginTime)
 			if err != nil {
 				logger.LOGE(err.Error())
 				return
 			}
 		} else {
-			logger.LOGE(track.trackId + " wrong")
+			logger.LOGE(track.trackID + " wrong")
 			return
 		}
 
 	}
 }
 
-func (this *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
+func (rtspHandler *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
 	defer func() {
 		close(ch)
 	}()
 	beginSend := true
-	if track.trackId == ctrl_track_video {
+	if track.trackID == ctrl_track_video {
 		beginSend = false
 
 		//清空之前累计的亢余数据
-		this.mutexVideo.Lock()
-		this.videoCache = list.New()
-		this.mutexVideo.Unlock()
-	} else if track.trackId == ctrl_track_audio {
-		this.mutexAudio.Lock()
-		this.audioCache = list.New()
-		this.mutexAudio.Unlock()
+		rtspHandler.mutexVideo.Lock()
+		rtspHandler.videoCache = list.New()
+		rtspHandler.mutexVideo.Unlock()
+	} else if track.trackID == ctrl_track_audio {
+		rtspHandler.mutexAudio.Lock()
+		rtspHandler.audioCache = list.New()
+		rtspHandler.mutexAudio.Unlock()
 	}
 	beginTime := uint32(0)
 	audioBeginTime := uint32(0)
-	logger.LOGT(track.trackId)
+	logger.LOGT(track.trackID)
 	track.seq = track.firstSeq
-	for this.isPlaying {
-		if ctrl_track_video == track.trackId {
+	for rtspHandler.isPlaying {
+		if ctrl_track_video == track.trackID {
 			if false == beginSend {
 				//等待关键帧
-				beginSend, beginTime = getH264Keyframe(this.videoCache, this.mutexVideo)
+				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, rtspHandler.mutexVideo)
 				if false == beginSend {
 					time.Sleep(30 * time.Millisecond)
 					continue
 				}
 			}
 			//发送数据
-			this.mutexVideo.Lock()
-			if this.videoCache == nil || this.videoCache.Len() == 0 {
-				this.mutexVideo.Unlock()
+			rtspHandler.mutexVideo.Lock()
+			if rtspHandler.videoCache == nil || rtspHandler.videoCache.Len() == 0 {
+				rtspHandler.mutexVideo.Unlock()
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
-			tag := this.videoCache.Front().Value.(*flv.FlvTag).Copy()
-			this.videoCache.Remove(this.videoCache.Front())
-			this.mutexVideo.Unlock()
-			err := this.sendFlvH264(track, tag, beginTime)
+			tag := rtspHandler.videoCache.Front().Value.(*flv.FlvTag).Copy()
+			rtspHandler.videoCache.Remove(rtspHandler.videoCache.Front())
+			rtspHandler.mutexVideo.Unlock()
+			err := rtspHandler.sendFlvH264(track, tag, beginTime)
 			if err != nil {
 				logger.LOGE(err.Error())
 				return
 			}
-		} else if ctrl_track_audio == track.trackId {
+		} else if ctrl_track_audio == track.trackID {
 			//			logger.LOGT("audio not processed now")
-			this.mutexAudio.Lock()
-			if this.audioCache == nil || this.audioCache.Len() == 0 {
-				this.mutexAudio.Unlock()
+			rtspHandler.mutexAudio.Lock()
+			if rtspHandler.audioCache == nil || rtspHandler.audioCache.Len() == 0 {
+				rtspHandler.mutexAudio.Unlock()
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
-			tag := this.audioCache.Front().Value.(*flv.FlvTag).Copy()
-			this.audioCache.Remove(this.audioCache.Front())
-			this.mutexAudio.Unlock()
+			tag := rtspHandler.audioCache.Front().Value.(*flv.FlvTag).Copy()
+			rtspHandler.audioCache.Remove(rtspHandler.audioCache.Front())
+			rtspHandler.mutexAudio.Unlock()
 			if audioBeginTime == 0 {
 				audioBeginTime = tag.Timestamp
 			}
 			if false == beginSend {
 				beginSend = true
-				err := this.sendFlvAudio(track, this.audioHeader, audioBeginTime)
+				err := rtspHandler.sendFlvAudio(track, rtspHandler.audioHeader, audioBeginTime)
 				if err != nil {
 					logger.LOGE(err.Error())
 					return
 				}
 			}
-			err := this.sendFlvAudio(track, tag, audioBeginTime)
+			err := rtspHandler.sendFlvAudio(track, tag, audioBeginTime)
 			if err != nil {
 				logger.LOGE(err.Error())
 				return
 			}
 
 		} else {
-			logger.LOGE(track.trackId + " wrong")
+			logger.LOGE(track.trackID + " wrong")
 			return
 		}
 	}
 }
 
-func (this *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSend uint32) (err error) {
+func (rtspHandler *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSend uint32) (err error) {
 	if "udp" == track.transPort {
-		pkts := this.generateH264RTPPackets(tag, beginSend, track)
+		pkts := rtspHandler.generateH264RTPPackets(tag, beginSend, track)
 		if nil == pkts {
 			return
 		}
@@ -551,7 +552,7 @@ func (this *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSen
 			}
 		}
 	} else {
-		pkts := this.generateH264RTPPackets(tag, beginSend, track)
+		pkts := rtspHandler.generateH264RTPPackets(tag, beginSend, track)
 		if nil == pkts {
 			return
 		}
@@ -566,10 +567,10 @@ func (this *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSen
 				tcpHeader[2] = byte(dataSize >> 8)
 				tcpHeader[3] = byte(dataSize & 0xff)
 				track.byteSend += 4
-				this.send(tcpHeader)
+				rtspHandler.send(tcpHeader)
 			}
 
-			err = this.send(pktData)
+			err = rtspHandler.send(pktData)
 			track.pktSend++
 			track.byteSend += int64(dataSize)
 			if err != nil {
@@ -581,13 +582,13 @@ func (this *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSen
 	return
 }
 
-func (this *RTSPHandler) sendFlvAudio(track *trackInfo, tag *flv.FlvTag, beginSend uint32) (err error) {
+func (rtspHandler *RTSPHandler) sendFlvAudio(track *trackInfo, tag *flv.FlvTag, beginSend uint32) (err error) {
 	var pkts *list.List
 	switch tag.Data[0] >> 4 {
 	case flv.SoundFormatAAC:
-		pkts = this.generateAACRTPPackets(tag, beginSend, track)
+		pkts = rtspHandler.generateAACRTPPackets(tag, beginSend, track)
 	case flv.SoundFormatMP3:
-		pkts = this.generateMP3RTPPackets(tag, beginSend, track)
+		pkts = rtspHandler.generateMP3RTPPackets(tag, beginSend, track)
 	default:
 		logger.LOGW("audio type not support now")
 		return
@@ -617,10 +618,10 @@ func (this *RTSPHandler) sendFlvAudio(track *trackInfo, tag *flv.FlvTag, beginSe
 				tcpHeader[2] = byte(dataSize >> 8)
 				tcpHeader[3] = byte(dataSize & 0xff)
 				track.byteSend += 4
-				this.send(tcpHeader)
+				rtspHandler.send(tcpHeader)
 			}
 
-			err = this.send(pktData)
+			err = rtspHandler.send(pktData)
 			track.pktSend++
 			track.byteSend += int64(dataSize)
 			if err != nil {
@@ -632,7 +633,7 @@ func (this *RTSPHandler) sendFlvAudio(track *trackInfo, tag *flv.FlvTag, beginSe
 	return
 }
 
-func (this *RTSPHandler) sendRTCP(track *trackInfo, rtpTime uint32) {
+func (rtspHandler *RTSPHandler) sendRTCP(track *trackInfo, rtpTime uint32) {
 	if "udp" == track.transPort {
 		data := createSR(track.ssrc, rtpTime, uint32(track.pktSend), uint32(track.byteSend))
 		_, err := track.RTCPCliConn.Write(data)
@@ -645,7 +646,7 @@ func (this *RTSPHandler) sendRTCP(track *trackInfo, rtpTime uint32) {
 }
 
 //packetization-mode 1
-func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
+func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
 	payLoadSize := RTP_MTU
 	if track.transPort == "tcp" {
 		payLoadSize -= 4
@@ -666,7 +667,7 @@ func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint3
 		cur += int(nalSize)
 		nalType := nalData[0] & 0xf
 		//忽略sps pps
-		if nalType == h264.Nal_type_sps || nalType == h264.Nal_type_pps {
+		if nalType == h264.NalType_sps || nalType == h264.NalType_pps {
 			continue
 		}
 
@@ -679,8 +680,8 @@ func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint3
 		tmp64 := int64(track.clockRate / 1000)
 		timestamp = uint32((tmp64 * int64(timestamp)) & 0xffffffff)
 		//关键帧前面加sps pps
-		if nalType == h264.Nal_type_idr {
-			sps, pps := h264.GetSpsPpsFromAVC(this.videoHeader.Data[5:])
+		if nalType == h264.NalType_idr {
+			sps, pps := h264.GetSpsPpsFromAVC(rtspHandler.videoHeader.Data[5:])
 
 			stapA := &amf.AMF0Encoder{}
 			stapA.Init()
@@ -694,7 +695,7 @@ func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint3
 				stapA.AppendByteArray(headerData)
 				//start bit
 				Nri := ((sps[0] & 0x60) >> 5)
-				Type := byte(NAL_TYPE_STAP_A)
+				Type := byte(NalType_STAP_A)
 				stapA.AppendByte(((Nri << 5) | Type))
 				//sps size
 				stapA.EncodeInt16(int16(len(sps)))
@@ -726,10 +727,10 @@ func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint3
 				rtpPkts.PushBack(pktData)
 			} else {
 				//分片包,使用FU_A包
-				payLoadSize -= 1 //FU header
+				payLoadSize-- //FU header
 				var FU_S, FU_E, FU_R, FU_Type, Nri, Type byte
 				Nri = ((nalData[0] & 0x60) >> 5)
-				Type = NAL_TYPE_FU_A
+				Type = NalType_FU_A
 				FU_Type = nalType
 				count := int(nalSize) / payLoadSize
 				if count*payLoadSize < int(nalSize) {
@@ -811,16 +812,16 @@ func (this *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint3
 	return
 }
 
-func (this *RTSPHandler) stopPlayThread() {
-	this.isPlaying = false
-	this.waitPlaying.Wait()
+func (rtspHandler *RTSPHandler) stopPlayThread() {
+	rtspHandler.isPlaying = false
+	rtspHandler.waitPlaying.Wait()
 }
 
 /*
 2byte au-header-length
 
 */
-func (this *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
+func (rtspHandler *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
 	payloadSize := RTP_MTU - 4
 	if "tcp" == track.transPort {
 		payloadSize -= 4
@@ -831,11 +832,11 @@ func (this *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32
 		return
 	}
 
-	au_header := make([]byte, 4)
-	au_header[0] = 0x00
-	au_header[1] = 0x10
-	au_header[2] = byte((dataSize & 0x1fe0) >> 5)
-	au_header[3] = byte((dataSize & 0x1f) << 3)
+	aHeader := make([]byte, 4)
+	aHeader[0] = 0x00
+	aHeader[1] = 0x10
+	aHeader[2] = byte((dataSize & 0x1fe0) >> 5)
+	aHeader[3] = byte((dataSize & 0x1f) << 3)
 	timestamp := tag.Timestamp - beginTime
 	if tag.Timestamp < beginTime {
 		timestamp = 0
@@ -859,7 +860,7 @@ func (this *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32
 			track.seq = 0
 		}
 		tmp.AppendByteArray(headerData)
-		tmp.AppendByteArray(au_header)
+		tmp.AppendByteArray(aHeader)
 		tmp.AppendByteArray(tag.Data[cur : cur+payloadSize])
 		pktData, _ := tmp.GetData()
 		rtpPkts.PushBack(pktData)
@@ -876,7 +877,7 @@ func (this *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32
 			track.seq = 0
 		}
 		single.AppendByteArray(headerData)
-		single.AppendByteArray(au_header)
+		single.AppendByteArray(aHeader)
 		single.AppendByteArray(tag.Data[cur:])
 		pktData, _ := single.GetData()
 		rtpPkts.PushBack(pktData)

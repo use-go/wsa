@@ -17,13 +17,13 @@ func newSSRCManager() (manager *ssrcManager) {
 	return
 }
 
-func (this *ssrcManager) NewSSRC() (id uint32) {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
+func (ssrcmanager *ssrcManager) NewSSRC() (id uint32) {
+	ssrcmanager.mutex.Lock()
+	defer ssrcmanager.mutex.Unlock()
 	for {
 		id = rand.Uint32()
-		if false == this.set.Has(id) {
-			this.set.Add(id)
+		if false == ssrcmanager.set.Has(id) {
+			ssrcmanager.set.Add(id)
 			return
 		}
 	}

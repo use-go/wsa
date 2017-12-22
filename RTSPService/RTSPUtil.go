@@ -273,7 +273,7 @@ func genMP3sdp(data []byte) (sdp string) {
 		return
 	}
 	logger.LOGD(header.SampleRate)
-	if false == MP3_ADU {
+	if false == Mp3ADU {
 		sdp += "m=audio 0 RTP/AVP " + strconv.Itoa(Payload_MPA) + RTSP_EL
 		sdp += "b=AS:" + strconv.Itoa(header.Bitrate) + RTSP_EL
 		sdp += "a=control:" + ctrl_track_audio + RTSP_EL

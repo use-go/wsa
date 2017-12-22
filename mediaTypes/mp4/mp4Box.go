@@ -19,94 +19,94 @@ type MP4Box struct {
 }
 
 //压入一个盒子
-func (this *MP4Box) Push(name []byte) {
+func (mp4Box *MP4Box) Push(name []byte) {
 	offset := &boxOffset{}
 	offset.longBox = false
-	offset.pos = this.writer.Len()
-	this.offset.PushBack(offset)
-	this.Push4Bytes(0)
-	this.PushBytes(name)
+	offset.pos = mp4Box.writer.Len()
+	mp4Box.offset.PushBack(offset)
+	mp4Box.Push4Bytes(0)
+	mp4Box.PushBytes(name)
 }
 
 //压入一个长盒子
-func (this *MP4Box) PushLongBox(name []byte) {
-	log.Fatal("do not call this func ,bytes.Buffer 32bit only")
+func (mp4Box *MP4Box) PushLongBox(name []byte) {
+	log.Fatal("do not call mp4Box func ,bytes.Buffer 32bit only")
 	offset := &boxOffset{}
 	offset.longBox = true
-	offset.pos = this.writer.Len()
-	this.offset.PushBack(offset)
-	this.Push4Bytes(1)
-	this.Push8Bytes(0)
-	this.PushBytes(name)
+	offset.pos = mp4Box.writer.Len()
+	mp4Box.offset.PushBack(offset)
+	mp4Box.Push4Bytes(1)
+	mp4Box.Push8Bytes(0)
+	mp4Box.PushBytes(name)
 }
 
 //弹出一个盒子
-func (this *MP4Box) Pop() {
-	if this.offset.Len() == 0 {
+func (mp4Box *MP4Box) Pop() {
+	if mp4Box.offset.Len() == 0 {
 		return
 	}
-	offset := this.offset.Back().Value.(*boxOffset)
-	boxSize := this.writer.Len() - offset.pos
+	offset := mp4Box.offset.Back().Value.(*boxOffset)
+	boxSize := mp4Box.writer.Len() - offset.pos
 	if offset.longBox == true {
-		data := this.writer.Bytes()
+		data := mp4Box.writer.Bytes()
 		data[offset.pos+0] = 0
 		data[offset.pos+1] = 0
 		data[offset.pos+2] = 0
 		data[offset.pos+3] = 1
 		//这里不应该使用这个，因为bytes.buffer 只有32位
-		log.Fatal("can not pop longbox this way,bytes.buffer 32bit only")
+		log.Fatal("can not pop longbox mp4Box way,bytes.buffer 32bit only")
 	} else {
-		data := this.writer.Bytes()
+		data := mp4Box.writer.Bytes()
 		data[offset.pos+0] = byte((boxSize >> 24) & 0xff)
 		data[offset.pos+1] = byte((boxSize >> 16) & 0xff)
 		data[offset.pos+2] = byte((boxSize >> 8) & 0xff)
 		data[offset.pos+3] = byte((boxSize >> 0) & 0xff)
 	}
 
-	this.offset.Remove(this.offset.Back())
+	mp4Box.offset.Remove(mp4Box.offset.Back())
 }
 
 //清空整个盒子
-func (this *MP4Box) Flush() []byte {
-	if this.writer.Len() == 0 {
+func (mp4Box *MP4Box) Flush() []byte {
+	if mp4Box.writer.Len() == 0 {
 		return nil
 	}
-	data := make([]byte, this.writer.Len())
-	copy(data, this.writer.Bytes())
-	this.writer.Reset()
+	data := make([]byte, mp4Box.writer.Len())
+	copy(data, mp4Box.writer.Bytes())
+	mp4Box.writer.Reset()
 	return data
 }
 
-func (this *MP4Box) Push8Bytes(data uint64) {
-	err := binary.Write(&this.writer, binary.BigEndian, data)
+func (mp4Box *MP4Box) Push8Bytes(data uint64) {
+	err := binary.Write(&mp4Box.writer, binary.BigEndian, data)
 	if err != nil {
 		log.Println(err.Error())
 	}
 }
 
-func (this *MP4Box) Push4Bytes(data uint32) {
-	err := binary.Write(&this.writer, binary.BigEndian, data)
+func (mp4Box *MP4Box) Push4Bytes(data uint32) {
+	err := binary.Write(&mp4Box.writer, binary.BigEndian, data)
 	if err != nil {
 		log.Println(err.Error())
 	}
 }
 
-func (this *MP4Box) Push2Bytes(data uint16) {
-	err := binary.Write(&this.writer, binary.BigEndian, data)
+func (mp4Box *MP4Box) Push2Bytes(data uint16) {
+	err := binary.Write(&mp4Box.writer, binary.BigEndian, data)
 	if err != nil {
 		log.Println(err.Error())
 	}
 }
 
-func (this *MP4Box) PushByte(data uint8) {
-	err := this.writer.WriteByte(data)
+func (mp4Box *MP4Box) PushByte(data uint8) {
+	err := mp4Box.writer.WriteByte(data)
 	if err != nil {
 		log.Println(err.Error())
 	}
 }
 
-func (this *MP4Box) PushBytes(data []byte) {
-	_, err := this.writer.Write(data)
+func (mp4Box *MP4Box) PushBytes(data []byte) {
+	_, err := mp4Box.writer.Write(data)
 	if err != nil {
 		log.Println(err.Error())
 	}

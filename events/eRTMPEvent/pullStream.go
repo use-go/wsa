@@ -19,34 +19,34 @@ type EvePullRTMPStream struct {
 	Src        chan wssAPI.MsgHandler
 }
 
-func (this *EvePullRTMPStream) Receiver() string {
+func (evePullRTMPStream *EvePullRTMPStream) Receiver() string {
 	return wssAPI.OBJRTMPServer
 }
 
-func (this *EvePullRTMPStream) Type() string {
+func (evePullRTMPStream *EvePullRTMPStream) Type() string {
 	return PullRTMPStream
 }
 
-func (this *EvePullRTMPStream) Init(protocol, app, instance, addr, streamName, sourceName string, port int) {
-	this.Protocol = protocol
-	this.App = app
-	this.Address = addr
-	this.Instance = instance
-	this.Port = port
-	this.StreamName = streamName
-	this.SourceName = sourceName
-	this.Src = make(chan wssAPI.MsgHandler)
+func (evePullRTMPStream *EvePullRTMPStream) Init(protocol, app, instance, addr, streamName, sourceName string, port int) {
+	evePullRTMPStream.Protocol = protocol
+	evePullRTMPStream.App = app
+	evePullRTMPStream.Address = addr
+	evePullRTMPStream.Instance = instance
+	evePullRTMPStream.Port = port
+	evePullRTMPStream.StreamName = streamName
+	evePullRTMPStream.SourceName = sourceName
+	evePullRTMPStream.Src = make(chan wssAPI.MsgHandler)
 }
 
-func (this *EvePullRTMPStream) Copy() (out *EvePullRTMPStream) {
+func (evePullRTMPStream *EvePullRTMPStream) Copy() (out *EvePullRTMPStream) {
 	out = &EvePullRTMPStream{}
-	out.Protocol = this.Protocol
-	out.App = this.App
-	out.Instance = this.Instance
-	out.Address = this.Address
-	out.Port = this.Port
-	out.StreamName = this.StreamName
-	out.SourceName = this.SourceName
-	out.Src = this.Src
+	out.Protocol = evePullRTMPStream.Protocol
+	out.App = evePullRTMPStream.App
+	out.Instance = evePullRTMPStream.Instance
+	out.Address = evePullRTMPStream.Address
+	out.Port = evePullRTMPStream.Port
+	out.StreamName = evePullRTMPStream.StreamName
+	out.SourceName = evePullRTMPStream.SourceName
+	out.Src = evePullRTMPStream.Src
 	return
 }

@@ -21,7 +21,7 @@ const (
 	SoundFormatreserved                = 9
 	SoundFormatAAC                     = 10
 	SoundFormatSpeex                   = 11
-	SoundFormatMP3_8KHz                = 14
+	SoundFormatMp38KHz                = 14
 	SoundFormatDeviceSpecificSound     = 15
 )
 

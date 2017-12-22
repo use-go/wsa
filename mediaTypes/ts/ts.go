@@ -69,15 +69,15 @@ type TsCreater struct {
 	data_alignment_indicator bool
 }
 
-func (this *TsCreater) Reset() {
-	this.tsCache = list.New()
-	this.beginTime = 0xffffffff
-	this.nowTime = 0
-	this.data_alignment_indicator = false
-	this.audioPts = 0
+func (tsCreater *TsCreater) Reset() {
+	tsCreater.tsCache = list.New()
+	tsCreater.beginTime = 0xffffffff
+	tsCreater.nowTime = 0
+	tsCreater.data_alignment_indicator = false
+	tsCreater.audioPts = 0
 }
 
-func (this *TsCreater) writePCR(buf []byte, pcr, pcrExt uint64) {
+func (tsCreater *TsCreater) writePCR(buf []byte, pcr, pcrExt uint64) {
 	cur := 0
 	buf[cur] = byte((pcr >> 25) & 0xff)
 	cur++
@@ -94,25 +94,25 @@ func (this *TsCreater) writePCR(buf []byte, pcr, pcrExt uint64) {
 	cur++
 }
 
-func (this *TsCreater) AddTag(tag *flv.FlvTag) {
+func (tsCreater *TsCreater) AddTag(tag *flv.FlvTag) {
 	if flv.FlvTagScriptData == tag.TagType {
 		return
 	}
-	if this.tsCache == nil {
-		this.keyframeWrited = false
-		this.encodeAudio = TS_VIDEO_ONLY
-		this.tsCache = list.New()
+	if tsCreater.tsCache == nil {
+		tsCreater.keyframeWrited = false
+		tsCreater.encodeAudio = TS_VIDEO_ONLY
+		tsCreater.tsCache = list.New()
 	}
-	this.nowTime = tag.Timestamp
-	if true == this.avHeaderAdded(tag) {
-		if 0xffffffff == this.beginTime {
-			this.beginTime = tag.Timestamp
-			if this.audioHeader == nil || TS_VIDEO_ONLY {
-				this.encodeAudio = false
+	tsCreater.nowTime = tag.Timestamp
+	if true == tsCreater.avHeaderAdded(tag) {
+		if 0xffffffff == tsCreater.beginTime {
+			tsCreater.beginTime = tag.Timestamp
+			if tsCreater.audioHeader == nil || TS_VIDEO_ONLY {
+				tsCreater.encodeAudio = false
 			} else {
-				this.encodeAudio = true
+				tsCreater.encodeAudio = true
 			}
-			this.addPatPmt()
+			tsCreater.addPatPmt()
 		}
 		var addDts, addPCR bool
 		if flv.FlvTagAudio == tag.TagType {
@@ -133,12 +133,12 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 		var payloadSize int
 
 		if flv.FlvTagAudio == tag.TagType {
-			dataPayload, payloadSize = this.audioPayload(tag)
+			dataPayload, payloadSize = tsCreater.audioPayload(tag)
 			if 0 == payloadSize || nil == dataPayload {
 				return
 			}
 		} else if flv.FlvTagVideo == tag.TagType {
-			dataPayload = this.videoPayload(tag)
+			dataPayload = tsCreater.videoPayload(tag)
 			if nil == dataPayload {
 				logger.LOGE(dataPayload)
 				return
@@ -146,15 +146,15 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			payloadSize = len(dataPayload)
 		}
 
-		tsCount, padSize = this.getTsCount(payloadSize, addPCR, addDts)
+		tsCount, padSize = tsCreater.getTsCount(payloadSize, addPCR, addDts)
 		if tag.TagType == flv.FlvTagAudio {
-			this.calAudioTime(tag)
+			tsCreater.calAudioTime(tag)
 
 		}
 		tsBuf := make([]byte, TS_length)
 		cur := 0
 
-		pcr, pcrExt, pcrPts, pcrDts := this.calPcrPtsDts(tag)
+		pcr, pcrExt, pcrPts, pcrDts := tsCreater.calPcrPtsDts(tag)
 
 		//logger.LOGD(pcr,pcrPts,pcrDts-pcrPts)
 		if 1 == tsCount {
@@ -175,36 +175,36 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			cur++
 			if addPCR || padSize > 0 {
 				if flv.FlvTagAudio == tag.TagType {
-					tsBuf[cur] = byte(0x30 | this.tsAcount)
+					tsBuf[cur] = byte(0x30 | tsCreater.tsAcount)
 					cur++
 				} else {
-					tsBuf[cur] = byte(0x30 | this.tsVcount)
+					tsBuf[cur] = byte(0x30 | tsCreater.tsVcount)
 					cur++
 				}
 			} else {
 				if flv.FlvTagAudio == tag.TagType {
-					tsBuf[cur] = byte(0x10 | this.tsAcount)
+					tsBuf[cur] = byte(0x10 | tsCreater.tsAcount)
 					cur++
 				} else {
-					tsBuf[cur] = byte(0x10 | this.tsVcount)
+					tsBuf[cur] = byte(0x10 | tsCreater.tsVcount)
 					cur++
 				}
 			}
 			if flv.FlvTagAudio == tag.TagType {
-				this.tsAcount++
-				if this.tsAcount == 16 {
-					this.tsAcount = 0
+				tsCreater.tsAcount++
+				if tsCreater.tsAcount == 16 {
+					tsCreater.tsAcount = 0
 				}
 			} else {
-				this.tsVcount++
-				if this.tsVcount == 16 {
-					this.tsVcount = 0
+				tsCreater.tsVcount++
+				if tsCreater.tsVcount == 16 {
+					tsCreater.tsVcount = 0
 				}
 			}
 
 			//!四字节头
 			//PCR、PAD
-			//timeMS := uint64(tag.Timestamp - this.beginTime)
+			//timeMS := uint64(tag.Timestamp - tsCreater.beginTime)
 			//pcr := uint64(((timeMS * (PCR_HZ / 1000)) / 300) % 0x200000000)
 			if addPCR {
 				adpLength := 7 + padSize
@@ -212,7 +212,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 				cur++
 				tsBuf[cur] = 0x10
 				cur++
-				this.writePCR(tsBuf[cur:], pcr, pcrExt)
+				tsCreater.writePCR(tsBuf[cur:], pcr, pcrExt)
 				cur += 6
 				cur += padSize
 			} else if false == addPCR && padSize > 0 {
@@ -247,14 +247,14 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 				tsBuf[cur] = 0x05
 				cur++
 
-				tsBuf[cur] = byte((0x20) | ((this.audioPts & 0x1c0000000) >> 29) | 1)
+				tsBuf[cur] = byte((0x20) | ((tsCreater.audioPts & 0x1c0000000) >> 29) | 1)
 				cur++
-				tmp16 = uint16(((this.audioPts & 0x3fff8000) >> 14) | 1)
+				tmp16 = uint16(((tsCreater.audioPts & 0x3fff8000) >> 14) | 1)
 				tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
 				cur++
 				tsBuf[cur] = byte(tmp16 & 0xff)
 				cur++
-				tmp16 = uint16((this.audioPts&0x7fff)<<1) | 1
+				tmp16 = uint16((tsCreater.audioPts&0x7fff)<<1) | 1
 				tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
 				cur++
 				tsBuf[cur] = byte(tmp16 & 0xff)
@@ -269,11 +269,11 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 				cur++
 				tsBuf[cur] = 0x00
 				cur++
-				if this.data_alignment_indicator {
+				if tsCreater.data_alignment_indicator {
 					tsBuf[cur] = 0x80
 				} else {
 					tsBuf[cur] = 0x84
-					this.data_alignment_indicator = true
+					tsCreater.data_alignment_indicator = true
 				}
 				cur++
 				tsBuf[cur] = 0xc0
@@ -309,7 +309,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 				cur += payloadSize
 			}
 			//!PES
-			this.appendTsPkt(tsBuf)
+			tsCreater.appendTsPkt(tsBuf)
 
 		} else {
 			//不止一个包的情况
@@ -334,37 +334,37 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					cur++
 					if addPCR {
 						if flv.FlvTagAudio == tag.TagType {
-							tsBuf[cur] = byte(0x30 | this.tsAcount)
+							tsBuf[cur] = byte(0x30 | tsCreater.tsAcount)
 							cur++
 						} else {
-							tsBuf[cur] = byte(0x30 | this.tsVcount)
+							tsBuf[cur] = byte(0x30 | tsCreater.tsVcount)
 							cur++
 						}
 					} else {
 						if flv.FlvTagAudio == tag.TagType {
-							tsBuf[cur] = byte(0x10 | this.tsAcount)
+							tsBuf[cur] = byte(0x10 | tsCreater.tsAcount)
 							cur++
 						} else {
-							tsBuf[cur] = byte(0x10 | this.tsVcount)
+							tsBuf[cur] = byte(0x10 | tsCreater.tsVcount)
 							cur++
 						}
 					}
 
 					if flv.FlvTagAudio == tag.TagType {
-						this.tsAcount++
-						if this.tsAcount == 16 {
-							this.tsAcount = 0
+						tsCreater.tsAcount++
+						if tsCreater.tsAcount == 16 {
+							tsCreater.tsAcount = 0
 						}
 					} else {
-						this.tsVcount++
-						if this.tsVcount == 16 {
-							this.tsVcount = 0
+						tsCreater.tsVcount++
+						if tsCreater.tsVcount == 16 {
+							tsCreater.tsVcount = 0
 						}
 					}
 
 					//!四字节头
 					//PCR
-					//timeMS := uint64(tag.Timestamp - this.beginTime)
+					//timeMS := uint64(tag.Timestamp - tsCreater.beginTime)
 					//pcr := uint64(((timeMS * (PCR_HZ / 1000)) / 300) % 0x200000000)
 					if addPCR {
 						adpLength := 7
@@ -372,7 +372,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						cur++
 						tsBuf[cur] = 0x10
 						cur++
-						this.writePCR(tsBuf[cur:], pcr, pcrExt)
+						tsCreater.writePCR(tsBuf[cur:], pcr, pcrExt)
 						cur += 6
 					}
 					//!PCR
@@ -398,14 +398,14 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						tsBuf[cur] = 0x05
 						cur++
 
-						tsBuf[cur] = byte((0x20) | ((this.audioPts & 0x1c0000000) >> 29) | 1)
+						tsBuf[cur] = byte((0x20) | ((tsCreater.audioPts & 0x1c0000000) >> 29) | 1)
 						cur++
-						tmp16 = uint16(((this.audioPts & 0x3fff8000) >> 14) | 1)
+						tmp16 = uint16(((tsCreater.audioPts & 0x3fff8000) >> 14) | 1)
 						tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
 						cur++
 						tsBuf[cur] = byte(tmp16 & 0xff)
 						cur++
-						tmp16 = uint16((this.audioPts&0x7fff)<<1) | 1
+						tmp16 = uint16((tsCreater.audioPts&0x7fff)<<1) | 1
 						tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
 						cur++
 						tsBuf[cur] = byte(tmp16 & 0xff)
@@ -418,11 +418,11 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						cur++
 						tsBuf[cur] = 0x00 //stream id
 						cur++
-						if this.data_alignment_indicator {
+						if tsCreater.data_alignment_indicator {
 							tsBuf[cur] = 0x80
 						} else {
 							tsBuf[cur] = 0x84
-							this.data_alignment_indicator = true
+							tsCreater.data_alignment_indicator = true
 						}
 						cur++
 						tsBuf[cur] = 0xc0
@@ -458,7 +458,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					//!PES头
 					copy(tsBuf[cur:], dataPayload[payloadCur:TS_length-cur])
 					payloadCur += TS_length - cur
-					this.appendTsPkt(tsBuf)
+					tsCreater.appendTsPkt(tsBuf)
 				} else {
 					//四字节头
 					tsBuf[cur] = 0x47
@@ -476,10 +476,10 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					if i == tsCount-1 && padSize != 0 {
 						//最后一帧，且有pad
 						if flv.FlvTagAudio == tag.TagType {
-							tsBuf[cur] = byte(0x30 | this.tsAcount)
+							tsBuf[cur] = byte(0x30 | tsCreater.tsAcount)
 							cur++
 						} else {
-							tsBuf[cur] = byte(0x30 | this.tsVcount)
+							tsBuf[cur] = byte(0x30 | tsCreater.tsVcount)
 							cur++
 						}
 						tsBuf[cur] = byte(padSize - 1)
@@ -493,10 +493,10 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					} else {
 						//普通添加数据
 						if flv.FlvTagAudio == tag.TagType {
-							tsBuf[cur] = byte(0x10 | this.tsAcount)
+							tsBuf[cur] = byte(0x10 | tsCreater.tsAcount)
 							cur++
 						} else {
-							tsBuf[cur] = byte(0x10 | this.tsVcount)
+							tsBuf[cur] = byte(0x10 | tsCreater.tsVcount)
 							cur++
 						}
 
@@ -505,88 +505,88 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						payloadCur += TS_length - cur
 					}
 					if flv.FlvTagAudio == tag.TagType {
-						this.tsAcount++
-						if this.tsAcount == 16 {
-							this.tsAcount = 0
+						tsCreater.tsAcount++
+						if tsCreater.tsAcount == 16 {
+							tsCreater.tsAcount = 0
 						}
 					} else {
-						this.tsVcount++
-						if this.tsVcount == 16 {
-							this.tsVcount = 0
+						tsCreater.tsVcount++
+						if tsCreater.tsVcount == 16 {
+							tsCreater.tsVcount = 0
 						}
 					}
-					this.appendTsPkt(tsBuf)
+					tsCreater.appendTsPkt(tsBuf)
 				}
 			}
 		}
 	}
 }
 
-func (this *TsCreater) GetDuration() (sec int) {
-	return int(this.nowTime - this.beginTime)
+func (tsCreater *TsCreater) GetDuration() (sec int) {
+	return int(tsCreater.nowTime - tsCreater.beginTime)
 }
 
-func (this *TsCreater) FlushTsList() (tsList *list.List) {
-	tsList = this.tsCache
-	this.tsCache = list.New()
-	this.keyframeWrited = false
-	this.addPatPmt()
+func (tsCreater *TsCreater) FlushTsList() (tsList *list.List) {
+	tsList = tsCreater.tsCache
+	tsCreater.tsCache = list.New()
+	tsCreater.keyframeWrited = false
+	tsCreater.addPatPmt()
 	return tsList
 }
 
-func (this *TsCreater) avHeaderAdded(tag *flv.FlvTag) (headerGeted bool) {
-	if TS_VIDEO_ONLY && this.videoHeader != nil {
+func (tsCreater *TsCreater) avHeaderAdded(tag *flv.FlvTag) (headerGeted bool) {
+	if TS_VIDEO_ONLY && tsCreater.videoHeader != nil {
 		return true
 	}
-	if this.audioHeader != nil && this.videoHeader != nil {
+	if tsCreater.audioHeader != nil && tsCreater.videoHeader != nil {
 		return true
 	}
-	this.beginTime = 0xffffffff
+	tsCreater.beginTime = 0xffffffff
 	if tag.TagType == flv.FlvTagAudio {
-		if this.audioHeader != nil {
+		if tsCreater.audioHeader != nil {
 			//防止只有音频的情况
 			return true
 		}
-		this.audioHeader = make([]byte, len(tag.Data))
-		copy(this.audioHeader, tag.Data)
-		this.parseAudioType(this.audioHeader)
+		tsCreater.audioHeader = make([]byte, len(tag.Data))
+		copy(tsCreater.audioHeader, tag.Data)
+		tsCreater.parseAudioType(tsCreater.audioHeader)
 		return false
 	}
 	if tag.TagType == flv.FlvTagVideo {
-		if this.videoHeader != nil {
+		if tsCreater.videoHeader != nil {
 			//防止没有音频的情况
 			return true
 		}
-		this.videoHeader = make([]byte, len(tag.Data))
-		copy(this.videoHeader, tag.Data)
-		this.videoTypeId = 0x1b
-		this.parseAVC(this.videoHeader)
+		tsCreater.videoHeader = make([]byte, len(tag.Data))
+		copy(tsCreater.videoHeader, tag.Data)
+		tsCreater.videoTypeId = 0x1b
+		tsCreater.parseAVC(tsCreater.videoHeader)
 		return false
 	}
 	return false
 }
 
-func (this *TsCreater) parseAudioType(data []byte) {
+func (tsCreater *TsCreater) parseAudioType(data []byte) {
 	audioCodec := data[0] >> 4
 	switch audioCodec {
 	case flv.SoundFormatAAC:
-		this.audioFrameSize = 1024
-		//this.asc = aac.GenerateAudioSpecificConfig(data[2:])
-		this.asc = aac.MP4AudioGetConfig(data[2:])
-		this.audioSampleHz = int(this.asc.Sample_rate)
-		this.audioTypeId = 0x0f
+		tsCreater.audioFrameSize = 1024
+		//tsCreater.asc = aac.GenerateAudioSpecificConfig(data[2:])
+		tsCreater.asc = aac.MP4AudioGetConfig(data[2:])
+		tsCreater.audioSampleHz = int(tsCreater.asc.Sample_rate)
+		tsCreater.audioTypeId = 0x0f
 	case flv.SoundFormatMP3:
-		this.audioFrameSize = 1152
+		tsCreater.audioFrameSize = 1152
 		mp3Header, err := mp3.ParseMP3Header(data[1:])
 		if err != nil {
 			logger.LOGE(err.Error())
 			return
 		}
-		this.audioSampleHz = mp3Header.SampleRate
+		tsCreater.audioSampleHz = mp3Header.SampleRate
 		if mp3Header.Version == 3 {
-			this.audioTypeId = 0x03
+			tsCreater.audioTypeId = 0x03
 		} else {
-			this.audioTypeId = 0x04
+			tsCreater.audioTypeId = 0x04
 		}
 	default:
 		logger.LOGE("ts audio type not supported", audioCodec)
@@ -595,14 +595,14 @@ func (this *TsCreater) parseAudioType(data []byte) {
 
 }
 
-func (this *TsCreater) parseAVC(data []byte) {
+func (tsCreater *TsCreater) parseAVC(data []byte) {
 	if data[0] == 0x17 && data[1] == 0 {
 		//avc
-		this.sps, this.pps = h264.GetSpsPpsFromAVC(data[5:])
+		tsCreater.sps, tsCreater.pps = h264.GetSpsPpsFromAVC(data[5:])
 	}
 }
 
-func (this *TsCreater) addPatPmt() {
+func (tsCreater *TsCreater) addPatPmt() {
 	cur := 0
 	var tmp16 uint16
 	var tmp32 uint32
@@ -659,7 +659,7 @@ func (this *TsCreater) addPatPmt() {
 	tsBuf[cur] = byte((tmp32 >> 0) & 0xff)
 	cur++
 
-	this.appendTsPkt(tsBuf)
+	tsCreater.appendTsPkt(tsBuf)
 	//pmt
 	tsBuf = make([]byte, TS_length)
 	for idx := 0; idx < TS_length; idx++ {
@@ -683,7 +683,7 @@ func (this *TsCreater) addPatPmt() {
 	tsBuf[cur] = 0x02 //table id
 	cur++
 
-	if this.encodeAudio {
+	if tsCreater.encodeAudio {
 		tmp16 = ((0xb0 << 8) | 0x17) //section length
 	} else {
 		tmp16 = ((0xb0 << 8) | 0x12)
@@ -713,7 +713,7 @@ func (this *TsCreater) addPatPmt() {
 	tsBuf[cur] = byte((tmp16 >> 0) & 0xff)
 	cur++
 	//video
-	tsBuf[cur] = byte(this.videoTypeId)
+	tsBuf[cur] = byte(tsCreater.videoTypeId)
 	cur++
 	tmp16 = (0xe000 | Video_Id)
 	tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
@@ -725,8 +725,8 @@ func (this *TsCreater) addPatPmt() {
 	tsBuf[cur] = 0x00
 	cur++
 	//audio
-	if this.encodeAudio {
-		tsBuf[cur] = byte(this.audioTypeId)
+	if tsCreater.encodeAudio {
+		tsBuf[cur] = byte(tsCreater.audioTypeId)
 		cur++
 		tmp16 = (0xe000 | Audio_Id)
 		tsBuf[cur] = byte((tmp16 >> 8) & 0xff)
@@ -749,16 +749,16 @@ func (this *TsCreater) addPatPmt() {
 	tsBuf[cur] = byte((tmp32 >> 0) & 0xff)
 	cur++
 
-	this.appendTsPkt(tsBuf)
+	tsCreater.appendTsPkt(tsBuf)
 }
 
-func (this *TsCreater) appendTsPkt(tsBuf []byte) {
+func (tsCreater *TsCreater) appendTsPkt(tsBuf []byte) {
 	tmp := make([]byte, len(tsBuf))
 	copy(tmp, tsBuf)
-	this.tsCache.PushBack(tmp)
+	tsCreater.tsCache.PushBack(tmp)
 }
 
-func (this *TsCreater) getTsCount(dataSize int, addPCR, addDts bool) (tsCount, padSize int) {
+func (tsCreater *TsCreater) getTsCount(dataSize int, addPCR, addDts bool) (tsCount, padSize int) {
 	firstValidSize := TS_length - 4
 	if addPCR {
 		firstValidSize -= 8
@@ -789,9 +789,9 @@ func (this *TsCreater) getTsCount(dataSize int, addPCR, addDts bool) (tsCount, p
 	return
 }
 
-func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
+func (tsCreater *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 	if tag.Data[0] == 0x17 && tag.Data[1] == 0 {
-		this.parseAVC(tag.Data)
+		tsCreater.parseAVC(tag.Data)
 		return nil
 	}
 	nalCur := 5
@@ -807,23 +807,23 @@ func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 		nalType := tag.Data[nalCur] & 0x1f
 
 		switch nalType {
-		case h264.Nal_type_sei:
-			this.sei = make([]byte, nalSize)
-			copy(this.sei, tag.Data[nalCur:nalCur+nalSize])
-		case h264.Nal_type_sps:
-			this.sps = make([]byte, nalSize)
-			copy(this.sps, tag.Data[nalCur:nalCur+nalSize])
-		case h264.Nal_type_pps:
-			this.pps = make([]byte, nalSize)
-			copy(this.pps, tag.Data[nalCur:nalCur+nalSize])
-		case h264.Nal_type_idr:
+		case h264.NalType_sei:
+			tsCreater.sei = make([]byte, nalSize)
+			copy(tsCreater.sei, tag.Data[nalCur:nalCur+nalSize])
+		case h264.NalType_sps:
+			tsCreater.sps = make([]byte, nalSize)
+			copy(tsCreater.sps, tag.Data[nalCur:nalCur+nalSize])
+		case h264.NalType_pps:
+			tsCreater.pps = make([]byte, nalSize)
+			copy(tsCreater.pps, tag.Data[nalCur:nalCur+nalSize])
+		case h264.NalType_idr:
 			getKeyframe = true
-			this.keyframeWrited = true
+			tsCreater.keyframeWrited = true
 			totalNalSize += nalSize + 3
 			tmp := make([]byte, nalSize)
 			copy(tmp, tag.Data[nalCur:nalCur+nalSize])
 			nalList.PushBack(tmp)
-		case h264.Nal_type_aud:
+		case h264.NalType_aud:
 			if /*0!=totalNalSize&&*/ nalSize != 2 {
 				totalNalSize += nalSize + 3
 				tmp := make([]byte, nalSize)
@@ -839,7 +839,7 @@ func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 		nalCur += nalSize
 	}
 
-	if false == getKeyframe && this.keyframeWrited == false {
+	if false == getKeyframe && tsCreater.keyframeWrited == false {
 		logger.LOGE("no keyframe")
 		return nil
 	}
@@ -852,14 +852,14 @@ func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 	if getKeyframe {
 		payloadSize := totalNalSize + 5
 
-		if len(this.sps) > 0 {
-			payloadSize += len(this.sps) + 3
+		if len(tsCreater.sps) > 0 {
+			payloadSize += len(tsCreater.sps) + 3
 		}
-		if len(this.pps) > 0 {
-			payloadSize += len(this.pps) + 3
+		if len(tsCreater.pps) > 0 {
+			payloadSize += len(tsCreater.pps) + 3
 		}
-		if len(this.sei) > 0 {
-			payloadSize += len(this.sei) + 3
+		if len(tsCreater.sei) > 0 {
+			payloadSize += len(tsCreater.sei) + 3
 		}
 		tmp32 := 0
 		payload = make([]byte, payloadSize)
@@ -874,7 +874,7 @@ func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 		payload[tmp32] = 0x10
 		tmp32++
 
-		if len(this.sps) > 0 {
+		if len(tsCreater.sps) > 0 {
 			payload[tmp32] = 0x00
 			tmp32++
 			payload[tmp32] = 0x00
@@ -882,30 +882,30 @@ func (this *TsCreater) videoPayload(tag *flv.FlvTag) (payload []byte) {
 			payload[tmp32] = 0x01
 			tmp32++
 
-			copy(payload[tmp32:], this.sps)
-			tmp32 += len(this.sps)
+			copy(payload[tmp32:], tsCreater.sps)
+			tmp32 += len(tsCreater.sps)
 		}
 
-		if len(this.pps) > 0 {
+		if len(tsCreater.pps) > 0 {
 			payload[tmp32] = 0x00
 			tmp32++
 			payload[tmp32] = 0x00
 			tmp32++
 			payload[tmp32] = 0x01
 			tmp32++
-			copy(payload[tmp32:], this.pps)
-			tmp32 += len(this.pps)
+			copy(payload[tmp32:], tsCreater.pps)
+			tmp32 += len(tsCreater.pps)
 		}
 
-		if len(this.sei) > 0 {
+		if len(tsCreater.sei) > 0 {
 			payload[tmp32] = 0x00
 			tmp32++
 			payload[tmp32] = 0x00
 			tmp32++
 			payload[tmp32] = 0x01
 			tmp32++
-			copy(payload[tmp32:], this.sei)
-			tmp32 += len(this.sei)
+			copy(payload[tmp32:], tsCreater.sei)
+			tmp32 += len(tsCreater.sei)
 		}
 
 		for e := nalList.Front(); e != nil; e = e.Next() {

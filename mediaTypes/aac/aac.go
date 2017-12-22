@@ -104,22 +104,22 @@ type AACCreater struct {
 	adtsAdded bool
 }
 
-func (this *AACCreater) Init(ascData []byte) {
-	if this.writer == nil {
-		this.writer = new(bytes.Buffer)
+func (aacCreater *AACCreater) Init(ascData []byte) {
+	if aacCreater.writer == nil {
+		aacCreater.writer = new(bytes.Buffer)
 	}
-	//this.asc=GenerateAudioSpecificConfig(ascData)
-	this.asc = MP4AudioGetConfig(ascData)
+	//aacCreater.asc=GenerateAudioSpecificConfig(ascData)
+	aacCreater.asc = MP4AudioGetConfig(ascData)
 }
 
 //first frame should asc
-func (this *AACCreater) Add(data []byte) {
-	this.writer.Write(CreateAACADTHeader(this.asc, len(data)))
-	this.writer.Write(data)
+func (aacCreater *AACCreater) Add(data []byte) {
+	aacCreater.writer.Write(CreateAACADTHeader(aacCreater.asc, len(data)))
+	aacCreater.writer.Write(data)
 }
 
-func (this *AACCreater) Flush() (data []byte) {
-	data = this.writer.Bytes()
-	this.writer.Reset()
+func (aacCreater *AACCreater) Flush() (data []byte) {
+	data = aacCreater.writer.Bytes()
+	aacCreater.writer.Reset()
 	return
 }
