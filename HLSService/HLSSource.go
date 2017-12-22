@@ -300,17 +300,17 @@ func (hlsSource *HLSSource) serveVideo(w http.ResponseWriter, req *http.Request,
 }
 
 func (hlsSource *HLSSource) AddFlvTag(tag *flv.FlvTag) {
-	if hlsSource.audioHeader == nil && tag.TagType == flv.FLV_TAG_Audio {
+	if hlsSource.audioHeader == nil && tag.TagType == flv.FlvTagAudio {
 		hlsSource.audioHeader = tag.Copy()
 		return
 	}
-	if hlsSource.videoHeader == nil && tag.TagType == flv.FLV_TAG_Video {
+	if hlsSource.videoHeader == nil && tag.TagType == flv.FlvTagVideo {
 		hlsSource.videoHeader = tag.Copy()
 		return
 	}
 
 	//if idr,new slice
-	if tag.TagType == flv.FLV_TAG_Video && tag.Data[0] == 0x17 && tag.Data[1] == 1 {
+	if tag.TagType == flv.FlvTagVideo && tag.Data[0] == 0x17 && tag.Data[1] == 1 {
 		hlsSource.createNewTSSegment(tag)
 	} else {
 		hlsSource.appendTag(tag)
@@ -406,7 +406,7 @@ func (hlsSource *HLSSource) appendTag(tag *flv.FlvTag) {
 		//tagIn.Timestamp-=hlsSource.beginTime
 		hlsSource.tsCur.AddTag(tagIn)
 	}
-	if flv.FLV_TAG_Audio == tag.TagType && hlsSource.audioCur != nil {
+	if flv.FlvTagAudio == tag.TagType && hlsSource.audioCur != nil {
 		hlsSource.audioCur.AddTag(tag)
 	}
 }

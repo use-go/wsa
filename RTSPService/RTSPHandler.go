@@ -141,16 +141,16 @@ func (this *RTSPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 func (this *RTSPHandler) appendFlvTag(msg *wssAPI.Msg) (err error) {
 	tag := msg.Param1.(*flv.FlvTag)
 
-	if this.audioHeader == nil && tag.TagType == flv.FLV_TAG_Audio {
+	if this.audioHeader == nil && tag.TagType == flv.FlvTagAudio {
 		this.audioHeader = tag.Copy()
 		return
 	}
-	if this.videoHeader == nil && tag.TagType == flv.FLV_TAG_Video {
+	if this.videoHeader == nil && tag.TagType == flv.FlvTagVideo {
 		this.videoHeader = tag.Copy()
 		return
 	}
 
-	if tag.TagType == flv.FLV_TAG_Video {
+	if tag.TagType == flv.FlvTagVideo {
 		this.mutexVideo.Lock()
 		if this.videoCache == nil || this.videoCache.Len() > 0xff {
 			this.videoCache = list.New()
@@ -159,7 +159,7 @@ func (this *RTSPHandler) appendFlvTag(msg *wssAPI.Msg) (err error) {
 		this.mutexVideo.Unlock()
 	}
 
-	if flv.FLV_TAG_Audio == tag.TagType {
+	if flv.FlvTagAudio == tag.TagType {
 		this.mutexAudio.Lock()
 		if this.audioCache == nil || this.audioCache.Len() > 0xff {
 			this.audioCache = list.New()
@@ -584,9 +584,9 @@ func (this *RTSPHandler) sendFlvH264(track *trackInfo, tag *flv.FlvTag, beginSen
 func (this *RTSPHandler) sendFlvAudio(track *trackInfo, tag *flv.FlvTag, beginSend uint32) (err error) {
 	var pkts *list.List
 	switch tag.Data[0] >> 4 {
-	case flv.SoundFormat_AAC:
+	case flv.SoundFormatAAC:
 		pkts = this.generateAACRTPPackets(tag, beginSend, track)
-	case flv.SoundFormat_MP3:
+	case flv.SoundFormatMP3:
 		pkts = this.generateMP3RTPPackets(tag, beginSend, track)
 	default:
 		logger.LOGW("audio type not support now")

@@ -1,71 +1,80 @@
 package flv
 
+//Flv data Type
 const (
-	FLV_TAG_Audio      = 8
-	FLV_TAG_Video      = 9
-	FLV_TAG_ScriptData = 18
+	FlvTagAudio      = 8
+	FlvTagVideo      = 9
+	FlvTagScriptData = 18
 )
 
+// SoundFormat Type
 const (
-	SoundFormat_LinearPCM_platformEndian = 0
-	SoundFormat_ADPCM                    = 1
-	SoundFormat_MP3                      = 2
-	SoundFormat_LinearPCM_littleEndian   = 3
-	SoundFormat_Nellymoser16KHzMono      = 4
-	SoundFormat_Nellymoser8KHzMono       = 5
-	SoundFormat_Nellymoser               = 6
-	SoundFormat_G711ALaw_PCM             = 7
-	SoundFormat_G711muLaw_PCM            = 8
-	SoundFormat_reserved                 = 9
-	SoundFormat_AAC                      = 10
-	SoundFormat_Speex                    = 11
-	SoundFormat_MP3_8KHz                 = 14
-	SoundFormat_DeviceSpecific_sound     = 15
+	SoundFormatLinearPCMplatformEndian = 0
+	SoundFormatADPCM                   = 1
+	SoundFormatMP3                     = 2
+	SoundFormatLinearPCMlittleEndian   = 3
+	SoundFormatNellymoser16KHzMono     = 4
+	SoundFormatNellymoser8KHzMono      = 5
+	SoundFormatNellymoser              = 6
+	SoundFormatG711ALawPCM             = 7
+	SoundFormatG711muLawPCM            = 8
+	SoundFormatreserved                = 9
+	SoundFormatAAC                     = 10
+	SoundFormatSpeex                   = 11
+	SoundFormatMP3_8KHz                = 14
+	SoundFormatDeviceSpecificSound     = 15
 )
 
+//Sound Rate
 const (
-	SoundRate_5_5K = 0
-	SoundRate_11K  = 1
-	SoundRate_22K  = 2
-	SoundRate_44K  = 3
+	SoundRate5_5K = 0
+	SoundRate11K  = 1
+	SoundRate22K  = 2
+	SoundRate44K  = 3
 )
 
+//Sound Size
 const (
-	SoundSize_8Bit  = 0
-	SoundSize_16Bit = 1
+	SoundSize8Bit  = 0
+	SoundSize16Bit = 1
 )
 
+//Sound Type
 const (
 	SndMono   = 0
 	SndStereo = 1
 )
 
+//AAC type
 const (
 	AACSequenceHeader = 0
 	AACRaw            = 1
 )
 
+//video 	FrameType
 const (
-	FrameType_Keyframe             = 1
-	FrameType_InterFrame           = 2
-	FrameType_DisposableInterFrame = 3 //H263 only
-	FrameType_GeneratedKeyframe    = 4 //server user only
-	FrameType_videoInfoCmdFrame    = 5
+	FrameTypeKeyframe             = 1
+	FrameTypeInterFrame           = 2
+	FrameTypeDisposableInterFrame = 3 //H263 only
+	FrameTypeGeneratedKeyframe    = 4 //server user only
+	FrameTypevideoInfoCmdFrame    = 5
 )
 
+// Codec Type
 const (
-	CodecID_JPEG               = 1
-	CodecID_SorenSonH263       = 2
-	CodecID_ScreenVideo        = 3
-	CodecID_On2VP6             = 4
-	CodecID_On2Vp6AlphaChannel = 5
-	CodecID_ScreenVideoV2      = 6
-	CodecID_AVC                = 7
+	CodecIDJPEG               = 1
+	CodecIDSorenSonH263       = 2
+	CodecIDScreenVideo        = 3
+	CodecIDOn2VP6             = 4
+	CodecIDOn2Vp6AlphaChannel = 5
+	CodecIDScreenVideoV2      = 6
+	CodecIDAVC                = 7
 )
 
+//AVC Type
 const (
-	AVC_Header = 0
-	AVC_NALU   = 1
+	AVCHeader = 0
+	AVCNALU   = 1
 )
 
 type FlvTag struct {
@@ -89,14 +98,15 @@ func GetVideoTag(flvTag *FlvTag) (result *VideoTag, err error) {
 	return
 }
 
-func (this *FlvTag) Copy() (dst *FlvTag) {
+//Copy Tag Type
+func (flvTag *FlvTag) Copy() (dst *FlvTag) {
 	dst = &FlvTag{}
-	dst.StreamID = this.StreamID
-	dst.TagType = this.TagType
-	dst.Timestamp = this.Timestamp
-	if len(this.Data) > 0 {
-		dst.Data = make([]byte, len(this.Data))
-		copy(dst.Data, this.Data)
+	dst.StreamID = flvTag.StreamID
+	dst.TagType = flvTag.TagType
+	dst.Timestamp = flvTag.Timestamp
+	if len(flvTag.Data) > 0 {
+		dst.Data = make([]byte, len(flvTag.Data))
+		copy(dst.Data, flvTag.Data)
 	}
 	return
 }

@@ -57,12 +57,12 @@ func (source *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 		}
 		tag := msg.Param1.(*flv.FlvTag)
 		switch tag.TagType {
-		case flv.FLV_TAG_Audio:
+		case flv.FlvTagAudio:
 			if source.audioHeader == nil {
 				source.audioHeader = tag.Copy()
 				source.audioHeader.Timestamp = 0
 			}
-		case flv.FLV_TAG_Video:
+		case flv.FlvTagVideo:
 			if source.videoHeader == nil {
 				source.videoHeader = tag.Copy()
 				source.videoHeader.Timestamp = 0
@@ -71,7 +71,7 @@ func (source *streamSource) ProcessMessage(msg *wssAPI.Msg) (err error) {
 				source.lastKeyFrame = tag.Copy()
 			}
 
-		case flv.FLV_TAG_ScriptData:
+		case flv.FlvTagScriptData:
 			if source.metadata == nil {
 				source.metadata = tag.Copy()
 			}

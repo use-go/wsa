@@ -95,7 +95,7 @@ func (this *TsCreater) writePCR(buf []byte, pcr, pcrExt uint64) {
 }
 
 func (this *TsCreater) AddTag(tag *flv.FlvTag) {
-	if flv.FLV_TAG_ScriptData == tag.TagType {
+	if flv.FlvTagScriptData == tag.TagType {
 		return
 	}
 	if this.tsCache == nil {
@@ -115,7 +115,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			this.addPatPmt()
 		}
 		var addDts, addPCR bool
-		if flv.FLV_TAG_Audio == tag.TagType {
+		if flv.FlvTagAudio == tag.TagType {
 			addDts = false
 			addPCR = false
 			if TS_VIDEO_ONLY {
@@ -132,12 +132,12 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 		var dataPayload []byte
 		var payloadSize int
 
-		if flv.FLV_TAG_Audio == tag.TagType {
+		if flv.FlvTagAudio == tag.TagType {
 			dataPayload, payloadSize = this.audioPayload(tag)
 			if 0 == payloadSize || nil == dataPayload {
 				return
 			}
-		} else if flv.FLV_TAG_Video == tag.TagType {
+		} else if flv.FlvTagVideo == tag.TagType {
 			dataPayload = this.videoPayload(tag)
 			if nil == dataPayload {
 				logger.LOGE(dataPayload)
@@ -147,7 +147,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 		}
 
 		tsCount, padSize = this.getTsCount(payloadSize, addPCR, addDts)
-		if tag.TagType == flv.FLV_TAG_Audio {
+		if tag.TagType == flv.FlvTagAudio {
 			this.calAudioTime(tag)
 
 		}
@@ -164,7 +164,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			cur = 0
 			tsBuf[cur] = 0x47
 			cur++
-			if flv.FLV_TAG_Audio == tag.TagType {
+			if flv.FlvTagAudio == tag.TagType {
 				tmp16 = uint16(0x4000 | Audio_Id)
 			} else {
 				tmp16 = uint16(0x4000 | Video_Id)
@@ -174,7 +174,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			tsBuf[cur] = byte(tmp16 & 0xff)
 			cur++
 			if addPCR || padSize > 0 {
-				if flv.FLV_TAG_Audio == tag.TagType {
+				if flv.FlvTagAudio == tag.TagType {
 					tsBuf[cur] = byte(0x30 | this.tsAcount)
 					cur++
 				} else {
@@ -182,7 +182,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					cur++
 				}
 			} else {
-				if flv.FLV_TAG_Audio == tag.TagType {
+				if flv.FlvTagAudio == tag.TagType {
 					tsBuf[cur] = byte(0x10 | this.tsAcount)
 					cur++
 				} else {
@@ -190,7 +190,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					cur++
 				}
 			}
-			if flv.FLV_TAG_Audio == tag.TagType {
+			if flv.FlvTagAudio == tag.TagType {
 				this.tsAcount++
 				if this.tsAcount == 16 {
 					this.tsAcount = 0
@@ -232,7 +232,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 			cur++
 			tsBuf[cur] = 0x01
 			cur++
-			if flv.FLV_TAG_Audio == tag.TagType {
+			if flv.FlvTagAudio == tag.TagType {
 				tsBuf[cur] = 0xc0
 				cur++
 				tmp16 = uint16(payloadSize + 8)
@@ -323,7 +323,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 				if 0 == i {
 					tsBuf[cur] = 0x47
 					cur++
-					if flv.FLV_TAG_Audio == tag.TagType {
+					if flv.FlvTagAudio == tag.TagType {
 						tmp16 = uint16(0x4000 | Audio_Id)
 					} else {
 						tmp16 = uint16(0x4000 | Video_Id)
@@ -333,7 +333,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					tsBuf[cur] = byte(tmp16 & 0xff)
 					cur++
 					if addPCR {
-						if flv.FLV_TAG_Audio == tag.TagType {
+						if flv.FlvTagAudio == tag.TagType {
 							tsBuf[cur] = byte(0x30 | this.tsAcount)
 							cur++
 						} else {
@@ -341,7 +341,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 							cur++
 						}
 					} else {
-						if flv.FLV_TAG_Audio == tag.TagType {
+						if flv.FlvTagAudio == tag.TagType {
 							tsBuf[cur] = byte(0x10 | this.tsAcount)
 							cur++
 						} else {
@@ -350,7 +350,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						}
 					}
 
-					if flv.FLV_TAG_Audio == tag.TagType {
+					if flv.FlvTagAudio == tag.TagType {
 						this.tsAcount++
 						if this.tsAcount == 16 {
 							this.tsAcount = 0
@@ -383,7 +383,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					cur++
 					tsBuf[cur] = 0x01
 					cur++
-					if flv.FLV_TAG_Audio == tag.TagType {
+					if flv.FlvTagAudio == tag.TagType {
 						tsBuf[cur] = 0xc0
 						cur++
 						tmp16 = uint16(payloadSize + 8)
@@ -463,7 +463,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					//四字节头
 					tsBuf[cur] = 0x47
 					cur++
-					if flv.FLV_TAG_Audio == tag.TagType {
+					if flv.FlvTagAudio == tag.TagType {
 						tmp16 = uint16(Audio_Id)
 					} else {
 						tmp16 = uint16(Video_Id)
@@ -475,7 +475,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 					//!3字节头
 					if i == tsCount-1 && padSize != 0 {
 						//最后一帧，且有pad
-						if flv.FLV_TAG_Audio == tag.TagType {
+						if flv.FlvTagAudio == tag.TagType {
 							tsBuf[cur] = byte(0x30 | this.tsAcount)
 							cur++
 						} else {
@@ -492,7 +492,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						payloadCur += TS_length - 4 - padSize
 					} else {
 						//普通添加数据
-						if flv.FLV_TAG_Audio == tag.TagType {
+						if flv.FlvTagAudio == tag.TagType {
 							tsBuf[cur] = byte(0x10 | this.tsAcount)
 							cur++
 						} else {
@@ -504,7 +504,7 @@ func (this *TsCreater) AddTag(tag *flv.FlvTag) {
 						copy(tsBuf[cur:], tmps)
 						payloadCur += TS_length - cur
 					}
-					if flv.FLV_TAG_Audio == tag.TagType {
+					if flv.FlvTagAudio == tag.TagType {
 						this.tsAcount++
 						if this.tsAcount == 16 {
 							this.tsAcount = 0
@@ -542,7 +542,7 @@ func (this *TsCreater) avHeaderAdded(tag *flv.FlvTag) (headerGeted bool) {
 		return true
 	}
 	this.beginTime = 0xffffffff
-	if tag.TagType == flv.FLV_TAG_Audio {
+	if tag.TagType == flv.FlvTagAudio {
 		if this.audioHeader != nil {
 			//防止只有音频的情况
 			return true
@@ -552,7 +552,7 @@ func (this *TsCreater) avHeaderAdded(tag *flv.FlvTag) (headerGeted bool) {
 		this.parseAudioType(this.audioHeader)
 		return false
 	}
-	if tag.TagType == flv.FLV_TAG_Video {
+	if tag.TagType == flv.FlvTagVideo {
 		if this.videoHeader != nil {
 			//防止没有音频的情况
 			return true
@@ -569,13 +569,13 @@ func (this *TsCreater) avHeaderAdded(tag *flv.FlvTag) (headerGeted bool) {
 func (this *TsCreater) parseAudioType(data []byte) {
 	audioCodec := data[0] >> 4
 	switch audioCodec {
-	case flv.SoundFormat_AAC:
+	case flv.SoundFormatAAC:
 		this.audioFrameSize = 1024
 		//this.asc = aac.GenerateAudioSpecificConfig(data[2:])
 		this.asc = aac.MP4AudioGetConfig(data[2:])
 		this.audioSampleHz = int(this.asc.Sample_rate)
 		this.audioTypeId = 0x0f
-	case flv.SoundFormat_MP3:
+	case flv.SoundFormatMP3:
 		this.audioFrameSize = 1152
 		mp3Header, err := mp3.ParseMP3Header(data[1:])
 		if err != nil {

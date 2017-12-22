@@ -176,7 +176,7 @@ func (websockHandler *websocketHandler) threadPlay() {
 		if WSCPause == websockHandler.lastCmd {
 			continue
 		}
-		if tag.TagType == flv.FLV_TAG_ScriptData {
+		if tag.TagType == flv.FlvTagScriptData {
 			err := websockHandler.sendWsControl(websockHandler.conn, WSCOnMetaData, tag.Data)
 			if err != nil {
 				logger.LOGE(err.Error())

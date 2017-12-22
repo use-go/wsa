@@ -70,7 +70,7 @@ func (websockHandler *websocketHandler) appendFlvTag(tag *flv.FlvTag) (err error
 	tag = tag.Copy()
 
 	//tag.Timestamp -= websockHandler.stPlay.beginTime
-	//if false == websockHandler.stPlay.keyFrameWrited && tag.TagType == flv.FLV_TAG_Video {
+	//if false == websockHandler.stPlay.keyFrameWrited && tag.TagType == flv.FlvTagVideo {
 	//	if websockHandler.stPlay.videoHeader == nil {
 	//		websockHandler.stPlay.videoHeader = tag
 	//	} else {
@@ -83,21 +83,21 @@ func (websockHandler *websocketHandler) appendFlvTag(tag *flv.FlvTag) (err error
 	//
 	//}
 
-	if websockHandler.stPlay.audioHeader == nil && tag.TagType == flv.FLV_TAG_Audio {
+	if websockHandler.stPlay.audioHeader == nil && tag.TagType == flv.FlvTagAudio {
 		websockHandler.stPlay.audioHeader = tag
 		websockHandler.stPlay.mutexCache.Lock()
 		websockHandler.stPlay.cache.PushBack(tag)
 		websockHandler.stPlay.mutexCache.Unlock()
 		return
 	}
-	if websockHandler.stPlay.videoHeader == nil && tag.TagType == flv.FLV_TAG_Video {
+	if websockHandler.stPlay.videoHeader == nil && tag.TagType == flv.FlvTagVideo {
 		websockHandler.stPlay.videoHeader = tag
 		websockHandler.stPlay.mutexCache.Lock()
 		websockHandler.stPlay.cache.PushBack(tag)
 		websockHandler.stPlay.mutexCache.Unlock()
 		return
 	}
-	if false == websockHandler.stPlay.keyFrameWrited && tag.TagType == flv.FLV_TAG_Video {
+	if false == websockHandler.stPlay.keyFrameWrited && tag.TagType == flv.FlvTagVideo {
 		if false == websockHandler.stPlay.keyFrameWrited && ((tag.Data[0] >> 4) == 1) {
 			websockHandler.stPlay.beginTime = tag.Timestamp
 			websockHandler.stPlay.keyFrameWrited = true

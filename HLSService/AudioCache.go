@@ -15,7 +15,7 @@ type audioCache struct {
 
 func (audio *audioCache) Init(tag *flv.FlvTag) {
 	audio.audioType = int((tag.Data[0] >> 4) & 0xf)
-	if audio.audioType == flv.SoundFormat_AAC {
+	if audio.audioType == flv.SoundFormatAAC {
 		audio.aacCache = &aac.AACCreater{}
 		audio.aacCache.Init(tag.Data[2:])
 	} else {
@@ -24,7 +24,7 @@ func (audio *audioCache) Init(tag *flv.FlvTag) {
 }
 
 func (audio *audioCache) AddTag(tag *flv.FlvTag) {
-	if audio.audioType == flv.SoundFormat_AAC {
+	if audio.audioType == flv.SoundFormatAAC {
 		audio.aacCache.Add(tag.Data[2:])
 	} else {
 		//		logger.LOGW("sound fmt not processed")
@@ -32,7 +32,7 @@ func (audio *audioCache) AddTag(tag *flv.FlvTag) {
 }
 
 func (audio *audioCache) Flush() (data []byte) {
-	if audio.audioType == flv.SoundFormat_AAC {
+	if audio.audioType == flv.SoundFormatAAC {
 		data = audio.aacCache.Flush()
 		return data
 	} else {

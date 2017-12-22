@@ -214,7 +214,7 @@ func (dashMpdCreater *mpdCreater) createAudioPeroid(startNumber int, period *Per
 	ada[0].Lang = "en"
 	sampleFreq := 0
 	channel := 0
-	if dashMpdCreater.audioHeader.Data[0]>>4 == flv.SoundFormat_AAC {
+	if dashMpdCreater.audioHeader.Data[0]>>4 == flv.SoundFormatAAC {
 		asc := aac.MP4AudioGetConfig(dashMpdCreater.audioHeader.Data[2:])
 		ada[0].Codecs = "mp4a.40."
 		ada[0].Codecs += strconv.Itoa(asc.Object_type)

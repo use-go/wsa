@@ -315,7 +315,7 @@ func (rtmppuller *RTMPPuller) threadRead() {
 }
 
 func (rtmppuller *RTMPPuller) sendFlvToSrc(pkt *RTMPPacket) (err error) {
-	if wssAPI.InterfaceIsNil(rtmppuller.src) && pkt.MessageTypeID != flv.FLV_TAG_ScriptData {
+	if wssAPI.InterfaceIsNil(rtmppuller.src) && pkt.MessageTypeID != flv.FlvTagScriptData {
 
 		rtmppuller.CreatePlaySRC()
 	}

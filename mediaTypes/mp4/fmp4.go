@@ -88,9 +88,9 @@ func (this *FMP4Creater) AddFlvTag(tag *flv.FlvTag) (slice *FMP4Slice) {
 		}
 	}
 	switch tag.TagType {
-	case flv.FLV_TAG_Audio:
+	case flv.FlvTagAudio:
 		return this.handleAudioTag(tmpTag)
-	case flv.FLV_TAG_Video:
+	case flv.FlvTagVideo:
 		return this.handleVideoTag(tmpTag)
 	default:
 		logger.LOGW(fmt.Sprintf("flv type:%d not processed", tag.TagType))
@@ -215,7 +215,7 @@ func (this *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 	}
 	logger.LOGT(this.audioSampleDuration)
 	slice = &FMP4Slice{}
-	slice.Type = flv.FLV_TAG_Audio
+	slice.Type = flv.FlvTagAudio
 	slice.Idx = -1
 	segEncoder := &amf.AMF0Encoder{}
 	segEncoder.Init()
@@ -431,7 +431,7 @@ func (this *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 
 func (this *FMP4Creater) createAudioSeg(tag *flv.FlvTag) (slice *FMP4Slice) {
 	slice = &FMP4Slice{}
-	slice.Type = flv.FLV_TAG_Audio
+	slice.Type = flv.FlvTagAudio
 	slice.Idx = this.audioIdx
 	this.audioIdx++
 	segEncoder := amf.AMF0Encoder{}
@@ -546,7 +546,7 @@ func (this *FMP4Creater) createAudioSeg(tag *flv.FlvTag) (slice *FMP4Slice) {
 
 func (this *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) {
 	slice = &FMP4Slice{}
-	slice.Type = flv.FLV_TAG_Video
+	slice.Type = flv.FlvTagVideo
 	slice.Idx = -1
 	segEncoder := amf.AMF0Encoder{}
 	segEncoder.Init()
@@ -762,7 +762,7 @@ func (this *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4Slice) 
 
 func (this *FMP4Creater) createVideoSeg(tag *flv.FlvTag) (slice *FMP4Slice) {
 	slice = &FMP4Slice{}
-	slice.Type = flv.FLV_TAG_Video
+	slice.Type = flv.FlvTagVideo
 	slice.Idx = this.videoIdx
 	this.videoIdx++
 	segEncoder := amf.AMF0Encoder{}

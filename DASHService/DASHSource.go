@@ -241,7 +241,7 @@ func (dashSource *DASHSource) createSlicer() (err error) {
 
 func (dashSource *DASHSource) addFlvTag(tag *flv.FlvTag) {
 	switch tag.TagType {
-	case flv.FLV_TAG_Audio:
+	case flv.FlvTagAudio:
 		if nil == dashSource.audioHeader {
 			dashSource.audioHeader = tag.Copy()
 			return
@@ -257,7 +257,7 @@ func (dashSource *DASHSource) addFlvTag(tag *flv.FlvTag) {
 				dashSource.slicer.AddAACFrame(tag.Data[2:], int64(tag.Timestamp))
 			}
 		}
-	case flv.FLV_TAG_Video:
+	case flv.FlvTagVideo:
 		if nil == dashSource.videoHeader {
 			dashSource.videoHeader = tag.Copy()
 			return

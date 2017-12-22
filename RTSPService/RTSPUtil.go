@@ -187,12 +187,12 @@ func generateSDP(videoHeader, audioHeader *flv.FlvTag) (sdp string, ok bool) {
 		audioType := int(audioHeader.Data[0] >> 4)
 		logger.LOGD(audioHeader.Data[0])
 		switch audioType {
-		case flv.SoundFormat_AAC:
+		case flv.SoundFormatAAC:
 			sdp += genAACsdp(audioHeader.Data)
 			if len(sdp) > 0 {
 				ok = true
 			}
-		case flv.SoundFormat_MP3:
+		case flv.SoundFormatMP3:
 			sdp += genMP3sdp(audioHeader.Data[1:])
 			if len(sdp) > 0 {
 				ok = true

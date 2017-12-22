@@ -124,7 +124,7 @@ func (rtmpplayer *rtmpPlayer) appendFlvTag(tag *flv.FlvTag) (err error) {
 	//		rtmpplayer.beginTime = tag.Timestamp
 	//	}
 	//	tag.Timestamp -= rtmpplayer.beginTime
-	if false == rtmpplayer.keyFrameWrited && tag.TagType == flv.FLV_TAG_Video {
+	if false == rtmpplayer.keyFrameWrited && tag.TagType == flv.FlvTagVideo {
 		if rtmpplayer.videoHeader == nil {
 			rtmpplayer.videoHeader = tag
 		} else {
