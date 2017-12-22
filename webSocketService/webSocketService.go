@@ -72,6 +72,7 @@ func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
 
 // Stop interface implemention
 func (websockService *WebSocketService) Stop(msg *wssAPI.Msg) (err error) {
+	//TODO....
 	return
 }
 
@@ -117,10 +118,11 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 	}
 	conn, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
-		logger.LOGE(err.Error())
+		logger.LOGE("webSocket handshake failed with error" + err.Error())
 		return
 	}
-	logger.LOGT(fmt.Sprintf("new websocket connect %s", conn.RemoteAddr().String()))
+	//new connection come here
+	logger.LOGT(fmt.Sprintf("new websocket client connected: %s", conn.RemoteAddr().String()))
 	websockService.handleConn(conn, req, path)
 	defer func() {
 		conn.Close()
@@ -133,11 +135,13 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 	msg := &wssAPI.Msg{}
 	msg.Param1 = conn
 	msg.Param2 = path
-
 	handler.Init(msg)
+	//close the handling proc
 	defer func() {
 		handler.processWSMessage(nil)
 	}()
+
+	//main Handling proc
 	for {
 		messageType, data, err := conn.ReadMessage()
 		if err != nil {

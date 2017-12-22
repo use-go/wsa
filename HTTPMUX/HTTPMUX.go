@@ -1,7 +1,7 @@
 package HTTPMUX
 
 /*
-the mutex struct
+ mapping of  the addres and route of httpmux
 */
 import (
 	"errors"

@@ -5,8 +5,44 @@ import (
 	"errors"
 
 	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
+
+func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
+	if nil == data || len(data) < 4 {
+		return errors.New("invalid msg")
+	}
+	ctrlType, err := amf.AMF0DecodeInt24(data)
+	if err != nil {
+		logger.LOGE("get ctrl type failed")
+		return
+	}
+	logger.LOGT(ctrlType)
+	switch ctrlType {
+	case WSCPlay:
+		return websockHandler.ctrlPlay(data[3:])
+	case WSCPlay2:
+		return websockHandler.ctrlPlay2(data[3:])
+	case WSCResume:
+		return websockHandler.ctrlResume(data[3:])
+	case WSCPause:
+		return websockHandler.ctrlPause(data[3:])
+	case WSCSeek:
+		return websockHandler.ctrlSeek(data[3:])
+	case WSCClose:
+		return websockHandler.ctrlClose(data[3:])
+	case WSCStop:
+		return websockHandler.ctrlStop(data[3:])
+	case WSCPublish:
+		return websockHandler.ctrlPublish(data[3:])
+	case WSCOnMetaData:
+		return websockHandler.ctrlOnMetadata(data[3:])
+	default:
+		logger.LOGE("unknowd websocket control type")
+		return errors.New("invalid ctrl msg type")
+	}
+}
 
 func (websockHandler *websocketHandler) ctrlPlay(data []byte) (err error) {
 	st := &stPlay{}
