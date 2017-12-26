@@ -72,24 +72,23 @@ func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 		buf.Write(threeBytes)
 		buf.Write(dataLast)
 		return buf.Bytes(), nil
-	} else {
+	}
 
-		buf := bytes.NewBuffer([]byte{})
-		buf.WriteByte(firstByte[0])
-		tmp := make([]byte, 1)
-		for {
-			_, err := conn.Read(tmp)
-			if err != nil {
-				logger.LOGE(err.Error())
-				return nil, err
-			}
-			buf.WriteByte(tmp[0])
-			if isFullRTSPPacket(buf.Bytes()) {
-				return buf.Bytes(), nil
-			}
+	buf := bytes.NewBuffer([]byte{})
+	buf.WriteByte(firstByte[0])
+	tmp := make([]byte, 1)
+	for {
+		_, err := conn.Read(tmp)
+		if err != nil {
+			logger.LOGE(err.Error())
+			return nil, err
+		}
+		buf.WriteByte(tmp[0])
+		if isFullRTSPPacket(buf.Bytes()) {
+			return buf.Bytes(), nil
 		}
 	}
-	return
+
 }
 
 func isFullRTSPPacket(data []byte) bool {
@@ -109,21 +108,20 @@ func isFullRTSPPacket(data []byte) bool {
 			if len(splits) != 2 {
 				logger.LOGW("unknown fmt rtsp data:" + strData)
 				return true
-			} else {
-				contentLength, err := strconv.Atoi(splits[1])
-				if err != nil {
-					logger.LOGE(err.Error())
-					return false
-				}
-				if contentLength == 0 {
-					return true
-				} else {
-					return strings.Count(strData, "\r\n\r\n") > 1
-				}
 			}
-		} else {
-			return true
+			contentLength, err := strconv.Atoi(splits[1])
+			if err != nil {
+				logger.LOGE(err.Error())
+				return false
+			}
+			if contentLength == 0 {
+				return true
+			}
+			return strings.Count(strData, "\r\n\r\n") > 1
+
 		}
+		return true
+
 	}
 
 	return false
@@ -230,14 +228,14 @@ func genH264sdp(data []byte) (sdp string) {
 	spsNoEmu := make([]byte, len(sps))
 	copy(spsNoEmu, sps)
 	spsNoEmu = h264.EmulationPrevention(spsNoEmu)
-	var profileLevelId int
+	var profileLevelID int
 
-	profileLevelId = ((int(spsNoEmu[1]) << 16) | (int(spsNoEmu[2]) << 8) | (int(spsNoEmu[3])))
+	profileLevelID = ((int(spsNoEmu[1]) << 16) | (int(spsNoEmu[2]) << 8) | (int(spsNoEmu[3])))
 	spsBase64 := base64.StdEncoding.EncodeToString(sps)
 	ppsBase64 := base64.StdEncoding.EncodeToString(pps)
 
 	fmtpFmt := fmt.Sprintf("a=fmtp:%d packetization-mode=1;profile-level-id=%06X;sprop-parameter-sets=%s,%s\r\n",
-		96, profileLevelId, spsBase64, ppsBase64)
+		96, profileLevelID, spsBase64, ppsBase64)
 	mediaType := "video"
 	rtpPayloadType := RTSP_payload_h264
 	ipAddress := "0.0.0.0"
@@ -341,7 +339,7 @@ func genRTPRTCP() (rtpPort, rtcpPort int, rtpConn, rtcpConn *net.UDPConn, ok boo
 	return
 }
 
-func getH264Keyframe(tags *list.List, mutex sync.RWMutex) (getKeyFrame bool, beginTime uint32) {
+func getH264Keyframe(tags *list.List, mutex *sync.RWMutex) (getKeyFrame bool, beginTime uint32) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	if tags == nil || tags.Len() == 0 {
@@ -349,15 +347,15 @@ func getH264Keyframe(tags *list.List, mutex sync.RWMutex) (getKeyFrame bool, beg
 	}
 	//udp 从任意包开始
 	return true, tags.Front().Value.(*flv.FlvTag).Timestamp
-	for tags.Len() > 0 {
-		tag := tags.Front().Value.(*flv.FlvTag)
-		if (tag.Data[0] & 0xf) != 0x7 {
-			logger.LOGE("invalid video type:" + string(tag.Data[0]))
-		}
-		if tag.Data[0] == 0x17 {
-			return true, tag.Timestamp
-		}
-		tags.Remove(tags.Front())
-	}
-	return
+	// for tags.Len() > 0 {
+	// 	tag := tags.Front().Value.(*flv.FlvTag)
+	// 	if (tag.Data[0] & 0xf) != 0x7 {
+	// 		logger.LOGE("invalid video type:" + string(tag.Data[0]))
+	// 	}
+	// 	if tag.Data[0] == 0x17 {
+	// 		return true, tag.Timestamp
+	// 	}
+	// 	tags.Remove(tags.Front())
+	// }
+	// return
 }

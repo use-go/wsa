@@ -223,7 +223,6 @@ func (rtspHandler *RTSPHandler) handleRTSP(data []byte) (err error) {
 		logger.LOGE("method " + cmd + " not support now")
 		return rtspHandler.sendErrorReply(lines, 551)
 	}
-	return
 }
 
 func (rtspHandler *RTSPHandler) send(data []byte) (err error) {
@@ -390,7 +389,7 @@ func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 		if ctrl_track_video == track.trackID {
 			if false == beginSend {
 				//等待关键帧
-				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, rtspHandler.mutexVideo)
+				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, &rtspHandler.mutexVideo)
 				if false == beginSend {
 					time.Sleep(30 * time.Millisecond)
 					continue
@@ -477,7 +476,7 @@ func (rtspHandler *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
 		if ctrl_track_video == track.trackID {
 			if false == beginSend {
 				//等待关键帧
-				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, rtspHandler.mutexVideo)
+				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, &rtspHandler.mutexVideo)
 				if false == beginSend {
 					time.Sleep(30 * time.Millisecond)
 					continue

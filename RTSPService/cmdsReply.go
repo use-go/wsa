@@ -53,7 +53,7 @@ func (rtspHandler *RTSPHandler) serveDescribe(lines []string) (err error) {
 		return rtspHandler.sendErrorReply(lines, 455)
 	}
 
-	_, rtspHandler.streamName, err = rtspHandler.parseUrl(strSpaces[1])
+	_, rtspHandler.streamName, err = rtspHandler.parseURL(strSpaces[1])
 	if err != nil {
 		logger.LOGE(err.Error())
 		return rtspHandler.sendErrorReply(lines, 455)
@@ -124,7 +124,7 @@ func (rtspHandler *RTSPHandler) serveDescribe(lines []string) (err error) {
 	return
 }
 
-func (rtspHandler *RTSPHandler) parseUrl(url string) (port int, streamName string, err error) {
+func (rtspHandler *RTSPHandler) parseURL(url string) (port int, streamName string, err error) {
 	if false == strings.HasPrefix(url, "rtsp://") {
 		err = errors.New("bad rtsp url:" + url)
 		logger.LOGE(err.Error())
@@ -426,10 +426,10 @@ func (rtspHandler *RTSPHandler) servePause(lines []string) (err error) {
 		err = errors.New("pause not playing")
 		errCode = 455
 		return
-	} else {
-		//停止播放
-		rtspHandler.stopPlayThread()
 	}
+	//停止播放
+	rtspHandler.stopPlayThread()
+
 	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
 	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
 	strOut += "Session: " + rtspHandler.session + RTSP_EL

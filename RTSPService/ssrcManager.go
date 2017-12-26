@@ -3,6 +3,7 @@ package RTSPService
 import (
 	"math/rand"
 	"sync"
+
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
@@ -27,5 +28,4 @@ func (ssrcmanager *ssrcManager) NewSSRC() (id uint32) {
 			return
 		}
 	}
-	return
 }
