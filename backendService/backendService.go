@@ -42,21 +42,6 @@ func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 		return errors.New("load backend config failed")
 	}
 
-	go func() {
-		strPort := ":" + strconv.Itoa(serviceConfig.Port)
-		handlers := backendHandlerInit()
-		mux := http.NewServeMux()
-		for _, item := range handlers {
-			backHandler := item.(backendServiceHander)
-			logger.LOGD(backHandler.getRoute())
-			//http.Handle(backHandler.GetRoute(), http.StripPrefix(backHandler.GetRoute(), backHandler.(http.Handler)))
-			mux.Handle(backHandler.getRoute(), http.StripPrefix(backHandler.getRoute(), backHandler.(http.Handler)))
-		}
-		err = http.ListenAndServe(strPort, mux)
-		if err != nil {
-			logger.LOGE("start backend serve failed")
-		}
-	}()
 	return
 }
 
@@ -73,8 +58,25 @@ func (backendService *BackendService) loadConfigFile(fileName string) (err error
 	return
 }
 
-//Start Service
+//Start Service in Goroutine
 func (backendService *BackendService) Start(msg *wssAPI.Msg) (err error) {
+
+	go func() {
+		strPort := ":" + strconv.Itoa(serviceConfig.Port)
+		handlers := backendHandlerInit()
+		mux := http.NewServeMux()
+		for _, item := range handlers {
+			backHandler := item.(backendServiceHander)
+			logger.LOGD(backHandler.getRoute())
+			//http.Handle(backHandler.GetRoute(), http.StripPrefix(backHandler.GetRoute(), backHandler.(http.Handler)))
+			mux.Handle(backHandler.getRoute(), http.StripPrefix(backHandler.getRoute(), backHandler.(http.Handler)))
+		}
+		err = http.ListenAndServe(strPort, mux)
+		if err != nil {
+			logger.LOGE("start backend serve failed")
+		}
+	}()
+
 	return
 }
 

@@ -4,7 +4,9 @@ import (
 	"sync"
 )
 
-//Set for interface Status
+//command  statue mac
+
+//Set for cmd Status change
 type Set struct {
 	m map[interface{}]bool
 	sync.RWMutex

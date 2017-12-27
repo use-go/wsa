@@ -20,7 +20,7 @@ type WebSocketService struct {
 	parent wssAPI.MsgHandler
 }
 
-// WebSocketConfig to store webservice configinfo
+// WebSocketConfig to store webservice configuration information
 type WebSocketConfig struct {
 	Port  int    `json:"Port"`
 	Route string `json:"Route"`
@@ -121,13 +121,16 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 		logger.LOGE("webSocket handshake failed with error" + err.Error())
 		return
 	}
-	//new connection come here
-	logger.LOGT(fmt.Sprintf("new websocket client connected: %s", conn.RemoteAddr().String()))
-	websockService.handleConn(conn, req, path)
+	//remmber to close the websocket connetction
 	defer func() {
 		conn.Close()
 		logger.LOGD("close websocket conn")
 	}()
+
+	//new connection came here
+	logger.LOGT(fmt.Sprintf("new websocket client connected: %s", conn.RemoteAddr().String()))
+	websockService.handleConn(conn, req, path)
+
 }
 
 func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *http.Request, path string) {

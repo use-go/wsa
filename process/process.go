@@ -273,7 +273,7 @@ func (processCtx *context) Start(msg *wssAPI.Msg) (err error) {
 			logger.LOGE("start " + k + " failed:" + err.Error())
 			continue
 		}
-		logger.LOGI("start " + k + " successed")
+		logger.LOGI("start " + k + " successed ")
 	}
 
 	return
