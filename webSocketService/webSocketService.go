@@ -124,7 +124,7 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 	//remmber to close the websocket connetction
 	defer func() {
 		conn.Close()
-		logger.LOGD("close websocket conn")
+		logger.LOGD("close websocket connection :" + conn.RemoteAddr().String())
 	}()
 
 	//new connection came here
@@ -162,16 +162,17 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 			err = handler.processWSMessage(data)
 			if err != nil {
 				logger.LOGE(err.Error())
-				logger.LOGE("ws binary error")
+				logger.LOGE("ws binary error in connection :" + conn.RemoteAddr().String())
 				return
 			}
 		case websocket.CloseMessage:
-			err = errors.New("websocket closed:" + conn.RemoteAddr().String())
+			err = errors.New("websocket closed by client:" + conn.RemoteAddr().String())
 			return
 		case websocket.PingMessage:
 			//conn.WriteMessage()
-			conn.WriteMessage(websocket.PongMessage, []byte(" "))
+			conn.WriteMessage(websocket.PongMessage, []byte("pongMessage"))
 		case websocket.PongMessage:
+			conn.WriteMessage(websocket.PingMessage, []byte("pingMessage"))
 		default:
 		}
 	}

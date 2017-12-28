@@ -10,6 +10,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//interface for each service instance
 type backendServiceHander interface {
 	init(msg *wssAPI.Msg) error
 	getRoute() string
@@ -28,6 +29,18 @@ type BackendConfig struct {
 
 var serviceConfig BackendConfig
 
+func serveDefaultHome(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", 404)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", 405)
+		return
+	}
+	http.ServeFile(w, r, "../test-websocket/video-player-living.html")
+}
+
 //Init BackendService
 func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 	if msg == nil || msg.Param1 == nil {
@@ -39,7 +52,7 @@ func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 	err = backendService.loadConfigFile(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
-		return errors.New("load backend config failed")
+		return errors.New("load backendService config failed")
 	}
 
 	return
@@ -71,6 +84,10 @@ func (backendService *BackendService) Start(msg *wssAPI.Msg) (err error) {
 			//http.Handle(backHandler.GetRoute(), http.StripPrefix(backHandler.GetRoute(), backHandler.(http.Handler)))
 			mux.Handle(backHandler.getRoute(), http.StripPrefix(backHandler.getRoute(), backHandler.(http.Handler)))
 		}
+		//handle static assert
+		mux.Handle("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir("../test-websocket"))))
+		mux.HandleFunc("/", serveDefaultHome)
+
 		err = http.ListenAndServe(strPort, mux)
 		if err != nil {
 			logger.LOGE("start backend serve failed")
@@ -121,7 +138,6 @@ func backendHandlerInit() []backendServiceHander {
 			logger.LOGE("add adminLoginHandle error!")
 		}
 	}
-
 	streamManagerHandle := &adminStreamManageHandler{}
 	streamManagerHandle.init(nil)
 	handers = append(handers, streamManagerHandle)

@@ -99,6 +99,7 @@ func (websockHandler *websocketHandler) ProcessMessage(msg *wssAPI.Msg) (err err
 	return
 }
 
+//handle the binary message
 func (websockHandler *websocketHandler) processWSMessage(data []byte) (err error) {
 	if nil == data || len(data) < 4 {
 		websockHandler.Stop(nil)
@@ -109,12 +110,12 @@ func (websockHandler *websocketHandler) processWSMessage(data []byte) (err error
 	case WSPktAudio:
 	case WSPktVideo:
 	case WSPktControl:
-		logger.LOGD("recv control data:")
+		logger.LOGD("recv control data: from" + websockHandler.conn.RemoteAddr().String())
 		logger.LOGD(data)
 		return websockHandler.controlMsg(data[1:])
 	default:
-		err = fmt.Errorf("msg type %d not supported", msgType)
-		logger.LOGW("invalid binary data")
+		err = fmt.Errorf("msg type %d not supported from"+websockHandler.conn.RemoteAddr().String(), msgType)
+		logger.LOGW("invalid binary data from" + websockHandler.conn.RemoteAddr().String())
 		return
 	}
 	return

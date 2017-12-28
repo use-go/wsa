@@ -11,9 +11,9 @@ type Task interface {
 	Type() string
 }
 
-//Msg content of the websocket
+//Msg type content of the websocket
 type Msg struct {
-	Type    string
+	Type    string // MSG Type to handle different Event
 	Version string
 	Param1  interface{}
 	Param2  interface{}
@@ -58,7 +58,7 @@ const (
 	OBJDASHServer      = `DASHServer`
 )
 
-// MSG Event Notify Type
+// MSG Type to handle different Event
 const (
 	MsgFlvTag            = "FLVTag"
 	MsgGetSourceNotify   = "MSG.GetSource.Notify.Async"
