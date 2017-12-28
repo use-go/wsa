@@ -11,24 +11,24 @@ import (
 )
 
 const (
-	AMF0_number         = 0x00
-	AMF0_boolean        = 0x01
-	AMF0_string         = 0x02
-	AMF0_object         = 0x03 //hash table=amfstring:key ,amftype:value,0x 00 00 09 end
-	AMF0_movieclip      = 0x04
-	AMF0_null           = 0x05
-	AMF0_undefined      = 0x06
-	AMF0_reference      = 0x07
-	AMF0_ecma_array     = 0x08 //object with size of hashTable
-	AMF0_object_end     = 0x09
-	AMF0_strict_array   = 0x0a //arrycount+propArray
-	AMF0_date           = 0x0b
-	AMF0_long_string    = 0x0c
-	AMF0_unsupported    = 0x0d
-	AMF0_recordset      = 0x0e
-	AMF0_xml_document   = 0x0f
-	AMF0_typed_object   = 0x10
-	AMF0_avmplus_object = 0x11
+	TAMF0Number        = 0x00
+	TAMF0Boolean       = 0x01
+	TAMF0String        = 0x02
+	TAMF0Object        = 0x03 //hash table=amfstring:key ,amftype:value,0x 00 00 09 end
+	TAMF0MovieClip     = 0x04
+	TAMF0Null          = 0x05
+	TAMF0Undefined     = 0x06
+	TAMF0Reference     = 0x07
+	TAMF0EcmaArray     = 0x08 //object with size of hashTable
+	TAMF0Object_end    = 0x09
+	TAMF0StrictArray   = 0x0a //arrycount+propArray
+	TAMF0Date          = 0x0b
+	TAMF0LongString    = 0x0c
+	TAMF0Unsupported   = 0x0d
+	TAMF0RecordSet     = 0x0e
+	TAMF0xmlDocument   = 0x0f
+	TAMF0TypedObject   = 0x10
+	TAMF0AvmplusObject = 0x11
 )
 
 type AMF0Object struct {
@@ -61,7 +61,7 @@ func (amf0Encoder *AMF0Encoder) EncodeString(str string) (err error) {
 		return errors.New("invald string")
 	}
 	if length >= 0xffff {
-		err = amf0Encoder.writer.WriteByte(AMF0_long_string)
+		err = amf0Encoder.writer.WriteByte(TAMF0LongString)
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func (amf0Encoder *AMF0Encoder) EncodeString(str string) (err error) {
 			return err
 		}
 	} else {
-		err = amf0Encoder.writer.WriteByte(AMF0_string)
+		err = amf0Encoder.writer.WriteByte(TAMF0String)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func (amf0Encoder *AMF0Encoder) EncodeString(str string) (err error) {
 }
 
 func (amf0Encoder *AMF0Encoder) EncodeNumber(num float64) (err error) {
-	err = amf0Encoder.writer.WriteByte(AMF0_number)
+	err = amf0Encoder.writer.WriteByte(TAMF0Number)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (amf0Encoder *AMF0Encoder) EncodeNumber(num float64) (err error) {
 }
 
 func (amf0Encoder *AMF0Encoder) EncodeBool(boo bool) (err error) {
-	err = amf0Encoder.writer.WriteByte(AMF0_boolean)
+	err = amf0Encoder.writer.WriteByte(TAMF0Boolean)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (amf0Encoder *AMF0Encoder) encodeObj(obj *AMF0Object) (data []byte) {
 	for v := obj.Props.Front(); v != nil; v = v.Next() {
 		enc.AppendByteArray(amf0Encoder.encodeProp(v.Value.(*AMF0Property)))
 	}
-	enc.EncodeInt24(AMF0_object_end)
+	enc.EncodeInt24(TAMF0Object_end)
 	data, _ = enc.GetData()
 	return data
 }
@@ -244,37 +244,37 @@ func (amf0Encoder *AMF0Encoder) encodeProp(prop *AMF0Property) (data []byte) {
 	}
 	//encode type
 	switch prop.PropType {
-	case AMF0_number:
+	case TAMF0Number:
 		enc.EncodeNumber(prop.Value.NumValue)
-	case AMF0_boolean:
+	case TAMF0Boolean:
 		enc.EncodeBool(prop.Value.BoolValue)
-	case AMF0_string:
+	case TAMF0String:
 		enc.EncodeString(prop.Value.StrValue)
-	case AMF0_object:
-		enc.AppendByte(AMF0_object)
+	case TAMF0Object:
+		enc.AppendByte(TAMF0Object)
 		enc.AppendByteArray(amf0Encoder.encodeObj(&prop.Value.ObjValue))
-	case AMF0_null:
-		enc.AppendByte(AMF0_null)
-	case AMF0_ecma_array:
-		enc.AppendByte(AMF0_ecma_array)
+	case TAMF0Null:
+		enc.AppendByte(TAMF0Null)
+	case TAMF0EcmaArray:
+		enc.AppendByte(TAMF0EcmaArray)
 		//size
 		//object
 		tmp := enc.encodeObj(&prop.Value.ObjValue)
 		tmpSize := int32(len(tmp))
 		enc.EncodeInt32(tmpSize)
 		enc.AppendByteArray(tmp)
-	case AMF0_strict_array:
-		enc.AppendByte(AMF0_strict_array)
+	case TAMF0StrictArray:
+		enc.AppendByte(TAMF0StrictArray)
 		enc.EncodeInt32(int32(prop.Value.ObjValue.Props.Len()))
 		for v := prop.Value.ObjValue.Props.Front(); v != nil; v = v.Next() {
 			enc.AppendByteArray(amf0Encoder.encodeProp(v.Value.(*AMF0Property)))
 		}
 
-	case AMF0_date:
-		enc.AppendByte(AMF0_date)
+	case TAMF0Date:
+		enc.AppendByte(TAMF0Date)
 		binary.Write(enc.writer, binary.BigEndian, &prop.Value.NumValue)
 		enc.EncodeInt16(prop.Value.S16Value)
-	case AMF0_long_string:
+	case TAMF0LongString:
 		enc.EncodeString(prop.Value.StrValue)
 	default:
 		logger.LOGW(fmt.Sprintf("not support amf type:%d", prop.PropType))
@@ -353,7 +353,7 @@ func amf0DecodeObj(data []byte, decodeName bool) (ret *AMF0Object, sizeUsed int3
 	for start < end {
 		if end-start >= 3 {
 			endType, _ := AMF0DecodeInt24(data[start:])
-			if endType == AMF0_object_end {
+			if endType == TAMF0Object_end {
 				start += 3
 				err = nil
 				break
@@ -408,20 +408,20 @@ func amf0DecodeProp(data []byte, decodeName bool) (ret *AMF0Property, sizeUsed i
 	sizeUsed += 1
 
 	switch ret.PropType {
-	case AMF0_number:
+	case TAMF0Number:
 		err = binary.Read(bytes.NewReader(data[sizeUsed:]), binary.BigEndian, &ret.Value.NumValue)
 		if err != nil {
 			return ret, sizeUsed, err
 		}
 		sizeUsed += 8
-	case AMF0_boolean:
+	case TAMF0Boolean:
 		if data[sizeUsed] == 0 {
 			ret.Value.BoolValue = false
 		} else {
 			ret.Value.BoolValue = true
 		}
 		sizeUsed += 1
-	case AMF0_string:
+	case TAMF0String:
 		stringLength, err := AMF0DecodeInt16(data[sizeUsed:])
 		if err != nil {
 			return ret, sizeUsed, err
@@ -435,15 +435,15 @@ func amf0DecodeProp(data []byte, decodeName bool) (ret *AMF0Property, sizeUsed i
 			}
 		}
 		sizeUsed += int32(2 + stringLength)
-	case AMF0_object:
+	case TAMF0Object:
 		tmpObj, size, err := amf0DecodeObj(data[sizeUsed:], true)
 		if err != nil {
 			return ret, sizeUsed, err
 		}
 		sizeUsed += size
 		ret.Value.ObjValue = *tmpObj
-	case AMF0_null:
-	case AMF0_ecma_array:
+	case TAMF0Null:
+	case TAMF0EcmaArray:
 		sizeUsed += 4
 		tmpObj, size, err := amf0DecodeObj(data[sizeUsed:], true)
 		if err != nil {
@@ -451,13 +451,13 @@ func amf0DecodeProp(data []byte, decodeName bool) (ret *AMF0Property, sizeUsed i
 		}
 		sizeUsed += size
 		ret.Value.ObjValue = *tmpObj
-	case AMF0_strict_array:
+	case TAMF0StrictArray:
 		size, err := amf0ReadStrictArray(data[sizeUsed:], ret)
 		if err != nil {
 			return ret, sizeUsed, err
 		}
 		sizeUsed += size
-	case AMF0_date:
+	case TAMF0Date:
 		ret.Value.NumValue, err = AMF0DecodeNumber(data[sizeUsed:])
 		if err != nil {
 			return ret, sizeUsed, err
@@ -469,7 +469,7 @@ func amf0DecodeProp(data []byte, decodeName bool) (ret *AMF0Property, sizeUsed i
 			return ret, sizeUsed, err
 		}
 		sizeUsed += 2
-	case AMF0_long_string:
+	case TAMF0LongString:
 		stringLength, err := AMF0DecodeInt32(data[sizeUsed:])
 		if err != nil {
 			return ret, sizeUsed, err
@@ -555,19 +555,19 @@ func (amf0Encoder *AMF0Object) dumpProp(prop *AMF0Property) {
 		logger.LOGT(prop.Name)
 	}
 	switch prop.PropType {
-	case AMF0_ecma_array:
+	case TAMF0EcmaArray:
 		logger.LOGT("ecma array")
-	case AMF0_object:
+	case TAMF0Object:
 		logger.LOGT("object")
 
 		prop.Value.ObjValue.Dump()
-	case AMF0_strict_array:
+	case TAMF0StrictArray:
 		logger.LOGT("static array")
-	case AMF0_string:
+	case TAMF0String:
 		logger.LOGT("string:" + prop.Value.StrValue)
-	case AMF0_number:
+	case TAMF0Number:
 		logger.LOGT(prop.Value.NumValue)
-	case AMF0_boolean:
+	case TAMF0Boolean:
 		logger.LOGT(prop.Value.BoolValue)
 	}
 

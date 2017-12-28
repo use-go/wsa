@@ -7,19 +7,21 @@
 
 <body>
     <video id="video" controls>
-
      </video>
     <br>
     <textarea name="log" id="log" cols="30" rows="3" readonly="readonly"></textarea>
+    <input id="sendbtn" type="submit" value="Send" />
+
     <!--<div id="log"></div>-->
     <script type="text/javascript">
+        var log = document.getElementById("log");
         var video = document.getElementById("video");
-        var addr = "ws://127.0.0.1:8080/live";
+        var addr = "ws://127.0.0.1:8080/ws/";
         var conn;
         video.addEventListener("play", onPlay);
 
         function onPlay() {
-            console.log("on play111")
+            console.log("on play action button triggerd")
             if (window["WebSocket"]) {
                 console.log("begin websocket")
                 connectWebServer();
@@ -45,6 +47,9 @@
             var WS_ctrl_streamEnd = 12;
 
             conn = new WebSocket(addr);
+            if (conn) {
+                appendLog('connect to server!')
+            }
             conn.onclose = function(evt) {
                 console.log(evt);
             }
@@ -72,7 +77,7 @@
                 var connect = {
                     id: 0,
                     app: 'live',
-                    tcUrl: 'ws://127.0.0.1:8080/ws/',
+                    tcUrl: 'ws://127.0.0.1:8080/live/',
                     audioCodecs: 0,
                     videoCodecs: 0
                 };
@@ -130,6 +135,7 @@
                         var obj;
                         obj = JSON.parse(str);
                         console.log(obj);
+                        appendLog(obj)
                         if (obj.status != 200) {
                             console.log("ctrl error");
                         }
@@ -139,5 +145,25 @@
                 }
             }
         }
+
+        function appendLog(loginfo) {
+            var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+            log.innerText = loginfo;
+            if (doScroll) {
+                log.scrollTop = log.scrollHeight - log.clientHeight;
+            }
+        }
+
+        document.getElementById("sendbtn").onclick = function() {
+            if (!conn) {
+                return false;
+            }
+            if (!msg.value) {
+                return false;
+            }
+            conn.send(msg.value);
+            msg.value = "";
+            return false;
+        };
     </script>
 </body>

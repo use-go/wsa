@@ -15,8 +15,8 @@ import (
 //RTMP Protocol Setting
 const (
 	RTMP_protocol_rtmp      = "rtmp"
-	RTMP_default_chunk_size = 128
-	RTMP_default_buff_ms    = 500
+	RTMP_Default_chunk_size = 128
+	RTMP_Default_buff_ms    = 500
 	RTMP_better_chunk_size  = 128
 
 	RTMP_channel_control      = 0x02
@@ -66,8 +66,8 @@ const (
 	RTMP_HEADER_TYPE_3 = 3
 )
 
-//RTMP_LINK struct
-type RTMP_LINK struct {
+//RTMPLink struct
+type RTMPLink struct {
 	Protocol    string
 	App         string
 	Flashver    string
@@ -101,7 +101,7 @@ type RTMP struct {
 	RecvChunkSize             uint32
 	NumInvokes                int32
 	StreamID                  uint32
-	Link                      RTMP_LINK
+	Link                      RTMPLink
 	AudioCodecs               int32
 	VideoCodecs               int32
 	TargetBW                  uint32
@@ -157,15 +157,15 @@ func FlvTagToRTMPPacket(ta *flv.FlvTag) (dst *RTMPPacket) {
 
 func (rtmp *RTMP) Init(conn net.Conn) {
 	rtmp.Conn = conn
-	rtmp.SendChunkSize = RTMP_default_chunk_size
-	rtmp.RecvChunkSize = RTMP_default_chunk_size
+	rtmp.SendChunkSize = RTMP_Default_chunk_size
+	rtmp.RecvChunkSize = RTMP_Default_chunk_size
 	rtmp.AudioCodecs = 3191
 	rtmp.VideoCodecs = 252
 	rtmp.TargetBW = 2500000
 	rtmp.AcknowledgementWindowSize = 0
 	rtmp.SelfBW = 2500000
 	rtmp.LimitType = 2
-	rtmp.buffMS = RTMP_default_buff_ms
+	rtmp.buffMS = RTMP_Default_buff_ms
 	rtmp.recvCache = make(map[int32]*RTMPPacket)
 	rtmp.methodCache = make(map[int32]string)
 }
@@ -604,13 +604,13 @@ func (rtmp *RTMP) ConnectResult(obj *AMF0Object) (err error) {
 	idx := obj.AMF0GetPropByIndex(1).Value.NumValue
 	encoder.EncodeNumber(idx)
 
-	encoder.AppendByte(AMF0_object)
+	encoder.AppendByte(TAMF0Object)
 	encoder.EncodeNamedString("fmsVer", "FMS/5,0,3,3029")
 	encoder.EncodeNamedNumber("capabilities", 255)
 	encoder.EncodeNamedNumber("mode", 1)
-	encoder.EncodeInt24(AMF0_object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
 
-	encoder.AppendByte(AMF0_object)
+	encoder.AppendByte(TAMF0Object)
 	encoder.EncodeNamedString("level", "status")
 	encoder.EncodeNamedString("code", "NetConnection.Connect.Success")
 	encoder.EncodeNamedString("description", "Connection succeeded.")
@@ -629,11 +629,11 @@ func (rtmp *RTMP) ConnectResult(obj *AMF0Object) (err error) {
 	encoder.AppendByte('a')
 	encoder.AppendByte('t')
 	encoder.AppendByte('a')
-	encoder.AppendByte(AMF0_ecma_array)
+	encoder.AppendByte(TAMF0EcmaArray)
 	encoder.EncodeInt32(0)
 	encoder.EncodeNamedString("version", "5,0,3,3029")
-	encoder.EncodeInt24(AMF0_object_end)
-	encoder.EncodeInt24(AMF0_object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
 
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -654,12 +654,12 @@ func (rtmp *RTMP) CmdError(level string, code string, description string, idx fl
 	encoder.Init()
 	encoder.EncodeString("_error")
 	encoder.EncodeNumber(idx)
-	encoder.AppendByte(AMF0_null)
-	encoder.AppendByte(AMF0_object)
+	encoder.AppendByte(TAMF0Null)
+	encoder.AppendByte(TAMF0Object)
 	encoder.EncodeNamedString("level", level)
 	encoder.EncodeNamedString("code", code)
 	encoder.EncodeNamedString("description", description)
-	encoder.EncodeInt24(AMF0_object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
 
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -679,15 +679,15 @@ func (rtmp *RTMP) CmdStatus(level, code, description, details string, clientID f
 	encoder.Init()
 	encoder.EncodeString("onStatus")
 	encoder.EncodeNumber(0.0)
-	encoder.AppendByte(AMF0_null)
-	encoder.AppendByte(AMF0_object)
+	encoder.AppendByte(TAMF0Null)
+	encoder.AppendByte(TAMF0Object)
 	encoder.EncodeNamedString("level", level)
 	encoder.EncodeNamedString("code", code)
 	if len(details) > 0 {
 		encoder.EncodeNamedString("details", details)
 	}
 	encoder.EncodeNamedNumber("clientID", clientID)
-	encoder.EncodeInt24(AMF0_object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
 		return
@@ -707,7 +707,7 @@ func (rtmp *RTMP) CmdNumberResult(idx float64, numValue float64) (err error) {
 	encoder.Init()
 	encoder.EncodeString("_result")
 	encoder.EncodeNumber(idx)
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	encoder.EncodeNumber(numValue)
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -752,7 +752,7 @@ func (rtmp *RTMP) OnBWDone() (err error) {
 	encoder.Init()
 	encoder.EncodeString("onBWDone")
 	encoder.EncodeNumber(0.0)
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -781,7 +781,7 @@ func (rtmp *RTMP) OnBWCheck() (err error) {
 	}
 	encoder.EncodeString(string(strByte))
 	encoder.EncodeNumber(0)
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -804,7 +804,7 @@ func (rtmp *RTMP) _OnBWDone() (err error) {
 	encoder.EncodeNumber(0) //??
 	encoder.EncodeNumber(0) //??
 	encoder.EncodeNumber(0) //??
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 
 	pkt.Body, err = encoder.GetData()
 	if err != nil {
@@ -827,7 +827,7 @@ func (rtmp *RTMP) FCUnpublish() (err error) {
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
 	encoder.EncodeString(rtmp.Link.Path)
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	pkt.Body, err = encoder.GetData()
 
 	if err != nil {
@@ -863,7 +863,7 @@ func (rtmp *RTMP) Connect(publish bool) (err error) {
 	encoder.EncodeString("connect")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_object)
+	encoder.AppendByte(TAMF0Object)
 	encoder.EncodeNamedString("app", rtmp.Link.App)
 	encoder.EncodeNamedString("flashver", "WIN 18,0,0,232")
 	encoder.EncodeNamedString("tcUrl", rtmp.Link.TcUrl)
@@ -877,7 +877,7 @@ func (rtmp *RTMP) Connect(publish bool) (err error) {
 		encoder.EncodeNamedNumber("objectEncoding", 3.0)
 	}
 
-	encoder.EncodeInt24(AMF0_object_end)
+	encoder.EncodeInt24(TAMF0Object_end)
 
 	pkt.Body, err = encoder.GetData()
 	logger.LOGD(pkt.Body)
@@ -899,7 +899,7 @@ func (rtmp *RTMP) CreateStream() (err error) {
 	encoder.EncodeString("createStream")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	pkt.Body, err = encoder.GetData()
 
 	if err != nil {
@@ -921,7 +921,7 @@ func (rtmp *RTMP) SendCheckBW() (err error) {
 	encoder.EncodeString("_checkbw")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	pkt.Body, err = encoder.GetData()
 
 	if err != nil {
@@ -943,7 +943,7 @@ func (rtmp *RTMP) SendReleaseStream() (err error) {
 	encoder.EncodeString("releaseStream")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	encoder.EncodeString(rtmp.Link.Path)
 	pkt.Body, err = encoder.GetData()
 
@@ -966,7 +966,7 @@ func (rtmp *RTMP) SendFCPublish() (err error) {
 	encoder.EncodeString("FCPublish")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	encoder.EncodeString(rtmp.Link.Path)
 	pkt.Body, err = encoder.GetData()
 
@@ -990,7 +990,7 @@ func (rtmp *RTMP) SendPlay() (err error) {
 	encoder.EncodeString("play")
 	rtmp.NumInvokes++
 	encoder.EncodeNumber(float64(rtmp.NumInvokes))
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	encoder.EncodeString(rtmp.Link.Path)
 	if rtmp.Link.SeekTime > 0 {
 		encoder.EncodeNumber(float64(rtmp.Link.SeekTime))
@@ -1020,7 +1020,7 @@ func (rtmp *RTMP) SendCheckBWResult(transactionID float64) (err error) {
 	encoder.Init()
 	encoder.EncodeString("_result")
 	encoder.EncodeNumber(transactionID)
-	encoder.AppendByte(AMF0_null)
+	encoder.AppendByte(TAMF0Null)
 	encoder.EncodeNumber(0.0)
 	pkt.Body, err = encoder.GetData()
 

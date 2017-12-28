@@ -6,6 +6,7 @@
     <script type="text/javascript">
         window.onload = function() {
             var conn;
+            var seraddr = "ws://127.0.0.1:8080/ws/";
             var msg = document.getElementById("msg");
             var log = document.getElementById("log");
 
@@ -28,7 +29,7 @@
                 return false;
             };
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://127.0.0.1:8080/ws/");
+                conn = new WebSocket(seraddr);
                 conn.onclose = function(evt) {
                     var item = document.createElement("div");
                     item.innerHTML = "<b>Connection closed.</b>";
