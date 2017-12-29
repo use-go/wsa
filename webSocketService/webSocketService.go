@@ -117,8 +117,9 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
 	conn, err := upgrader.Upgrade(w, req, nil)
+
 	if err != nil {
-		logger.LOGE("webSocket handshake failed with error" + err.Error())
+		logger.LOGE("webSocket handshake failed with error " + err.Error() + "of remote :" + conn.RemoteAddr().String())
 		return
 	}
 	//remmber to close the websocket connetction
@@ -155,14 +156,14 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 		case websocket.TextMessage:
 			err = conn.WriteMessage(websocket.TextMessage, data)
 			if err != nil {
-				logger.LOGI("send text msg failed:" + err.Error())
+				logger.LOGI("send text msg failed: " + err.Error() + " target :" + conn.RemoteAddr().String())
 				return
 			}
 		case websocket.BinaryMessage:
 			err = handler.processWSMessage(data)
 			if err != nil {
 				logger.LOGE(err.Error())
-				logger.LOGE("ws binary error in connection :" + conn.RemoteAddr().String())
+				logger.LOGE("websocket binary error in connection :" + conn.RemoteAddr().String())
 				return
 			}
 		case websocket.CloseMessage:

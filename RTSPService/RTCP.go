@@ -19,8 +19,8 @@ const (
 	RTCP_APP  = 204
 )
 
-//RTCP_Packet Type
-type RTCP_Packet struct {
+//RTCPPacket Type
+type RTCPPacket struct {
 	version              byte  //2
 	padding              bool  //1
 	receptionReportCount byte  //5
@@ -29,17 +29,19 @@ type RTCP_Packet struct {
 	body                 interface{}
 }
 
-type RTCP_header_SR struct {
-	ssrc              uint32
-	ntp_timestamp_MSW uint32 //从1900到现在的秒数 不是1970
-	ntp_timestamp_LSW uint32 //秒剩下的 1s/2的32次方等于  单位232.8皮秒
-	rtp_timestamp     uint32 //RTP时间
-	pkt_count         uint32 //已发送RTP包个数
-	octet_count       uint32 //已发送总字节数
-	reportBlock       []RTCP_header_report_block
+//RTCPHeaderSR struct
+type RTCPHeaderSR struct {
+	ssrc            uint32
+	ntpTimestampMSW uint32 //从1900到现在的秒数 不是1970
+	ntpTimestampLSW uint32 //秒剩下的 1s/2的32次方等于  单位232.8皮秒
+	rtpTimestamp    uint32 //RTP时间
+	pktCount        uint32 //已发送RTP包个数
+	octetCount      uint32 //已发送总字节数
+	reportBlock     []RTCPHeaderReportBlock
 }
 
-type RTCP_header_report_block struct {
+//RTCPHeaderReportBlock struct
+type RTCPHeaderReportBlock struct {
 	ssrc            uint32
 	fract_lost      byte   //8
 	cumulative_lost uint32 //24
@@ -49,18 +51,18 @@ type RTCP_header_report_block struct {
 	delay_last_SR   uint32
 }
 
-type RTCP_header_RR struct {
-	reportBlock []RTCP_header_report_block
+type RTCPHeaderRR struct {
+	reportBlock []RTCPHeaderReportBlock
 }
 
-type RTCP_header_SDES struct {
+type RTCPHeaderSDES struct {
 }
 
-type RTCP_header_BYE struct {
+type RTCPHeaderBYE struct {
 }
 
-func parseRTCP(data []byte) (pkt *RTCP_Packet, err error) {
-	pkt = &RTCP_Packet{}
+func parseRTCP(data []byte) (pkt *RTCPPacket, err error) {
+	pkt = &RTCPPacket{}
 	if len(data) < 4 {
 		return nil, errors.New("data not enough")
 	}
@@ -76,16 +78,16 @@ func parseRTCP(data []byte) (pkt *RTCP_Packet, err error) {
 	}
 	switch pkt.packetType {
 	case RTCP_SR:
-		sr := &RTCP_header_SR{}
+		sr := &RTCPHeaderSR{}
 		pkt.body = sr
 		sr.ssrc = uint32(reader.Read32Bits())
-		sr.ntp_timestamp_MSW = uint32(reader.Read32Bits())
-		sr.ntp_timestamp_LSW = uint32(reader.Read32Bits())
-		sr.rtp_timestamp = uint32(reader.Read32Bits())
-		sr.pkt_count = uint32(reader.Read32Bits())
-		sr.octet_count = uint32(reader.Read32Bits())
+		sr.ntpTimestampMSW = uint32(reader.Read32Bits())
+		sr.ntpTimestampLSW = uint32(reader.Read32Bits())
+		sr.rtpTimestamp = uint32(reader.Read32Bits())
+		sr.pktCount = uint32(reader.Read32Bits())
+		sr.octetCount = uint32(reader.Read32Bits())
 		if pkt.receptionReportCount > 0 {
-			sr.reportBlock = make([]RTCP_header_report_block, pkt.receptionReportCount)
+			sr.reportBlock = make([]RTCPHeaderReportBlock, pkt.receptionReportCount)
 			for i := 0; i < int(pkt.receptionReportCount); i++ {
 				sr.reportBlock[i].ssrc = uint32(reader.Read32Bits())
 				sr.reportBlock[i].fract_lost = byte(reader.ReadBits(8))
@@ -97,9 +99,9 @@ func parseRTCP(data []byte) (pkt *RTCP_Packet, err error) {
 			}
 		}
 	case RTCP_RR:
-		rr := &RTCP_header_RR{}
+		rr := &RTCPHeaderRR{}
 		if pkt.receptionReportCount > 0 {
-			rr.reportBlock = make([]RTCP_header_report_block, pkt.receptionReportCount)
+			rr.reportBlock = make([]RTCPHeaderReportBlock, pkt.receptionReportCount)
 			for i := 0; i < int(pkt.receptionReportCount); i++ {
 				rr.reportBlock[i].ssrc = uint32(reader.Read32Bits())
 				rr.reportBlock[i].fract_lost = byte(reader.ReadBits(8))

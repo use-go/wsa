@@ -1,0 +1,672 @@
+Client paused
+streamedian.min.js:sourcemap:1 Client started
+streamedian.min.js:1 [mse] Media source opened: open
+streamedian.min.js:1 [transport:ws] WSP/1.1 INIT
+proto: rtsp
+host: 127.0.0.1
+port: 8554
+seq: 1
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 1
+channel: 127.0.0.1-956 1314020757
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 JOIN
+channel: 127.0.0.1-956 1314020757
+seq: 2
+
+
+streamedian.min.js:1 [transport:ws] [data]
+WSP/1.1 200 OK
+seq: 2
+
+
+streamedian.min.js:1 [client:rtsp] OPTIONS * RTSP/1.0
+CSeq: 1
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 55
+seq: 3
+
+OPTIONS * RTSP/1.0
+CSeq: 1
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [mse] Media source ended: closed
+streamedian.min.js:1 [mse] Media source closed: closed
+streamedian.min.js:1 [mse] Media source opened: open
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 3
+
+RTSP/1.0 200 OK
+CSeq: 1
+Public: OPTIONS, DESCRIBE, GET_PARAMETER, PAUSE, PLAY, SETUP, SET_PARAMETER, TEARDOWN
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:45:45 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 1
+Public: OPTIONS, DESCRIBE, GET_PARAMETER, PAUSE, PLAY, SETUP, SET_PARAMETER, TEARDOWN
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:45:45 GMT
+
+
+streamedian.min.js:1 [client:rtsp] DESCRIBE rtsp://127.0.0.1:8554/test RTSP/1.0
+Accept: application/sdp
+CSeq: 2
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 106
+seq: 4
+
+DESCRIBE rtsp://127.0.0.1:8554/test RTSP/1.0
+Accept: application/sdp
+CSeq: 2
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 4
+
+RTSP/1.0 200 OK
+CSeq: 2
+Content-Type: application/sdp
+Content-Base: rtsp://127.0.0.1:8554/test/
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+Content-Length: 545
+
+v=0
+o=- 1188340656180883 1 IN IP4 127.0.0.1
+s=Session streamed with GStreamer
+i=rtsp-server
+t=0 0
+a=tool:GStreamer
+a=type:broadcast
+a=control:*
+a=range:npt=0-160.448
+m=video 0 RTP/AVP 96
+c=IN IP4 0.0.0.0
+b=AS:388
+a=rtpmap:96 H264/90000
+a=control:stream=0
+a=framerate:25
+a=fmtp:96 packetization-mode=1;profile-level-id=42801f;sprop-parameter-sets=Z0KAH5ZSAUBf8slBgYGQAAADABAAAAMDKEA=,aMuNSA==
+m=audio 0 RTP/AVP 97
+c=IN IP4 0.0.0.0
+b=AS:352
+a=rtpmap:97 MP4A-LATM/48000
+a=control:stream=1
+a=fmtp:97 cpresent=0;config=40002320
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 2
+Content-Type: application/sdp
+Content-Base: rtsp://127.0.0.1:8554/test/
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+Content-Length: 545
+
+v=0
+o=- 1188340656180883 1 IN IP4 127.0.0.1
+s=Session streamed with GStreamer
+i=rtsp-server
+t=0 0
+a=tool:GStreamer
+a=type:broadcast
+a=control:*
+a=range:npt=0-160.448
+m=video 0 RTP/AVP 96
+c=IN IP4 0.0.0.0
+b=AS:388
+a=rtpmap:96 H264/90000
+a=control:stream=0
+a=framerate:25
+a=fmtp:96 packetization-mode=1;profile-level-id=42801f;sprop-parameter-sets=Z0KAH5ZSAUBf8slBgYGQAAADABAAAAMDKEA=,aMuNSA==
+m=audio 0 RTP/AVP 97
+c=IN IP4 0.0.0.0
+b=AS:352
+a=rtpmap:97 MP4A-LATM/48000
+a=control:stream=1
+a=fmtp:97 cpresent=0;config=40002320
+
+streamedian.min.js:1 [parser:sdp] v=0
+o=- 1188340656180883 1 IN IP4 127.0.0.1
+s=Session streamed with GStreamer
+i=rtsp-server
+t=0 0
+a=tool:GStreamer
+a=type:broadcast
+a=control:*
+a=range:npt=0-160.448
+m=video 0 RTP/AVP 96
+c=IN IP4 0.0.0.0
+b=AS:388
+a=rtpmap:96 H264/90000
+a=control:stream=0
+a=framerate:25
+a=fmtp:96 packetization-mode=1;profile-level-id=42801f;sprop-parameter-sets=Z0KAH5ZSAUBf8slBgYGQAAADABAAAAMDKEA=,aMuNSA==
+m=audio 0 RTP/AVP 97
+c=IN IP4 0.0.0.0
+b=AS:352
+a=rtpmap:97 MP4A-LATM/48000
+a=control:stream=1
+a=fmtp:97 cpresent=0;config=40002320
+
+streamedian.min.js:1 [parser:sdp] Ignored unknown SDP directive: i=rtsp-server
+streamedian.min.js:1 [parser:sdp] Ignored unknown SDP directive: c=IN IP4 0.0.0.0
+streamedian.min.js:1 [parser:sdp] Ignored unknown SDP directive: b=AS:388
+streamedian.min.js:1 [parser:sdp] Ignored unknown SDP directive: c=IN IP4 0.0.0.0
+streamedian.min.js:1 [parser:sdp] Ignored unknown SDP directive: b=AS:352
+streamedian.min.js:1 [client:rtsp] SDP contained 2 track(s). Calling SETUP for each.
+streamedian.min.js:1 [client:rtsp] setup track: video
+streamedian.min.js:1 [client:rtsp] setup track: audio
+streamedian.min.js:1 [client:rtsp] SETUP rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+CSeq: 3
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 172
+seq: 5
+
+SETUP rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+CSeq: 3
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] SETUP rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Transport: RTP/AVP/TCP;unicast;interleaved=2-3
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+CSeq: 4
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 172
+seq: 6
+
+SETUP rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Transport: RTP/AVP/TCP;unicast;interleaved=2-3
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+CSeq: 4
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 5
+
+RTSP/1.0 200 OK
+CSeq: 3
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1;ssrc=FFAABDE4;mode="PLAY"
+Server: GStreamer RTSP server
+Session: QJs1mOvOBWXT21yk
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 3
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1;ssrc=FFAABDE4;mode="PLAY"
+Server: GStreamer RTSP server
+Session: QJs1mOvOBWXT21yk
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] PLAY rtsp://127.0.0.1:8554/test/ RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 5
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 105
+seq: 7
+
+PLAY rtsp://127.0.0.1:8554/test/ RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 5
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 6
+
+RTSP/1.0 200 OK
+CSeq: 4
+Transport: RTP/AVP/TCP;unicast;interleaved=2-3;ssrc=EDFF0450;mode="PLAY"
+Server: GStreamer RTSP server
+Session: oAHgXM-EOLJdGsAy
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 4
+Transport: RTP/AVP/TCP;unicast;interleaved=2-3;ssrc=EDFF0450;mode="PLAY"
+Server: GStreamer RTSP server
+Session: oAHgXM-EOLJdGsAy
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] PLAY rtsp://127.0.0.1:8554/test/ RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 6
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 105
+seq: 8
+
+PLAY rtsp://127.0.0.1:8554/test/ RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 6
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 7
+
+RTSP/1.0 200 OK
+CSeq: 5
+RTP-Info: url=rtsp://127.0.0.1:8554/test/stream=0;seq=29148;rtptime=2320152525
+Range: npt=0-160.448
+Server: GStreamer RTSP server
+Session: QJs1mOvOBWXT21yk
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 5
+RTP-Info: url=rtsp://127.0.0.1:8554/test/stream=0;seq=29148;rtptime=2320152525
+Range: npt=0-160.448
+Server: GStreamer RTSP server
+Session: QJs1mOvOBWXT21yk
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 8
+
+RTSP/1.0 200 OK
+CSeq: 6
+RTP-Info: url=rtsp://127.0.0.1:8554/test/stream=1;seq=29523;rtptime=1814875937
+Range: npt=0.007733929-160.448
+Server: GStreamer RTSP server
+Session: oAHgXM-EOLJdGsAy
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 6
+RTP-Info: url=rtsp://127.0.0.1:8554/test/stream=1;seq=29523;rtptime=1814875937
+Range: npt=0.007733929-160.448
+Server: GStreamer RTSP server
+Session: oAHgXM-EOLJdGsAy
+Date: Fri, 29 Dec 2017 07:45:46 GMT
+
+
+streamedian.min.js:1 [remuxer] (2) [{…}, {…}]
+streamedian.min.js:1 timescale: 16777216; unitsInTick: 48; fixedFramerate: false; avgFrameDuration: 174762.66666666666
+11streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [remuxer:base] Initial pts=0 dts=0 offset=2320152525
+streamedian.min.js:1 [remuxer:base] Initial pts=0 dts=0 offset=3402892381.875
+streamedian.min.js:1 [mse] Use codec: video/mp4; codecs="avc1.42801f"
+streamedian.min.js:1 [mse] Use codec: audio/mp4; codecs="mp4a.40.2"
+2975streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 7
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 122
+seq: 9
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 7
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 8
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 122
+seq: 10
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 8
+User-Agent: SFRtsp 0.3
+
+
+22streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 9
+
+RTSP/1.0 200 OK
+CSeq: 7
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 7
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:16 GMT
+
+
+9streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 10
+
+RTSP/1.0 200 OK
+CSeq: 8
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 8
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:16 GMT
+
+
+2941streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 Client paused
+6streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 9
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 122
+seq: 11
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 9
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 10
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 12
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 10
+User-Agent: SFRtsp 0.3
+
+
+27streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 11
+
+RTSP/1.0 200 OK
+CSeq: 9
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 9
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:46 GMT
+
+
+11streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 12
+
+RTSP/1.0 200 OK
+CSeq: 10
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 10
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:46:46 GMT
+
+
+192streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 Client started
+2687streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 11
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 13
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 11
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 12
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 14
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 12
+User-Agent: SFRtsp 0.3
+
+
+35streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 13
+
+RTSP/1.0 200 OK
+CSeq: 11
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 11
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:16 GMT
+
+
+2streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 14
+
+RTSP/1.0 200 OK
+CSeq: 12
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 12
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:16 GMT
+
+
+2917streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 13
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 15
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 13
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 14
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 16
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 14
+User-Agent: SFRtsp 0.3
+
+
+21streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 15
+
+RTSP/1.0 200 OK
+CSeq: 13
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 13
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:46 GMT
+
+
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 16
+
+RTSP/1.0 200 OK
+CSeq: 14
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:46 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 14
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:47:46 GMT
+
+
+2896streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 15
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 17
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=0 RTSP/1.0
+Session: QJs1mOvOBWXT21yk
+CSeq: 15
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [client:rtsp] GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 16
+User-Agent: SFRtsp 0.3
+
+
+streamedian.min.js:1 [transport:ws] WSP/1.1 WRAP
+contentLength: 123
+seq: 18
+
+GET_PARAMETER rtsp://127.0.0.1:8554/test/stream=1 RTSP/1.0
+Session: oAHgXM-EOLJdGsAy
+CSeq: 16
+User-Agent: SFRtsp 0.3
+
+
+22streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 17
+
+RTSP/1.0 200 OK
+CSeq: 15
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:48:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 15
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:48:16 GMT
+
+
+3streamedian.min.js:1 [transport:ws] got data
+streamedian.min.js:1 [transport:ws] [ctrl]
+WSP/1.1 200 OK
+seq: 18
+
+RTSP/1.0 200 OK
+CSeq: 16
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:48:16 GMT
+
+
+streamedian.min.js:1 [client:rtsp] RTSP/1.0 200 OK
+CSeq: 16
+Server: GStreamer RTSP server
+Date: Fri, 29 Dec 2017 07:48:16 GMT
+
+
+805streamedian.min.js:1 [transport:ws] got data
