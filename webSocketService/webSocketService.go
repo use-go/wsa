@@ -111,17 +111,21 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimSuffix(path, "/")
 	//logger.LOGT(path)
-	var upgrader = websocket.Upgrader{
+	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
-	conn, err := upgrader.Upgrade(w, req, nil)
 
+	subProtocol := req.Header.Get("Sec-Websocket-Protocol")
+	respHeader := http.Header{"Sec-Websocket-Protocol": []string{subProtocol}}
+
+	conn, err := upgrader.Upgrade(w, req, respHeader)
 	if err != nil {
 		logger.LOGE("webSocket handshake failed with error " + err.Error() + "of remote :" + conn.RemoteAddr().String())
 		return
 	}
+
 	//remmber to close the websocket connetction
 	defer func() {
 		conn.Close()
