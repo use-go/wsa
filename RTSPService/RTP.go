@@ -5,6 +5,7 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 )
 
+//DataType for RTP
 const (
 	NalType_SINGLE_NAL_MIN = 1
 	NalType_SINGLE_NAL_MAX = 23
@@ -14,9 +15,9 @@ const (
 	NalType_MTAP24         = 27
 	NalType_FU_A           = 28
 	NalType_FU_B           = 29
-	Payload_h264            = 96
-	Payload_MPA             = 14 //mp3 freq 90000
-	RTP_H264_freq           = 90000
+	Payload_h264           = 96
+	Payload_MPA            = 14 //mp3 freq 90000
+	RTP_H264_freq          = 90000
 
 	RTP_MTU = 1500
 )

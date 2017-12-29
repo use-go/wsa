@@ -33,7 +33,7 @@ func init() {
 	rtpPortSet = wssAPI.NewSet()
 }
 
-//vlc no heart beat
+//ReadPacket vlc no heart beat
 func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 	if timeout {
 		logger.LOGT(serviceConfig.TimeoutSec)

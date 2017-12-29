@@ -19,6 +19,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//RTSPHandler
 type RTSPHandler struct {
 	conn        net.Conn
 	mutexConn   sync.Mutex
@@ -95,6 +96,7 @@ func (trackinfo *trackInfo) reset() {
 	}
 }
 
+//Init RTSP Handler
 func (rtspHandler *RTSPHandler) Init(msg *wssAPI.Msg) (err error) {
 	rtspHandler.session = wssAPI.GenerateGUID()
 	rtspHandler.sinkAdded = false

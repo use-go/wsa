@@ -10,6 +10,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//RTSPService Service
 type RTSPService struct {
 }
 

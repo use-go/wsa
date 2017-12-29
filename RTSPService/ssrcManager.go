@@ -8,7 +8,7 @@ import (
 )
 
 type ssrcManager struct {
-	set   *wssAPI.Set
+	set   *wssAPI.Set //mark for a Stremaer
 	mutex sync.RWMutex
 }
 
@@ -18,6 +18,7 @@ func newSSRCManager() (manager *ssrcManager) {
 	return
 }
 
+//Get a Globol Unique SSRC for Streamer
 func (ssrcmanager *ssrcManager) NewSSRC() (id uint32) {
 	ssrcmanager.mutex.Lock()
 	defer ssrcmanager.mutex.Unlock()

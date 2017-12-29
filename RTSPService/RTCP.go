@@ -10,6 +10,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//RTCP Cmd Type
 const (
 	RTCP_SR   = 200
 	RTCP_RR   = 201
@@ -18,6 +19,7 @@ const (
 	RTCP_APP  = 204
 )
 
+//RTCP_Packet Type
 type RTCP_Packet struct {
 	version              byte  //2
 	padding              bool  //1

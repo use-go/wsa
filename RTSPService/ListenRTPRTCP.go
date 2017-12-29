@@ -1,6 +1,5 @@
-//监听RTP RTCP
 package RTSPService
-
+//监听RTP RTCP
 import (
 	"net"
 	"sync"
@@ -8,7 +7,7 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 )
 
-//这两个函数 直到track里面的svr conn关闭后，自动退出？
+//这两个函数 直到track里面的svr conn关闭后，自动退出?
 func listenRTP(track *trackInfo, handler *RTSPHandler, wait *sync.WaitGroup, chAddr chan *net.UDPAddr) {
 	defer func() {
 		wait.Done()

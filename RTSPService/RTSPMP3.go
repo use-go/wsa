@@ -8,6 +8,7 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 )
 
+//MP3 Audio Type
 const (
 	Mp3ADU          = true
 	Mp3Interleaving = false //交错包，将MP3的固定头修改下即可，目前没有实现

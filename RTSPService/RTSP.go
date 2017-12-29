@@ -1,12 +1,13 @@
 package RTSPService
 
 import (
-
 	"net"
 	"strconv"
+
 	"github.com/use-go/websocket-streamserver/logger"
 )
 
+//RTSP Descriptions
 const (
 	RTSP_VER             = "RTSP/1.0"
 	RTSP_EL              = "\r\n"
