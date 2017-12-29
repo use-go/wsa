@@ -169,10 +169,11 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 			err = errors.New("websocket closed by client:" + conn.RemoteAddr().String())
 			return
 		case websocket.PingMessage:
-			//conn.WriteMessage()
+			//conn.WriteMessage(websocket.PongMessage, []byte(""))
 			conn.WriteMessage(websocket.PongMessage, []byte("pongMessage"))
 		case websocket.PongMessage:
-			conn.WriteMessage(websocket.PingMessage, []byte("pingMessage"))
+			//the below line can be removed
+			logger.LOGD("pong message received from connection :" + conn.RemoteAddr().String())
 		default:
 		}
 	}

@@ -39,8 +39,8 @@ func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
 	case WSCOnMetaData:
 		return websockHandler.ctrlOnMetadata(data[3:])
 	default:
-		logger.LOGE("unknowd websocket control type")
-		return errors.New("invalid ctrl msg type")
+		logger.LOGE("unknown websocket control type :from" + websockHandler.conn.RemoteAddr().String())
+		return errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
 	}
 }
 

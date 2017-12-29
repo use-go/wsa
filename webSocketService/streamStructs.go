@@ -3,10 +3,10 @@ package webSocketService
 import (
 	"encoding/json"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
-
-	"github.com/gorilla/websocket"
 )
 
 // WS Status
@@ -22,17 +22,21 @@ const (
 	WSPktControl = 18
 )
 
-// WS Cmd
+// WS Control Cmd
 const (
-	WSCPlay       = 1
-	WSCPlay2      = 2
-	WSCResume     = 3
-	WSCPause      = 4
-	WSCSeek       = 5
-	WSCClose      = 7
-	WSCStop       = 6
-	WSCPublish    = 0x10
-	WSCOnMetaData = 9
+	WSCConnect      = 0
+	WSCPlay         = 1
+	WSCPlay2        = 2
+	WSCResume       = 3
+	WSCPause        = 4
+	WSCSeek         = 5
+	WSCStop         = 6
+	WSCClose        = 7
+	WSCPublish      = 8
+	WSCOnMetaData   = 9
+	WSCStreamBegin  = 11
+	WSCStreamEnd    = 12
+
 )
 
 var cmdsMap map[int]*wssAPI.Set
