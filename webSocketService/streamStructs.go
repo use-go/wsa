@@ -36,7 +36,6 @@ const (
 	WSCOnMetaData   = 9
 	WSCStreamBegin  = 11
 	WSCStreamEnd    = 12
-
 )
 
 var cmdsMap map[int]*wssAPI.Set

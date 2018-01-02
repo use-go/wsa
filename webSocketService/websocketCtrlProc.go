@@ -1,3 +1,7 @@
+// Copyright 2018 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package webSocketService
 
 import (
@@ -9,6 +13,25 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//ProcessWSCtrlMessage to deal the RTPS over RTSP
+func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err error) {
+	if nil == data || len(data) < 4 {
+		return errors.New("invalid msg")
+	}
+	ctrlType, err := wssAPI.DecodeCtrlMsgType(data)
+
+	switch ctrlType {
+	case wssAPI.WSPCInit:
+	case wssAPI.WSPCJoin:
+	case wssAPI.WSPWarp:
+	default:
+		logger.LOGE("unknown websocket control type :from" + websockHandler.conn.RemoteAddr().String())
+		return errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
+	}
+	return
+}
+
+// controlMsg for control actions
 func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
 	if nil == data || len(data) < 4 {
 		return errors.New("invalid msg")

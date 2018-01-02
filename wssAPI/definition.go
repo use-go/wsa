@@ -60,12 +60,12 @@ const (
 
 // MSG Type to handle different Event
 const (
-	MsgFlvTag            = "FLVTag"
-	MsgGetSourceNotify   = "MSG.GetSource.Notify.Async"
-	MsgGetSourceFailed   = "MSG.GetSource.Failed"
-	MsgSourceClosedForce = "MSG.SourceClosed.Force"
-	MsgPublishStart      = "NetStream.Publish.Start"
-	MsgPublishStop       = "NetStream.Publish.Stop"
-	MsgPlayStart         = "NetStream.Play.Start"
-	MsgPlayStop          = "NetStream.Play.Stop"
+	MsgFlvTag            = "MSG.NetStream.Type.FLVTag"
+	MsgGetSourceNotify   = "MSG.NetStream.GetSource.Notify.Async"
+	MsgGetSourceFailed   = "MSG.NetStream.GetSource.Failed"
+	MsgSourceClosedForce = "MSG.NetStream.SourceClosed.Force"
+	MsgPublishStart      = "MSG.NetStream.Publish.Start"
+	MsgPublishStop       = "MSG.NetStream.Publish.Stop"
+	MsgPlayStart         = "MSG.NetStream.Play.Start"
+	MsgPlayStop          = "MSG.NetStream.Play.Stop"
 )

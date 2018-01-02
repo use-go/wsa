@@ -158,9 +158,10 @@ func (websockService *WebSocketService) handleConn(conn *websocket.Conn, req *ht
 		}
 		switch messageType {
 		case websocket.TextMessage:
-			err = conn.WriteMessage(websocket.TextMessage, data)
+			//err = conn.WriteMessage(websocket.TextMessage, data)
+			err = handler.ProcessWSCtrlMessage(data)
 			if err != nil {
-				logger.LOGI("send text msg failed: " + err.Error() + " target :" + conn.RemoteAddr().String())
+				logger.LOGI("websocket control msg error : " + err.Error() + " target :" + conn.RemoteAddr().String())
 				return
 			}
 		case websocket.BinaryMessage:
