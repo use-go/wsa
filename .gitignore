@@ -3,3 +3,4 @@ examples/examples
 debug
 /streamServer/debug
 main.exe
+*.test

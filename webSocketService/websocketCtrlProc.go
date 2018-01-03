@@ -18,9 +18,9 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 	if nil == data || len(data) < 4 {
 		return errors.New("invalid msg")
 	}
-	ctrlType, err := wssAPI.DecodeCtrlMsgType(data)
+	ctrlTMsg, err := wssAPI.DecodeCtrlMsg(data)
 
-	switch ctrlType {
+	switch ctrlTMsg.MsgType {
 	case wssAPI.WSPCInit:
 	case wssAPI.WSPCJoin:
 	case wssAPI.WSPWarp:

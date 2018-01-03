@@ -117,6 +117,7 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
 
+	//sub Protocol Negotiation
 	subProtocol := req.Header.Get("Sec-Websocket-Protocol")
 	respHeader := http.Header{"Sec-Websocket-Protocol": []string{subProtocol}}
 
@@ -125,7 +126,6 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 		logger.LOGE("webSocket handshake failed with error " + err.Error() + "of remote :" + conn.RemoteAddr().String())
 		return
 	}
-
 	//remmber to close the websocket connetction
 	defer func() {
 		conn.Close()
