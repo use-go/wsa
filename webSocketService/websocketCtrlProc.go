@@ -7,35 +7,151 @@ package webSocketService
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/websocket"
 
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
+//channelIndex Denote the Channel Index In Session
+var channelIndex = 0
+var channelWebSocket map[int]*websocket.Conn
+
+func init() {
+	channelWebSocket = map[int]*websocket.Conn{}
+}
+
 //ProcessWSCtrlMessage to deal the RTPS over RTSP
 func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err error) {
 	if nil == data || len(data) < 4 {
 		return errors.New("invalid msg")
 	}
-	ctrlTMsg, err := wssAPI.DecodeCtrlMsg(data)
+	ctrlMsg, err := wssAPI.DecodeWSPCtrlMsg(data)
 
-	switch ctrlTMsg.MsgType {
+	switch ctrlMsg.MsgType {
 	case wssAPI.WSPCInit:
+		//Init Video Session
+		err = websockHandler.procWSPCInit(ctrlMsg)
 	case wssAPI.WSPCJoin:
+	//Join the streaming
+
 	case wssAPI.WSPWarp:
 	default:
 		logger.LOGE("unknown websocket control type :from" + websockHandler.conn.RemoteAddr().String())
-		return errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
+		err = errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
 	}
 	return
 }
+func (websockHandler *websocketHandler) procWSPCInit(ctrlMsg *wssAPI.WSPMessage) (err error) {
 
-// controlMsg for control actions
-func (websockHandler *websocketHandler) controlMsg(data []byte) (err error) {
+	if wssAPI.CheckHeader(ctrlMsg.Headers) {
+		seqStr := ctrlMsg.Headers["seq"]
+		codeMsg := "200 OK"
+		headerMsg := map[string]string{}
+		payLoadMsg := ""
+		strChannel, errr := websockHandler.initChannel(ctrlMsg.Headers)
+		headerMsg["channel"] = strChannel
+		if errr != nil {
+			err = errors.New("initChannel error with inner eror: " + errr.Error())
+			codeMsg = "500 Internal Server Error"
+		}
+		replymsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
+		websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
+		return
+	}
+	return errors.New("Check WSPInit Header Failed")
+}
+
+func (websockHandler *websocketHandler) initChannel(headers map[string]string) (strChannel string, err error) {
+
+	ipStr := headers["host"]
+	portStr := headers["port"]
+
+	encodedIntIP := wssAPI.IP2Int(ipStr)
+	channelIndex++
+	strChannelIndex := strconv.Itoa(channelIndex)
+	encodedIPStr := strconv.Itoa(encodedIntIP)
+	strChannel = ipStr + "-" + strChannelIndex + encodedIPStr
+
+	cli := &websocket.Dialer{}
+	req := http.Header{}
+	wsURL := "ws://" + ipStr + ":" + portStr + "/ws/"
+	wsConn, _, errr := cli.Dial(wsURL, req)
+	if errr != nil {
+		logger.LOGE(errr.Error())
+		err = errr
+		return
+	}
+	//save Session
+	channelWebSocket[channelIndex] = wsConn
+
+	// var sock = net.connect({ host: ipStr, port: portStr }, function() {
+
+	//     okFunc()
+	//     sock.connectInfo = true
+
+	//     sock.rtpBuffer = new Buffer(2048)
+	//     sock.on("data", function(data) {
+	//         if (sock.outControlData) {
+	//             sock.outControlData = false
+	//             return
+	//         }
+
+	//         var flag = 0
+	//         if (sock.SubBuffer && sock.SubBufferLen > 0) {
+	//             flag = sock.SubBuffer.length - sock.SubBufferLen
+	//             data.copy(sock.SubBuffer, sock.SubBufferLen, 0, flag - 1)
+	//             sock.emit("rtpData", sock.SubBuffer)
+
+	//             sock.SubBufferLen = 0
+	//         }
+
+	//         while (flag < data.length) {
+	//             var len = data.readUIntBE(flag + 2, 2)
+	//             sock.SubBuffer = new Buffer(4 + len)
+	//             if ((flag + 4 + len) <= data.length) {
+	//                 data.copy(sock.SubBuffer, 0, flag, flag + len - 1)
+	//                 sock.emit("rtpData", sock.SubBuffer)
+	//                 sock.SubBufferLen = 0
+	//             } else {
+	//                 data.copy(sock.SubBuffer, 0, flag, data.length - 1)
+	//                 sock.SubBufferLen = data.length - flag
+	//             }
+	//             flag += 4
+	//             flag += len
+	//         }
+	//     })
+
+	// }).on("error", function(e) {
+	//     //clean all client;
+	//     console.log(e)
+	// })
+	// sock.setTimeout(1000 * 3, function() {
+	//     if (!sock.connectInfo) {
+	//         console.log("time out")
+	//         failFunc("relink host[" + ip + "] time out")
+	//         sock.destroy()
+	//     }
+	// })
+
+	// sock.on("close", function(code) {
+	//     //关闭所有子项目
+
+	// })
+
+	return
+}
+
+// rtmpControlMsg for control actions
+func (websockHandler *websocketHandler) rtmpControlMsg(data []byte) (err error) {
 	if nil == data || len(data) < 4 {
 		return errors.New("invalid msg")
 	}
+	//decode the rtmp ctrl msg type
 	ctrlType, err := amf.AMF0DecodeInt24(data)
 	if err != nil {
 		logger.LOGE("get ctrl type failed")

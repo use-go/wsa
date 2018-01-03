@@ -134,7 +134,7 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 
 	//new connection came here
 	logger.LOGT(fmt.Sprintf("new websocket client connected: %s", conn.RemoteAddr().String()))
-	websockService.handleConn(conn, req, path)
+	go websockService.handleConn(conn, req, path)
 
 }
 

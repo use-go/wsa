@@ -26,7 +26,7 @@ const (
 type WSPMessage struct {
 	Msg     string
 	MsgType string
-	Data    map[string]string
+	Headers map[string]string
 	Payload string
 }
 
@@ -38,8 +38,8 @@ type WSPInit struct {
 	Seq   uint
 }
 
-//DecodeCtrlMsg classify the msg type
-func DecodeCtrlMsg(data []byte) (ret *WSPMessage, err error) {
+//DecodeWSPCtrlMsg decode ctrl msg & classify the msg type
+func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 
 	if checkWSPData(data) {
 
@@ -47,11 +47,11 @@ func DecodeCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 		logger.LOGD(contentString)
 		strlines := strings.Split(contentString, "\r\n")
 		arryLenth := len(strlines)
-		if arryLenth > 1 {
-			parseredMsg := WSPMessage{Data: map[string]string{}}
+		// \r\n\r\n in the end ,2 empty string occured, Must more 3
+		if arryLenth > 3 {
+			parseredMsg := WSPMessage{Headers: map[string]string{}}
 			parseredMsg.MsgType = parsingWSPMsgType(strlines[0])
 
-			// \r\n\r\n in the end ,2 empty string occured
 			for i := 1; i < arryLenth-2; i++ {
 				//get the version
 				tmpStr := strlines[i]
@@ -61,9 +61,11 @@ func DecodeCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 				//tmpStr = strings.TrimSpace(tmpStr)
 				tmpStr = strings.Replace(tmpStr, " ", "", -1)
 				tmpStrArry := strings.SplitN(tmpStr, ":", 2)
-				parseredMsg.Data[tmpStrArry[0]] = tmpStrArry[1]
+				parseredMsg.Headers[tmpStrArry[0]] = tmpStrArry[1]
 
 			}
+
+			parseredMsg.Msg = contentString
 			ret = &parseredMsg
 			return
 		}
@@ -92,4 +94,42 @@ func parsingWSPMsgType(strHeadline string) string {
 	logger.LOGD("protocol version : " + strHeadline)
 
 	return targetArray[1]
+}
+
+//CheckHeader ok or not
+func CheckHeader(headers map[string]string) bool {
+	if len(headers) < 2 {
+		return false
+	}
+	seqInt, err := strconv.Atoi(headers["seq"])
+
+	if err != nil || seqInt < 0 {
+		return false
+	}
+
+	ipformat := `((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)`
+	ipformatCheck := regexp.MustCompile(ipformat)
+
+	if ipformatCheck.MatchString(headers["host"]) {
+		return true
+	}
+
+	return false
+}
+
+//EncodeWSPCtrlMsg return client request msg
+func EncodeWSPCtrlMsg(code, seq string, headers map[string]string, payload string) string {
+
+	msg := "WSP/1.1 " + code + "\r\n"
+	msg += "seq: " + seq + "\r\n"
+	if len(headers) > 0 {
+		for key, value := range headers {
+			msg += key + ": " + value + "\r\n"
+		}
+	}
+	msg += "\r\n\r\n"
+	if payload != "" {
+		msg += payload
+	}
+	return msg
 }

@@ -10,6 +10,8 @@ import (
 	"net"
 	"os"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/use-go/websocket-streamserver/logger"
@@ -210,4 +212,21 @@ func InterfaceValid(val interface{}) bool {
 		return false
 	}
 	return !reflect.ValueOf(val).IsNil()
+}
+
+//IP2Int Enocde IP to a int
+func IP2Int(ip string) int {
+	num := 0
+	ipSections := strings.Split(ip, ".")
+
+	intIPSec1, _ := strconv.Atoi(ipSections[0])
+	intIPSec1 *= 256 * 256 * 256
+	intIPSec2, _ := strconv.Atoi(ipSections[1])
+	intIPSec1 *= 256 * 256
+	intIPSec3, _ := strconv.Atoi(ipSections[2])
+	intIPSec1 *= 256
+	intIPSec4, _ := strconv.Atoi(ipSections[3])
+	num = intIPSec1 + intIPSec2 + intIPSec3 + intIPSec4
+	num = num >> 0
+	return num
 }

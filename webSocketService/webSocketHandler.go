@@ -112,7 +112,7 @@ func (websockHandler *websocketHandler) processWSMessage(data []byte) (err error
 	case WSPktControl:
 		logger.LOGD("recv control data: from" + websockHandler.conn.RemoteAddr().String())
 		logger.LOGD(data)
-		return websockHandler.controlMsg(data[1:])
+		return websockHandler.rtmpControlMsg(data[1:])
 	default:
 		err = fmt.Errorf("msg type %d not supported from"+websockHandler.conn.RemoteAddr().String(), msgType)
 		logger.LOGW("invalid binary data from" + websockHandler.conn.RemoteAddr().String())
