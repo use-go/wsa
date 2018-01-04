@@ -7,7 +7,6 @@ package webSocketService
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"strconv"
 
 	"github.com/gorilla/websocket"
@@ -19,10 +18,10 @@ import (
 
 //channelIndex Denote the Channel Index In Session
 var channelIndex = 0
-var channelWebSocket map[int]*websocket.Conn
+var channelWebSocket map[string]*websocket.Conn
 
 func init() {
-	channelWebSocket = map[int]*websocket.Conn{}
+	channelWebSocket = map[string]*websocket.Conn{}
 }
 
 //ProcessWSCtrlMessage to deal the RTPS over RTSP
@@ -37,13 +36,29 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 		//Init Video Session
 		err = websockHandler.procWSPCInit(ctrlMsg)
 	case wssAPI.WSPCJoin:
-	//Join the streaming
-
+		//Join the streaming
+		err = websockHandler.procWSPCJoin(ctrlMsg)
 	case wssAPI.WSPWarp:
 	default:
 		logger.LOGE("unknown websocket control type :from" + websockHandler.conn.RemoteAddr().String())
 		err = errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
 	}
+	return
+}
+
+func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage) (err error) {
+
+	seqStr := ctrlMsg.Headers["seq"]
+	codeMsg := "200 OK"
+	headerMsg := map[string]string{}
+	payLoadMsg := ""
+	strChannel := ctrlMsg.Headers["channel"]
+	if _, exist := channelWebSocket[strChannel]; !exist {
+		err = errors.New("Channel information not exist")
+		codeMsg = " 400 Bad Request"
+	}
+	replymsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
+	websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
 	return
 }
 func (websockHandler *websocketHandler) procWSPCInit(ctrlMsg *wssAPI.WSPMessage) (err error) {
@@ -75,19 +90,22 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	channelIndex++
 	strChannelIndex := strconv.Itoa(channelIndex)
 	encodedIPStr := strconv.Itoa(encodedIntIP)
-	strChannel = ipStr + "-" + strChannelIndex + encodedIPStr
+	strChannel = ipStr + "-" + strChannelIndex + portStr + " " + encodedIPStr
 
-	cli := &websocket.Dialer{}
-	req := http.Header{}
-	wsURL := "ws://" + ipStr + ":" + portStr + "/ws/"
-	wsConn, _, errr := cli.Dial(wsURL, req)
-	if errr != nil {
-		logger.LOGE(errr.Error())
-		err = errr
-		return
+	if _, exist := channelWebSocket[strChannel]; !exist {
+		channelWebSocket[strChannel] = websockHandler.conn
 	}
-	//save Session
-	channelWebSocket[channelIndex] = wsConn
+	// cli := &websocket.Dialer{}
+	// req := http.Header{}
+	// wsURL := "ws://" + ipStr + ":" + portStr + "/ws/"
+	// wsConn, _, errr := cli.Dial(wsURL, req)
+	// if errr != nil {
+	// 	logger.LOGE(errr.Error())
+	// 	err = errr
+	// 	return
+	// }
+	// //save Session
+	// channelWebSocket[channelIndex] = wsConn
 
 	// var sock = net.connect({ host: ipStr, port: portStr }, function() {
 

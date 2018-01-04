@@ -59,9 +59,11 @@ func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 					continue
 				}
 				//tmpStr = strings.TrimSpace(tmpStr)
-				tmpStr = strings.Replace(tmpStr, " ", "", -1)
+				//tmpStr = strings.TrimSpace(tmpStr)
 				tmpStrArry := strings.SplitN(tmpStr, ":", 2)
-				parseredMsg.Headers[tmpStrArry[0]] = tmpStrArry[1]
+				keyStr := strings.TrimSpace(tmpStrArry[0])
+				valueStr := strings.TrimSpace(tmpStrArry[1])
+				parseredMsg.Headers[keyStr] = valueStr
 
 			}
 
