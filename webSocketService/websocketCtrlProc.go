@@ -7,6 +7,7 @@ package webSocketService
 import (
 	"encoding/json"
 	"errors"
+	"net"
 	"strconv"
 
 	"github.com/gorilla/websocket"
@@ -19,6 +20,7 @@ import (
 //channelIndex Denote the Channel Index In Session
 var channelIndex = 0
 var channelWebSocket map[string]*websocket.Conn
+var channelRTPSocket map[int]*net.Conn
 
 func init() {
 	channelWebSocket = map[string]*websocket.Conn{}
@@ -39,10 +41,17 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 		//Join the streaming
 		err = websockHandler.procWSPCJoin(ctrlMsg)
 	case wssAPI.WSPWarp:
+		//further to handle the wapperd rtsp message in content
+		err = websockHandler.procWSPWarp(ctrlMsg)
 	default:
 		logger.LOGE("unknown websocket control type :from" + websockHandler.conn.RemoteAddr().String())
 		err = errors.New("invalid ctrl msg type :from" + websockHandler.conn.RemoteAddr().String())
 	}
+	return
+}
+
+func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) (err error) {
+
 	return
 }
 
@@ -107,8 +116,20 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	// //save Session
 	// channelWebSocket[channelIndex] = wsConn
 
-	// var sock = net.connect({ host: ipStr, port: portStr }, function() {
+	// below is processing to build up a tcp connection to transferdata to client
 
+
+	// sock := net.Dialer{Timeout: 3 * time.Second}
+	// conn, errr := sock.Dial("tcp", ipStr+":"+portStr)
+	// if errr != nil {
+	// 	err = errr
+	// }
+
+	// if _, exist := channelRTPSocket[channelIndex]; !exist {
+	// 	channelRTPSocket[channelIndex] = &conn
+	// }
+
+	//var sock = net.connect({ host: ipStr, port: portStr }, function() {
 	//     okFunc()
 	//     sock.connectInfo = true
 

@@ -1,3 +1,36 @@
+/*
+	The RTP header has the following format:
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |V=2|P|X|  CC   |M|     PT      |       sequence number         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           timestamp                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           synchronization source (SSRC) identifier            |
+   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+   |            contributing source (CSRC) identifiers             |
+   |                             ....                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   version (V): 2 bits
+      This field identifies the version of RTP.  The version defined by
+      this specification is two (2).  (The value 1 is used by the first
+      draft version of RTP and the value 0 is used by the protocol
+      initially implemented in the "vat" audio tool.)
+   padding (P): 1 bit
+      If the padding bit is set, the packet contains one or more
+      additional padding octets at the end which are not part of the
+      payload.  The last octet of the padding contains a count of how
+      many padding octets should be ignored, including itself.  Padding
+      may be needed by some encryption algorithms with fixed block sizes
+      or for carrying several RTP packets in a lower-layer protocol data
+      unit.
+   extension (X): 1 bit
+      If the extension bit is set, the fixed header MUST be followed by
+      exactly one header extension, with a format defined in Section
+      5.3.1.
+*/
+
 package RTSPService
 
 import (
