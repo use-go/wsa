@@ -51,6 +51,8 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 }
 
 func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) (err error) {
+	//from here ,we send RTSP message to SS
+	//when receiving reply ,forward it to client
 
 	return
 }

@@ -42,22 +42,18 @@ type WSPInit struct {
 func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 
 	if checkWSPData(data) {
-
 		contentString := string(data)
 		logger.LOGD(contentString)
-		strlines := strings.Split(contentString, "\r\n")
+
+		firstIndex := strings.Index(contentString, "\r\n\r\n")
+		strlines := strings.Split(contentString[:firstIndex], "\r\n")
 		arryLenth := len(strlines)
 		// \r\n\r\n in the end ,2 empty string occured, Must more 3
-		if arryLenth > 3 {
+		if arryLenth > 1 {
 			parseredMsg := WSPMessage{Headers: map[string]string{}}
 			parseredMsg.MsgType = parsingWSPMsgType(strlines[0])
 
-			//if this the wrapperd rtsp message
-			if parseredMsg.MsgType == strings.ToUpper(WSPWrap) {
-				parseredMsg.Payload = ""
-			}
-
-			for i := 1; i < arryLenth-2; i++ {
+			for i := 1; i < arryLenth; i++ {
 				//get the version
 				tmpStr := strlines[i]
 				if len(tmpStr) < 2 {
@@ -72,6 +68,11 @@ func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 
 			}
 
+			//if this the wrapperd rtsp message
+			if WSPWrap == strings.ToUpper(parseredMsg.MsgType) {
+				parseredMsg.Payload = contentString[firstIndex+4:]
+				logger.LOGD(parseredMsg.Payload)
+			}
 			parseredMsg.Msg = contentString
 			ret = &parseredMsg
 			return
@@ -86,7 +87,7 @@ func checkWSPData(data []byte) bool {
 	logger.LOGD("control data arrived： (Lenth  " + strconv.Itoa(lenth) + " bytes)")
 	logger.LOGD(data)
 	// Check the Data beganing
-	protocalDataFormatCheck := regexp.MustCompile(`WSP/1\.1\s+\w+`)
+	protocalDataFormatCheck := regexp.MustCompile(`(?s)WSP/1\.1\s+\w+\r\n.+?\r\n\r\n$`)
 	if protocalDataFormatCheck.Match(data) {
 		return true
 	}
