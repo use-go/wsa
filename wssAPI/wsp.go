@@ -18,7 +18,7 @@ const (
 	WSPVersion = "WSP/1.1"
 	WSPCInit   = "INIT"
 	WSPCJoin   = "JOIN"
-	WSPWarp    = "WARP"
+	WSPWrap    = "WRAP"
 	WSPRtsp    = "RTSP"
 )
 
@@ -51,6 +51,11 @@ func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 		if arryLenth > 3 {
 			parseredMsg := WSPMessage{Headers: map[string]string{}}
 			parseredMsg.MsgType = parsingWSPMsgType(strlines[0])
+
+			//if this the wrapperd rtsp message
+			if parseredMsg.MsgType == strings.ToUpper(WSPWrap) {
+				parseredMsg.Payload = ""
+			}
 
 			for i := 1; i < arryLenth-2; i++ {
 				//get the version

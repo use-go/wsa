@@ -40,7 +40,7 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 	case wssAPI.WSPCJoin:
 		//Join the streaming
 		err = websockHandler.procWSPCJoin(ctrlMsg)
-	case wssAPI.WSPWarp:
+	case wssAPI.WSPWrap:
 		//further to handle the wapperd rtsp message in content
 		err = websockHandler.procWSPWarp(ctrlMsg)
 	default:
@@ -117,7 +117,6 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	// channelWebSocket[channelIndex] = wsConn
 
 	// below is processing to build up a tcp connection to transferdata to client
-
 
 	// sock := net.Dialer{Timeout: 3 * time.Second}
 	// conn, errr := sock.Dial("tcp", ipStr+":"+portStr)
