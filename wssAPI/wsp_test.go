@@ -54,7 +54,6 @@ func TestDecodeWSPCtrlMsg(t *testing.T) {
 				logger.LOGD(parseredMsg.Payload)
 			}
 			parseredMsg.Msg = contentString
-			ret = &parseredMsg
 			return
 		}
 		t.Fatalf("message body: got wrong, can not parsing the fileld")

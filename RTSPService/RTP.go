@@ -40,19 +40,18 @@ import (
 
 //DataType for RTP
 const (
-	NalType_SINGLE_NAL_MIN = 1
-	NalType_SINGLE_NAL_MAX = 23
-	NalType_STAP_A         = 24
-	NalType_STAP_B         = 25
-	NalType_MTAP16         = 26
-	NalType_MTAP24         = 27
-	NalType_FU_A           = 28
-	NalType_FU_B           = 29
-	Payload_h264           = 96
-	Payload_MPA            = 14 //mp3 freq 90000
-	RTP_H264_freq          = 90000
-
-	RTP_MTU = 1500
+	NalTypeSingleNalMIN = 1
+	NalTypeSingleNalMAX = 23
+	NalTypeStapA        = 24
+	NalTypeStapB        = 25
+	NalTypeMtap16       = 26
+	NalTypeMtap24       = 27
+	NalTypeFuA        = 28
+	NalTypeFuB        = 29
+	PayloadH264        = 96
+	PayloadMPA         = 14 //mp3 freq 90000
+	RTPH264Freq       = 90000
+	RTPMTU = 1500
 )
 
 func createRTPHeader(payloadType, seq, timestamp, ssrc uint32) []byte {

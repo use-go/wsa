@@ -59,8 +59,6 @@ func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 				if len(tmpStr) < 2 {
 					continue
 				}
-				//tmpStr = strings.TrimSpace(tmpStr)
-				//tmpStr = strings.TrimSpace(tmpStr)
 				tmpStrArry := strings.SplitN(tmpStr, ":", 2)
 				keyStr := strings.TrimSpace(tmpStrArry[0])
 				valueStr := strings.TrimSpace(tmpStrArry[1])
@@ -84,7 +82,7 @@ func DecodeWSPCtrlMsg(data []byte) (ret *WSPMessage, err error) {
 func checkWSPData(data []byte) bool {
 
 	lenth := len(data)
-	logger.LOGD("control data arrived： (Lenth  " + strconv.Itoa(lenth) + " bytes)")
+	logger.LOGD("control data arrived： (Lenth:  " + strconv.Itoa(lenth) + " bytes)")
 	logger.LOGD(data)
 	// Check the Data beganing
 	protocalDataFormatCheck := regexp.MustCompile(`(?s)WSP/1\.1\s+\w+\r\n.+?\r\n\r\n$`)

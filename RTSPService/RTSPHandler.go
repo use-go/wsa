@@ -1,3 +1,7 @@
+// Copyright 2017-2018 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package RTSPService
 
 import (
@@ -19,7 +23,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-//RTSPHandler
+//RTSPHandler Of RTSP service
 type RTSPHandler struct {
 	conn        net.Conn
 	mutexConn   sync.Mutex
@@ -106,10 +110,12 @@ func (rtspHandler *RTSPHandler) Init(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Start RTSP handler
 func (rtspHandler *RTSPHandler) Start(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//Stop RTSP handler
 func (rtspHandler *RTSPHandler) Stop(msg *wssAPI.Msg) (err error) {
 	rtspHandler.isPlaying = false
 	rtspHandler.waitPlaying.Wait()
@@ -117,14 +123,17 @@ func (rtspHandler *RTSPHandler) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//GetType return   name of current handler
 func (rtspHandler *RTSPHandler) GetType() string {
 	return "RTSPHandler"
 }
 
+//HandleTask not implemention
 func (rtspHandler *RTSPHandler) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
+//ProcessMessage clssfiy the action type
 func (rtspHandler *RTSPHandler) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	switch msg.Type {
 	case wssAPI.MsgFlvTag:
@@ -192,7 +201,7 @@ func (rtspHandler *RTSPHandler) handleRTPRTCP(data []byte) (err error) {
 }
 
 func (rtspHandler *RTSPHandler) handleRTSP(data []byte) (err error) {
-	lines := strings.Split(string(data), RTSP_EL)
+	lines := strings.Split(string(data), RTSPEndLine)
 
 	//取出方法
 	if len(lines) < 1 {
@@ -211,15 +220,15 @@ func (rtspHandler *RTSPHandler) handleRTSP(data []byte) (err error) {
 	}
 	//处理每个方法
 	switch cmd {
-	case RTSP_METHOD_OPTIONS:
+	case RTSPMethodOptions:
 		return rtspHandler.serveOptions(lines)
-	case RTSP_METHOD_DESCRIBE:
+	case RTSPMethodDescribe:
 		return rtspHandler.serveDescribe(lines)
-	case RTSP_METHOD_SETUP:
+	case RTSPMethodSetup:
 		return rtspHandler.serveSetup(lines)
-	case RTSP_METHOD_PLAY:
+	case RTSPMethodPlay:
 		return rtspHandler.servePlay(lines)
-	case RTSP_METHOD_PAUSE:
+	case RTSPMethodPause:
 		return rtspHandler.servePause(lines)
 	default:
 		logger.LOGE("method " + cmd + " not support now")
@@ -280,7 +289,7 @@ func (rtspHandler *RTSPHandler) threadPlay() {
 	for _, v := range rtspHandler.tracks {
 		ch := make(chan int)
 		if v.transPort == "udp" {
-			go rtspHandler.threadUdp(ch, v)
+			go rtspHandler.threadUDP(ch, v)
 		} else {
 			go rtspHandler.threadTCP(ch, v)
 		}
@@ -294,7 +303,7 @@ func (rtspHandler *RTSPHandler) threadPlay() {
 	logger.LOGT("all ch end")
 }
 
-func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
+func (rtspHandler *RTSPHandler) threadUDP(ch chan int, track *trackInfo) {
 	waitRTP := new(sync.WaitGroup)
 	waitRTCP := new(sync.WaitGroup)
 	defer func() {
@@ -351,13 +360,13 @@ func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 	}()
 	//发送数据
 	beginSend := false
-	if track.trackID == ctrl_track_video {
+	if track.trackID == CtrlTrackVideo {
 
 		//清空之前累计的亢余数据
 		rtspHandler.mutexVideo.Lock()
 		rtspHandler.videoCache = list.New()
 		rtspHandler.mutexVideo.Unlock()
-	} else if track.trackID == ctrl_track_audio {
+	} else if track.trackID == CtrlTrackAudio {
 		rtspHandler.mutexAudio.Lock()
 		rtspHandler.audioCache = list.New()
 		rtspHandler.mutexAudio.Unlock()
@@ -388,7 +397,7 @@ func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 			rtspHandler.sendRTCP(track, timestamp)
 		}
 		//如果是视频 等到有关键帧时开始发送，如果是音频，直接发送
-		if ctrl_track_video == track.trackID {
+		if CtrlTrackVideo == track.trackID {
 			if false == beginSend {
 				//等待关键帧
 				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, &rtspHandler.mutexVideo)
@@ -418,7 +427,7 @@ func (rtspHandler *RTSPHandler) threadUdp(ch chan int, track *trackInfo) {
 				logger.LOGE(err.Error())
 				return
 			}
-		} else if ctrl_track_audio == track.trackID {
+		} else if CtrlTrackAudio == track.trackID {
 			//			logger.LOGT("audio not processed now")
 			rtspHandler.mutexAudio.Lock()
 			if rtspHandler.audioCache == nil || rtspHandler.audioCache.Len() == 0 {
@@ -458,14 +467,14 @@ func (rtspHandler *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
 		close(ch)
 	}()
 	beginSend := true
-	if track.trackID == ctrl_track_video {
+	if track.trackID == CtrlTrackVideo {
 		beginSend = false
 
 		//清空之前累计的亢余数据
 		rtspHandler.mutexVideo.Lock()
 		rtspHandler.videoCache = list.New()
 		rtspHandler.mutexVideo.Unlock()
-	} else if track.trackID == ctrl_track_audio {
+	} else if track.trackID == CtrlTrackAudio {
 		rtspHandler.mutexAudio.Lock()
 		rtspHandler.audioCache = list.New()
 		rtspHandler.mutexAudio.Unlock()
@@ -475,7 +484,7 @@ func (rtspHandler *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
 	logger.LOGT(track.trackID)
 	track.seq = track.firstSeq
 	for rtspHandler.isPlaying {
-		if ctrl_track_video == track.trackID {
+		if CtrlTrackVideo == track.trackID {
 			if false == beginSend {
 				//等待关键帧
 				beginSend, beginTime = getH264Keyframe(rtspHandler.videoCache, &rtspHandler.mutexVideo)
@@ -499,7 +508,7 @@ func (rtspHandler *RTSPHandler) threadTCP(ch chan int, track *trackInfo) {
 				logger.LOGE(err.Error())
 				return
 			}
-		} else if ctrl_track_audio == track.trackID {
+		} else if CtrlTrackAudio == track.trackID {
 			//			logger.LOGT("audio not processed now")
 			rtspHandler.mutexAudio.Lock()
 			if rtspHandler.audioCache == nil || rtspHandler.audioCache.Len() == 0 {
@@ -648,7 +657,7 @@ func (rtspHandler *RTSPHandler) sendRTCP(track *trackInfo, rtpTime uint32) {
 
 //packetization-mode 1
 func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
-	payLoadSize := RTP_MTU
+	payLoadSize := RTPMTU
 	if track.transPort == "tcp" {
 		payLoadSize -= 4
 	}
@@ -692,11 +701,11 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 				if track.seq > 0xffff {
 					track.seq = 0
 				}
-				headerData := createRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+				headerData := createRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 				stapA.AppendByteArray(headerData)
 				//start bit
 				Nri := ((sps[0] & 0x60) >> 5)
-				Type := byte(NalType_STAP_A)
+				Type := byte(NalTypeStapA)
 				stapA.AppendByte(((Nri << 5) | Type))
 				//sps size
 				stapA.EncodeInt16(int16(len(sps)))
@@ -721,7 +730,7 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 				if track.seq > 0xffff {
 					track.seq = 0
 				}
-				headerData := createRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+				headerData := createRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 				single.AppendByteArray(headerData)
 				single.AppendByteArray(nalData)
 				pktData, _ := single.GetData()
@@ -729,10 +738,10 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 			} else {
 				//分片包,使用FU_A包
 				payLoadSize-- //FU header
-				var FU_S, FU_E, FU_R, FU_Type, Nri, Type byte
+				var FuS, FuE, FuR, FuType, Nri, Type byte
 				Nri = ((nalData[0] & 0x60) >> 5)
-				Type = NalType_FU_A
-				FU_Type = nalType
+				Type = NalTypeFuA
+				FuType = nalType
 				count := int(nalSize) / payLoadSize
 				if count*payLoadSize < int(nalSize) {
 					count++
@@ -741,19 +750,19 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 				curFrame := 0
 				curNalData := 1 //nal 的第一个字节的帧类型信息放到fh_header 里面
 				{
-					FU_S = 1
-					FU_E = 0
-					FU_R = 0
+					FuS = 1
+					FuE = 0
+					FuR = 0
 					fua := amf.AMF0Encoder{}
 					fua.Init()
 					track.seq++
 					if track.seq > 0xffff {
 						track.seq = 0
 					}
-					headerData := createRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+					headerData := createRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 					fua.AppendByteArray(headerData)
 					fua.AppendByte((Nri << 5) | Type)
-					fua.AppendByte((FU_S << 7) | (FU_E << 6) | (FU_R << 5) | FU_Type)
+					fua.AppendByte((FuS << 7) | (FuE << 6) | (FuR << 5) | FuType)
 					fua.AppendByteArray(nalData[curNalData : payLoadSize+curNalData])
 					curNalData += payLoadSize
 					pktData, _ := fua.GetData()
@@ -763,9 +772,9 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 
 				//mid frame
 				{
-					FU_S = 0
-					FU_E = 0
-					FU_R = 0
+					FuS = 0
+					FuE = 0
+					FuR = 0
 					for curFrame+1 < count {
 						track.seq++
 						if track.seq > 0xffff {
@@ -773,10 +782,10 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 						}
 						fua := amf.AMF0Encoder{}
 						fua.Init()
-						headerData := createRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+						headerData := createRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 						fua.AppendByteArray(headerData)
 						fua.AppendByte((Nri << 5) | Type)
-						fua.AppendByte((FU_S << 7) | (FU_E << 6) | (FU_R << 5) | FU_Type)
+						fua.AppendByte((FuS << 7) | (FuE << 6) | (FuR << 5) | FuType)
 						fua.AppendByteArray(nalData[curNalData : payLoadSize+curNalData])
 						curNalData += payLoadSize
 						pktData, _ := fua.GetData()
@@ -787,19 +796,19 @@ func (rtspHandler *RTSPHandler) generateH264RTPPackets(tag *flv.FlvTag, beginTim
 				//last frame
 				lastFrameSize := int(nalSize) - curNalData
 				if lastFrameSize > 0 {
-					FU_S = 0
-					FU_E = 1
-					FU_R = 0
+					FuS = 0
+					FuE = 1
+					FuR = 0
 					track.seq++
 					if track.seq > 0xffff {
 						track.seq = 0
 					}
 					fua := amf.AMF0Encoder{}
 					fua.Init()
-					headerData := createRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+					headerData := createRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 					fua.AppendByteArray(headerData)
 					fua.AppendByte((Nri << 5) | Type)
-					fua.AppendByte((FU_S << 7) | (FU_E << 6) | (FU_R << 5) | FU_Type)
+					fua.AppendByte((FuS << 7) | (FuE << 6) | (FuR << 5) | FuType)
 					fua.AppendByteArray(nalData[curNalData:])
 					curNalData += payLoadSize
 					pktData, _ := fua.GetData()
@@ -823,7 +832,7 @@ func (rtspHandler *RTSPHandler) stopPlayThread() {
 
 */
 func (rtspHandler *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
-	payloadSize := RTP_MTU - 4
+	payloadSize := RTPMTU - 4
 	if "tcp" == track.transPort {
 		payloadSize -= 4
 	}
@@ -854,7 +863,7 @@ func (rtspHandler *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime
 		logger.LOGF("big aac")
 		tmp := &amf.AMF0Encoder{}
 		tmp.Init()
-		headerData := createRTPHeaderAAC(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+		headerData := createRTPHeaderAAC(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 
 		track.seq++
 		if track.seq > 0xffff {
@@ -872,7 +881,7 @@ func (rtspHandler *RTSPHandler) generateAACRTPPackets(tag *flv.FlvTag, beginTime
 	if dataSize > 0 {
 		single := &amf.AMF0Encoder{}
 		single.Init()
-		headerData := createRTPHeaderAAC(Payload_h264, uint32(track.seq), timestamp, track.ssrc)
+		headerData := createRTPHeaderAAC(PayloadH264, uint32(track.seq), timestamp, track.ssrc)
 		track.seq++
 		if track.seq > 0xffff {
 			track.seq = 0

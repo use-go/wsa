@@ -237,13 +237,13 @@ func genH264sdp(data []byte) (sdp string) {
 	fmtpFmt := fmt.Sprintf("a=fmtp:%d packetization-mode=1;profile-level-id=%06X;sprop-parameter-sets=%s,%s\r\n",
 		96, profileLevelID, spsBase64, ppsBase64)
 	mediaType := "video"
-	rtpPayloadType := RTSP_payload_h264
+	rtpPayloadType := RTSPPayloadH264
 	ipAddress := "0.0.0.0"
 	rtpmapLine := "a=rtpmap:96 H264/90000\r\n"
 	rtcpmuxLine := ""
 	rangeLine := "a=range:npt=0-\r\n"
 	sdpLines := fmt.Sprintf("m=%s %d RTP/AVP %d\r\nc=IN IP4 %s\r\nb=AS:%d\r\n%s%s%s%sa=control:%s\r\n",
-		mediaType, 0, rtpPayloadType, ipAddress, 500, rtpmapLine, rtcpmuxLine, rangeLine, fmtpFmt, ctrl_track_video)
+		mediaType, 0, rtpPayloadType, ipAddress, 500, rtpmapLine, rtcpmuxLine, rangeLine, fmtpFmt, CtrlTrackVideo)
 	sdp = sdpLines
 
 	return
@@ -255,11 +255,11 @@ func genAACsdp(data []byte) (sdp string) {
 		return
 	}
 	//mpeg4的音频RTP 时间 单位就是采样率
-	sdp += "m=audio 0 RTP/AVP 96" + RTSP_EL
-	sdp += "a=rtpmap:96 MPEG4-GENERIC/" + strconv.Itoa(asc.Sample_rate) + "/" + strconv.Itoa(asc.Channels) + RTSP_EL
+	sdp += "m=audio 0 RTP/AVP 96" + RTSPEndLine
+	sdp += "a=rtpmap:96 MPEG4-GENERIC/" + strconv.Itoa(asc.Sample_rate) + "/" + strconv.Itoa(asc.Channels) + RTSPEndLine
 	sdp += "a=fmtp:96 streamtype=5;profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;" +
-		"config=" + aac.CreateAudioSpecificConfigForSDP(asc) + RTSP_EL
-	sdp += "a=control:" + ctrl_track_audio + RTSP_EL
+		"config=" + aac.CreateAudioSpecificConfigForSDP(asc) + RTSPEndLine
+	sdp += "a=control:" + CtrlTrackAudio + RTSPEndLine
 	logger.LOGD(sdp)
 	return
 }
@@ -272,15 +272,15 @@ func genMP3sdp(data []byte) (sdp string) {
 	}
 	logger.LOGD(header.SampleRate)
 	if false == Mp3ADU {
-		sdp += "m=audio 0 RTP/AVP " + strconv.Itoa(Payload_MPA) + RTSP_EL
-		sdp += "b=AS:" + strconv.Itoa(header.Bitrate) + RTSP_EL
-		sdp += "a=control:" + ctrl_track_audio + RTSP_EL
+		sdp += "m=audio 0 RTP/AVP " + strconv.Itoa(PayloadMPA) + RTSPEndLine
+		sdp += "b=AS:" + strconv.Itoa(header.Bitrate) + RTSPEndLine
+		sdp += "a=control:" + CtrlTrackAudio + RTSPEndLine
 		logger.LOGD(sdp)
 	} else {
-		sdp += "m=audio 0 RTP/AVP " + strconv.Itoa(Payload_h264) + RTSP_EL
-		sdp += "b=AS:" + strconv.Itoa(header.Bitrate) + RTSP_EL
-		sdp += "a=rtpmap:96 MPA-ROBUST/90000" + RTSP_EL
-		sdp += "a=control:" + ctrl_track_audio + RTSP_EL
+		sdp += "m=audio 0 RTP/AVP " + strconv.Itoa(PayloadH264) + RTSPEndLine
+		sdp += "b=AS:" + strconv.Itoa(header.Bitrate) + RTSPEndLine
+		sdp += "a=rtpmap:96 MPA-ROBUST/90000" + RTSPEndLine
+		sdp += "a=control:" + CtrlTrackAudio + RTSPEndLine
 		logger.LOGD(sdp)
 	}
 	return

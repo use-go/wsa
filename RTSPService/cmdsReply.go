@@ -14,9 +14,9 @@ import (
 
 func (rtspHandler *RTSPHandler) sendErrorReply(lines []string, code int) (err error) {
 	cseq := getCSeq(lines)
-	strOut := RTSP_VER + " " + strconv.Itoa(code) + " " + getRTSPStatusByCode(code) + RTSP_EL
-	strOut += "CSeq: " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(code) + " " + getRTSPStatusByCode(code) + RTSPEndLine
+	strOut += "CSeq: " + strconv.Itoa(cseq) + RTSPEndLine
+	strOut += RTSPEndLine
 	err = rtspHandler.send([]byte(strOut))
 	return
 }
@@ -28,12 +28,12 @@ func (rtspHandler *RTSPHandler) serveOptions(lines []string) (err error) {
 	if len(cliSession) > 0 && cliSession != rtspHandler.session {
 		hasSession = true
 	}
-	str := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
-	str += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
+	str := RTSPVer + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSPEndLine
+	str += HDRCSEQ + ": " + strconv.Itoa(cseq) + RTSPEndLine
 	if hasSession {
-		str += "Session: " + rtspHandler.session + RTSP_EL
+		str += "Session: " + rtspHandler.session + RTSPEndLine
 	}
-	str += "Public: OPTIONS,DESCRIBE,SETUP,PLAY,PAUSE,TEARDOWN " + RTSP_EL + RTSP_EL
+	str += "Public: OPTIONS,DESCRIBE,SETUP,PLAY,PAUSE,TEARDOWN " + RTSPEndLine + RTSPEndLine
 	err = rtspHandler.send([]byte(str))
 
 	if rtspHandler.tcpTimeout {
@@ -106,15 +106,15 @@ func (rtspHandler *RTSPHandler) serveDescribe(lines []string) (err error) {
 		}
 	}
 
-	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
-	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSPEndLine
+	strOut += HDRCSEQ + ": " + strconv.Itoa(cseq) + RTSPEndLine
 
 	if needSdp {
-		strOut += "Content-Type: application/sdp" + RTSP_EL
-		strOut += "Content-Length: " + strconv.Itoa(len(sdp)+len(RTSP_EL)) + RTSP_EL + RTSP_EL
-		strOut += sdp + RTSP_EL
+		strOut += "Content-Type: application/sdp" + RTSPEndLine
+		strOut += "Content-Length: " + strconv.Itoa(len(sdp)+len(RTSPEndLine)) + RTSPEndLine + RTSPEndLine
+		strOut += sdp + RTSPEndLine
 	} else {
-		//strOut += RTSP_EL
+		//strOut += RTSPEndLine
 		logger.LOGE("can not generate sdp")
 		err = rtspHandler.sendErrorReply(lines, 415)
 		return
@@ -190,7 +190,7 @@ func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 		subs = strings.Split(subs[1], "/")
 		trackName = subs[len(subs)-1]
 	}
-	if strings.Compare(trackName, ctrl_track_audio) != 0 && strings.Compare(trackName, ctrl_track_video) != 0 {
+	if strings.Compare(trackName, CtrlTrackAudio) != 0 && strings.Compare(trackName, CtrlTrackVideo) != 0 {
 		logger.LOGE("track :" + trackName + " not found")
 		return rtspHandler.sendErrorReply(lines, 404)
 	}
@@ -212,23 +212,23 @@ func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 	{
 
 		//video 90000
-		if strings.Compare(trackName, ctrl_track_audio) == 0 {
+		if strings.Compare(trackName, CtrlTrackAudio) == 0 {
 			if rtspHandler.audioHeader != nil {
 				asc := aac.GenerateAudioSpecificConfig(rtspHandler.audioHeader.Data[2:])
 				track.clockRate = uint32(asc.SamplingFrequency)
 			}
 		}
 		//audio 90000
-		if strings.Compare(trackName, ctrl_track_video) == 0 {
-			track.clockRate = RTP_H264_freq
+		if strings.Compare(trackName, CtrlTrackVideo) == 0 {
+			track.clockRate = RTPH264Freq
 		}
-		strTransport := getHeaderByName(lines, HDR_TRANSPORT, true)
+		strTransport := getHeaderByName(lines, HDRTRANSPORT, true)
 		if len(strTransport) == 0 {
 			logger.LOGE("setup failed,no transport")
 			return rtspHandler.sendErrorReply(lines, 400)
 		}
 		strTransport = removeSpace(strTransport)
-		strTransport = strings.TrimPrefix(strTransport, HDR_TRANSPORT)
+		strTransport = strings.TrimPrefix(strTransport, HDRTRANSPORT)
 		strTransport = strings.TrimPrefix(strTransport, ":")
 		strTransport = strings.TrimPrefix(strTransport, " ")
 		subs := strings.Split(strTransport, ";")
@@ -245,7 +245,7 @@ func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 		} else {
 			track.unicast = false
 		}
-		if subs[0] == RTSP_RTP_AVP || subs[0] == RTSP_RTP_AVP_UDP {
+		if subs[0] == RTSPRTPAVP || subs[0] == RTSPRTPAVPUDP {
 			track.transPort = "udp"
 			if false == strings.HasPrefix(subs[2], "client_port=") {
 				logger.LOGE("udp not found client port")
@@ -276,7 +276,7 @@ func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 				return rtspHandler.sendErrorReply(lines, 461)
 			}
 
-		} else if subs[0] == RTSP_RTP_AVP_TCP {
+		} else if subs[0] == RTSPRTPAVPTCP {
 			track.transPort = "tcp"
 			if false == strings.Contains(strTransport, "interleaved=") {
 				logger.LOGE("not found tcp interleaved")
@@ -316,22 +316,22 @@ func (rtspHandler *RTSPHandler) serveSetup(lines []string) (err error) {
 	track.ssrc = uint32(rand.Intn(0xffff))
 	//返回结果
 
-	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
-	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += "Server: " + RTSPServerName + RTSP_EL
-	strOut += "Session: " + rtspHandler.session + ";timeout=" + strconv.Itoa(serviceConfig.TimeoutSec) + RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSPEndLine
+	strOut += HDRCSEQ + ": " + strconv.Itoa(cseq) + RTSPEndLine
+	strOut += "Server: " + RTSPServerName + RTSPEndLine
+	strOut += "Session: " + rtspHandler.session + ";timeout=" + strconv.Itoa(serviceConfig.TimeoutSec) + RTSPEndLine
 	if track.transPort == "udp" {
 		strOut += "Transport: RTP/AVP;unicast;"
 		strOut += "client_port=" + strconv.Itoa(track.RTPCliPort) + "-" + strconv.Itoa(track.RTCPCliPort) + ";"
 		strOut += "server_port=" + strconv.Itoa(track.RTPSvrPort) + "-" + strconv.Itoa(track.RTCPSvrPort)
-		strOut += RTSP_EL
+		strOut += RTSPEndLine
 	} else {
 		//tcp
 		strOut += "Transport: RTP/AVP/TCP;unicast;"
 		strOut += "interleaved=" + strconv.Itoa(track.RTPChannel) + "-" + strconv.Itoa(track.RTCPChannel)
-		strOut += RTSP_EL
+		strOut += RTSPEndLine
 	}
-	strOut += RTSP_EL
+	strOut += RTSPEndLine
 
 	return rtspHandler.send([]byte(strOut))
 }
@@ -370,10 +370,10 @@ func (rtspHandler *RTSPHandler) servePlay(lines []string) (err error) {
 	//begin time:use default zero
 	//start play
 
-	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
-	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += "Session: " + rtspHandler.session + RTSP_EL
-	strOut += "Range: npt=0.0-" + RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSPEndLine
+	strOut += HDRCSEQ + ": " + strconv.Itoa(cseq) + RTSPEndLine
+	strOut += "Session: " + rtspHandler.session + RTSPEndLine
+	strOut += "Range: npt=0.0-" + RTSPEndLine
 	strOut += "RTP-Info: "
 	addCmma := false
 	line0 := removeSpace(lines[0])
@@ -394,8 +394,8 @@ func (rtspHandler *RTSPHandler) servePlay(lines []string) (err error) {
 		strOut += "seq=" + strconv.Itoa(v.firstSeq) + ";"
 		strOut += "rtptime=" + strconv.Itoa(int(v.RTPStartTime))
 	}
-	strOut += RTSP_EL
-	strOut += RTSP_EL
+	strOut += RTSPEndLine
+	strOut += RTSPEndLine
 	rtspHandler.mutexTracks.RUnlock()
 
 	err = rtspHandler.send([]byte(strOut))
@@ -430,10 +430,10 @@ func (rtspHandler *RTSPHandler) servePause(lines []string) (err error) {
 	//停止播放
 	rtspHandler.stopPlayThread()
 
-	strOut := RTSP_VER + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSP_EL
-	strOut += HDR_CSEQ + ": " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += "Session: " + rtspHandler.session + RTSP_EL
-	strOut += RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(200) + " " + getRTSPStatusByCode(200) + RTSPEndLine
+	strOut += HDRCSEQ + ": " + strconv.Itoa(cseq) + RTSPEndLine
+	strOut += "Session: " + rtspHandler.session + RTSPEndLine
+	strOut += RTSPEndLine
 	err = rtspHandler.send([]byte(strOut))
 	return
 }

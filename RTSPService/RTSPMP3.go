@@ -32,7 +32,7 @@ func (rtspHandler *RTSPHandler) generateMP3RTPPackets(tag *flv.FlvTag, beginTime
 func (rtspHandler *RTSPHandler) generateMP3RTPRaw(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
 	//logger.LOGD(len(tag.Data))
 	rtpPkts = list.New()
-	payloadSize := RTP_MTU - 4
+	payloadSize := RTPMTU - 4
 	if "tcp" == track.transPort {
 		payloadSize -= 4
 	}
@@ -60,7 +60,7 @@ func (rtspHandler *RTSPHandler) generateMP3RTPRaw(tag *flv.FlvTag, beginTime uin
 		} else {
 			m = 0
 		}
-		headerData := rtspHandler.createMPEGRTPHeader(Payload_MPA, uint32(track.seq), timestamp, track.ssrc, m)
+		headerData := rtspHandler.createMPEGRTPHeader(PayloadMPA, uint32(track.seq), timestamp, track.ssrc, m)
 		tmp.AppendByteArray(headerData)
 		track.seq++
 		if track.seq >= 0xffff {
@@ -84,7 +84,7 @@ func (rtspHandler *RTSPHandler) generateMP3RTPRaw(tag *flv.FlvTag, beginTime uin
 		} else {
 			m = 0
 		}
-		headerData := rtspHandler.createMPEGRTPHeader(Payload_MPA, uint32(track.seq), timestamp, track.ssrc, m)
+		headerData := rtspHandler.createMPEGRTPHeader(PayloadMPA, uint32(track.seq), timestamp, track.ssrc, m)
 		tmp.AppendByteArray(headerData)
 		track.seq++
 		if track.seq >= 0xffff {
@@ -102,7 +102,7 @@ func (rtspHandler *RTSPHandler) generateMP3RTPRaw(tag *flv.FlvTag, beginTime uin
 //rfc 5219
 func (rtspHandler *RTSPHandler) generateMP3ADU(tag *flv.FlvTag, beginTime uint32, track *trackInfo) (rtpPkts *list.List) {
 	rtpPkts = list.New()
-	payloadSize := RTP_MTU - 4
+	payloadSize := RTPMTU - 4
 	if "tcp" == track.transPort {
 		payloadSize -= 4
 	}
@@ -135,7 +135,7 @@ func (rtspHandler *RTSPHandler) generateMP3ADU(tag *flv.FlvTag, beginTime uint32
 		tmp.Init()
 
 		//rtp header
-		headerData := rtspHandler.createMPEGRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc, m)
+		headerData := rtspHandler.createMPEGRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc, m)
 		tmp.AppendByteArray(headerData)
 		track.seq++
 		if track.seq > 0xffff {
@@ -155,7 +155,7 @@ func (rtspHandler *RTSPHandler) generateMP3ADU(tag *flv.FlvTag, beginTime uint32
 		for dataSize > payloadSize {
 			tmp := amf.AMF0Encoder{}
 			tmp.Init()
-			headerData := rtspHandler.createMPEGRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc, m)
+			headerData := rtspHandler.createMPEGRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc, m)
 			tmp.AppendByteArray(headerData)
 			track.seq++
 			if track.seq > 0xffff {
@@ -179,7 +179,7 @@ func (rtspHandler *RTSPHandler) generateMP3ADU(tag *flv.FlvTag, beginTime uint32
 			tmp := amf.AMF0Encoder{}
 			tmp.Init()
 			//rtp header
-			headerData := rtspHandler.createMPEGRTPHeader(Payload_h264, uint32(track.seq), timestamp, track.ssrc, m)
+			headerData := rtspHandler.createMPEGRTPHeader(PayloadH264, uint32(track.seq), timestamp, track.ssrc, m)
 			tmp.AppendByteArray(headerData)
 			track.seq++
 			if track.seq > 0xffff {

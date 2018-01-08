@@ -14,6 +14,7 @@ import (
 type RTSPService struct {
 }
 
+//RTSPConfig for configuration from file
 type RTSPConfig struct {
 	Port       int `json:"port"`
 	TimeoutSec int `json:"timeoutSec"`
@@ -22,6 +23,7 @@ type RTSPConfig struct {
 var service *RTSPService
 var serviceConfig RTSPConfig
 
+//Init Service configuration for RTSPService
 func (rtspService *RTSPService) Init(msg *wssAPI.Msg) (err error) {
 	if nil == msg || nil == msg.Param1 {
 		logger.LOGE("init rtsp server failed")
@@ -59,6 +61,7 @@ func (rtspService *RTSPService) loadConfigFile(fileName string) (err error) {
 	return
 }
 
+//Start RTSPService
 func (rtspService *RTSPService) Start(msg *wssAPI.Msg) (err error) {
 	logger.LOGT("start RTSP server")
 	strPort := ":" + strconv.Itoa(serviceConfig.Port)
@@ -83,11 +86,11 @@ func (rtspService *RTSPService) rtspLoop(listener *net.TCPListener) {
 			logger.LOGE(err.Error())
 			continue
 		}
-		go rtspService.handleConnect(conn)
+		go rtspService.handleConn(conn)
 	}
 }
 
-func (rtspService *RTSPService) handleConnect(conn net.Conn) {
+func (rtspService *RTSPService) handleConn(conn net.Conn) {
 	defer func() {
 		conn.Close()
 	}()
@@ -111,18 +114,22 @@ func (rtspService *RTSPService) handleConnect(conn net.Conn) {
 	}
 }
 
+//Stop RTSPService not implemention
 func (rtspService *RTSPService) Stop(msg *wssAPI.Msg) (err error) {
 	return
 }
 
+//GetType return name of current service
 func (rtspService *RTSPService) GetType() string {
 	return wssAPI.OBJRTSPServer
 }
 
+//HandleTask  not implemention
 func (rtspService *RTSPService) HandleTask(task wssAPI.Task) (err error) {
 	return
 }
 
+//ProcessMessage  not implemention
 func (rtspService *RTSPService) ProcessMessage(msg *wssAPI.Msg) (err error) {
 	return
 }

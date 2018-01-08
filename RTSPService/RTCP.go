@@ -12,11 +12,11 @@ import (
 
 //RTCP Cmd Type
 const (
-	RTCP_SR   = 200
-	RTCP_RR   = 201
-	RTCP_SDES = 202
-	RTCP_BYE  = 203
-	RTCP_APP  = 204
+	RTCPSR   = 200
+	RTCPRR   = 201
+	RTCPSDES = 202
+	RTCPBYE  = 203
+	RTCPAPP  = 204
 )
 
 //RTCPPacket Type
@@ -42,22 +42,25 @@ type RTCPHeaderSR struct {
 
 //RTCPHeaderReportBlock struct
 type RTCPHeaderReportBlock struct {
-	ssrc            uint32
-	fract_lost      byte   //8
-	cumulative_lost uint32 //24
-	h_seq_no        uint32
-	jitter          uint32
-	lastSR          uint32
-	delay_last_SR   uint32
+	ssrc           uint32
+	fractLost      byte   //8
+	cumulativeLost uint32 //24
+	hSeqNo         uint32
+	jitter         uint32
+	lastSR         uint32
+	delayLastSR    uint32
 }
 
+//RTCPHeaderRR Description
 type RTCPHeaderRR struct {
 	reportBlock []RTCPHeaderReportBlock
 }
 
+//RTCPHeaderSDES Description
 type RTCPHeaderSDES struct {
 }
 
+//RTCPHeaderBYE  Description
 type RTCPHeaderBYE struct {
 }
 
@@ -77,7 +80,7 @@ func parseRTCP(data []byte) (pkt *RTCPPacket, err error) {
 		return
 	}
 	switch pkt.packetType {
-	case RTCP_SR:
+	case RTCPSR:
 		sr := &RTCPHeaderSR{}
 		pkt.body = sr
 		sr.ssrc = uint32(reader.Read32Bits())
@@ -90,31 +93,31 @@ func parseRTCP(data []byte) (pkt *RTCPPacket, err error) {
 			sr.reportBlock = make([]RTCPHeaderReportBlock, pkt.receptionReportCount)
 			for i := 0; i < int(pkt.receptionReportCount); i++ {
 				sr.reportBlock[i].ssrc = uint32(reader.Read32Bits())
-				sr.reportBlock[i].fract_lost = byte(reader.ReadBits(8))
-				sr.reportBlock[i].cumulative_lost = uint32(reader.ReadBits(24))
-				sr.reportBlock[i].h_seq_no = uint32(reader.Read32Bits())
+				sr.reportBlock[i].fractLost = byte(reader.ReadBits(8))
+				sr.reportBlock[i].cumulativeLost = uint32(reader.ReadBits(24))
+				sr.reportBlock[i].hSeqNo = uint32(reader.Read32Bits())
 				sr.reportBlock[i].jitter = uint32(reader.Read32Bits())
 				sr.reportBlock[i].lastSR = uint32(reader.Read32Bits())
-				sr.reportBlock[i].delay_last_SR = uint32(reader.Read32Bits())
+				sr.reportBlock[i].delayLastSR = uint32(reader.Read32Bits())
 			}
 		}
-	case RTCP_RR:
+	case RTCPRR:
 		rr := &RTCPHeaderRR{}
 		if pkt.receptionReportCount > 0 {
 			rr.reportBlock = make([]RTCPHeaderReportBlock, pkt.receptionReportCount)
 			for i := 0; i < int(pkt.receptionReportCount); i++ {
 				rr.reportBlock[i].ssrc = uint32(reader.Read32Bits())
-				rr.reportBlock[i].fract_lost = byte(reader.ReadBits(8))
-				rr.reportBlock[i].cumulative_lost = uint32(reader.ReadBits(24))
-				rr.reportBlock[i].h_seq_no = uint32(reader.Read32Bits())
+				rr.reportBlock[i].fractLost = byte(reader.ReadBits(8))
+				rr.reportBlock[i].cumulativeLost = uint32(reader.ReadBits(24))
+				rr.reportBlock[i].hSeqNo = uint32(reader.Read32Bits())
 				rr.reportBlock[i].jitter = uint32(reader.Read32Bits())
 				rr.reportBlock[i].lastSR = uint32(reader.Read32Bits())
-				rr.reportBlock[i].delay_last_SR = uint32(reader.Read32Bits())
+				rr.reportBlock[i].delayLastSR = uint32(reader.Read32Bits())
 			}
 		}
-	case RTCP_SDES:
-	case RTCP_APP:
-	case RTCP_BYE:
+	case RTCPSDES:
+	case RTCPAPP:
+	case RTCPBYE:
 	default:
 		logger.LOGW(fmt.Sprintf("rtcp packet type :%d nor supproted", pkt.packetType))
 	}
@@ -127,9 +130,9 @@ func createSR(ssrc, rtpTime, rtpCount, sendCount uint32) (data []byte) {
 	var tmp32 uint32
 	version := uint32(2)
 	padding := uint32(1)
-	reception_report_count := uint32(0)
+	receptionReportCount := uint32(0)
 	length := uint32(6)
-	tmp32 = ((version << 30) | (padding << 29) | (reception_report_count << 24) | (uint32(RTCP_SR) << 16) | (length))
+	tmp32 = ((version << 30) | (padding << 29) | (receptionReportCount << 24) | (uint32(RTCPSR) << 16) | (length))
 
 	enc.EncodeUint32(tmp32) //header
 

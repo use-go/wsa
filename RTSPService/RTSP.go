@@ -1,3 +1,7 @@
+// Copyright 2017-2018 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package RTSPService
 
 import (
@@ -9,53 +13,53 @@ import (
 
 //RTSP Descriptions
 const (
-	RTSP_VER             = "RTSP/1.0"
-	RTSP_EL              = "\r\n"
-	RTSP_RTP_AVP         = "RTP/AVP"
-	RTSP_RTP_AVP_TCP     = "RTP/AVP/TCP"
-	RTSP_RTP_AVP_UDP     = "RTP/AVP/UDP"
-	RTSP_RAW_UDP         = "RTP/RAW/UDP"
-	RTSP_CONTROL_ID_0    = "track1"
-	RTSP_CONTROL_ID_1    = "track2"
-	HDR_CONTENTLENGTH    = "Content-Length"
-	HDR_ACCEPT           = "Accept"
-	HDR_ALLOW            = "Allow"
-	HDR_BLOCKSIZE        = "Blocksize"
-	HDR_CONTENTTYPE      = "Content-Type"
-	HDR_DATE             = "Date"
-	HDR_REQUIRE          = "Require"
-	HDR_TRANSPORTREQUIRE = "Transport-Require"
-	HDR_SEQUENCENO       = "SequenceNo"
-	HDR_CSEQ             = "CSeq"
-	HDR_STREAM           = "Stream"
-	HDR_SESSION          = "Session"
-	HDR_TRANSPORT        = "Transport"
-	HDR_RANGE            = "Range"
-	HDR_USER_AGENT       = "User-Agent"
+	RTSPVer             = "RTSP/1.0"
+	RTSPEndLine         = "\r\n"
+	RTSPRTPAVP          = "RTP/AVP"
+	RTSPRTPAVPTCP       = "RTP/AVP/TCP"
+	RTSPRTPAVPUDP       = "RTP/AVP/UDP"
+	RTSPRawUDP          = "RTP/RAW/UDP"
+	RTSPControlID0      = "track1"
+	RTSPControlID1      = "track2"
+	HDRCONTENTLENGTH    = "Content-Length"
+	HDRACCEPT           = "Accept"
+	HDRALLOW            = "Allow"
+	HDRBLOCKSIZE        = "Blocksize"
+	HDRCONTENTTYPE      = "Content-Type"
+	HDRDATE             = "Date"
+	HDRREQUIRE          = "Require"
+	HDRTRANSPORTREQUIRE = "Transport-Require"
+	HDRSEQUENCENO       = "SequenceNo"
+	HDRCSEQ             = "CSeq"
+	HDRSTREAM           = "Stream"
+	HDRSESSION          = "Session"
+	HDRTRANSPORT        = "Transport"
+	HDRRANGE            = "Range"
+	HDRUSERAGENT        = "User-Agent"
 
-	RTSP_METHOD_MAXLEN         = 15
-	RTSP_METHOD_DESCRIBE       = "DESCRIBE"
-	RTSP_METHOD_ANNOUNCE       = "ANNOUNCE"
-	RTSP_METHOD_GET_PARAMETERS = "GET_PARAMETERS"
-	RTSP_METHOD_OPTIONS        = "OPTIONS"
-	RTSP_METHOD_PAUSE          = "PAUSE"
-	RTSP_METHOD_PLAY           = "PLAY"
-	RTSP_METHOD_RECORD         = "RECORD"
-	RTSP_METHOD_REDIRECT       = "REDIRECT"
-	RTSP_METHOD_SETUP          = "SETUP"
-	RTSP_METHOD_SET_PARAMETER  = "SET_PARAMETER"
-	RTSP_METHOD_TEARDOWN       = "TEARDOWN"
+	RTSPMethodMAXLEN        = 15
+	RTSPMethodDescribe      = "DESCRIBE"
+	RTSPMethodAnnounce      = "ANNOUNCE"
+	RTSPMethodGetParameters = "GETPARAMETERS"
+	RTSPMethodOptions       = "OPTIONS"
+	RTSPMethodPause         = "PAUSE"
+	RTSPMethodPlay          = "PLAY"
+	RTSPMethodRecord        = "RECORD"
+	RTSPMethodRedirect      = "REDIRECT"
+	RTSPMethodSetup         = "SETUP"
+	RTSPMethodSetParameter  = "SET_PARAMETER"
+	RTSPMethodTeardown      = "TEARDOWN"
 
-	DEFAULT_MTU_2 = 0xfff
+	RTPDefaultMTU2 = 0xfff
 
-	RTSP_payload_h264  = 96
-	RTP_video_freq     = 90000
-	RTP_audio_freq     = 8000
-	SOCKET_PACKET_SIZE = 1456
+	RTSPPayloadH264     = 96
+	RTPVideoFreq        = 90000
+	RTPAudioFreq        = 8000
+	RTPSocketPacketSize = 1456
 
-	RTSPServerName   = "StreamServer_RTSP_alpha"
-	ctrl_track_audio = "track_audio"
-	ctrl_track_video = "track_video"
+	RTSPServerName = "StreamServer_RTSP_alpha"
+	CtrlTrackAudio = "track_audio"
+	CtrlTrackVideo = "track_video"
 )
 
 func getRTSPStatusByCode(code int) (status string) {
@@ -157,9 +161,9 @@ func getRTSPStatusByCode(code int) (status string) {
 }
 
 func sendRTSPErrorReply(code int, cseq int, conn net.Conn) error {
-	strOut := RTSP_VER + " " + strconv.Itoa(code) + " " + getRTSPStatusByCode(code) + RTSP_EL
-	strOut += "CSeq: " + strconv.Itoa(cseq) + RTSP_EL
-	strOut += RTSP_EL
+	strOut := RTSPVer + " " + strconv.Itoa(code) + " " + getRTSPStatusByCode(code) + RTSPEndLine
+	strOut += "CSeq: " + strconv.Itoa(cseq) + RTSPEndLine
+	strOut += RTSPEndLine
 	_, err := conn.Write([]byte(strOut))
 	if err != nil {
 		logger.LOGE(err.Error())
