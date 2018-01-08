@@ -100,15 +100,14 @@ func (rtspService *RTSPService) handleConn(conn net.Conn) {
 	for {
 		data, err := ReadPacket(conn, handler.tcpTimeout)
 		if err != nil {
-			logger.LOGE("read rtsp failed")
-			logger.LOGE(err.Error())
+			logger.LOGE("read rtsp failed with error: " + err.Error())
 			handler.handlePacket(nil)
 			return
 		}
 		logger.LOGT(string(data))
 		err = handler.handlePacket(data)
 		if err != nil {
-			logger.LOGE(err.Error())
+			logger.LOGE("handle rtsp packet error: " + err.Error())
 			return
 		}
 	}

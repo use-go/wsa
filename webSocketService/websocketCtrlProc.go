@@ -106,6 +106,9 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	if _, exist := channelWebSocket[strChannel]; !exist {
 		channelWebSocket[strChannel] = websockHandler.conn
 	}
+
+	//create a tcp channel with rtsp server
+
 	// cli := &websocket.Dialer{}
 	// req := http.Header{}
 	// wsURL := "ws://" + ipStr + ":" + portStr + "/ws/"

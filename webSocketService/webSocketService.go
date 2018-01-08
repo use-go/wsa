@@ -60,11 +60,15 @@ func (websockService *WebSocketService) Start(msg *wssAPI.Msg) (err error) {
 		return errors.New("Somthing error when retrive httpMux of websocket")
 	}
 
-	go func(addr string, handler http.Handler) {
-		err := http.ListenAndServe(addr, handler)
-		if err != nil {
-			logger.LOGE(err.Error())
+    go func(addr string, handler http.Handler) {
+		for {
+			err := http.ListenAndServe(addr, handler)
+			if err != nil {
+				logger.LOGE(err.Error())
+				continue
+			}
 		}
+
 	}(serviceAddrWithPort, serverMux)
 
 	return
@@ -83,6 +87,11 @@ func (websockService *WebSocketService) GetType() string {
 
 // HandleTask interface implemention
 func (websockService *WebSocketService) HandleTask(task wssAPI.Task) (err error) {
+
+	// defer func() {
+	// 	conn.Close()
+	// 	logger.LOGD("close websocket connection :" + conn.RemoteAddr().String())
+	// }()
 	return
 }
 
@@ -127,14 +136,14 @@ func (websockService *WebSocketService) ServeHTTP(w http.ResponseWriter, req *ht
 		return
 	}
 	//remmber to close the websocket connetction
-	defer func() {
-		conn.Close()
-		logger.LOGD("close websocket connection :" + conn.RemoteAddr().String())
-	}()
+	// defer func() {
+	// 	conn.Close()
+	// 	logger.LOGD("close websocket connection :" + conn.RemoteAddr().String())
+	// }()
 
 	//new connection came here
 	logger.LOGT(fmt.Sprintf("new websocket client connected: %s", conn.RemoteAddr().String()))
-	websockService.handleConn(conn, req, path)
+	go websockService.handleConn(conn, req, path)
 
 }
 
