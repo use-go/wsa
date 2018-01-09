@@ -44,7 +44,6 @@ func Connect(uri string) (conInfo *ConnectionInfo, err error) {
 	if conn, err = dailer.Dial("tcp", URL.Host); err != nil {
 		return
 	}
-
 	u2 := *URL
 	u2.User = nil
 

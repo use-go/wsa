@@ -230,3 +230,9 @@ func IP2Int(ip string) int {
 	num = num >> 0
 	return num
 }
+
+// GetMD5Hash return the Encoded HASH
+func GetMD5Hash(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
+}
