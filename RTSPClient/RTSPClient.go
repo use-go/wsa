@@ -5,26 +5,30 @@ import (
 	"net"
 	"net/textproto"
 	"net/url"
+	"time"
+
+	"github.com/nareix/joy4/av/pktque"
 )
 
+//Client info for RTSP Connetction
 type Client struct {
 	DebugConn     bool
 	url           *url.URL
 	conn          net.Conn
 	rconn         io.Reader
-	requestUri    string
+	requestURI    string
 	cseq          uint
 	streams       []*Stream
 	session       string
 	authorization string
 	body          io.Reader
-	pktque        *pktqueue.Queue
+	pktque        *pktque.Buf
 }
 
 //Request of RTSP
 type Request struct {
 	Header []string
-	Uri    string
+	URI    string
 	Method string
 }
 
@@ -40,25 +44,21 @@ type Response struct {
 	Body          []byte
 }
 
-//Connect to SS
-func Connect(uri string) (conInfo *ConnectionInfo, err error) {
-	var URL *url.URL
-	if URL, err = url.Parse(uri); err != nil {
-		return
-	}
+//Connect to SS with timeout setting
+func Connect(targetURL *url.URL) (cli *Client, err error) {
 
-	dailer := net.Dialer{}
+	dailer := net.Dialer{Timeout: 3 * time.Second}
 	var conn net.Conn
-	if conn, err = dailer.Dial("tcp", URL.Host); err != nil {
+	if conn, err = dailer.Dial("tcp", targetURL.Host); err != nil {
 		return
 	}
-	u2 := *URL
+	u2 := *targetURL
 	u2.User = nil
 
-	conInfo = &ConnectionInfo{
+	cli = &Client{
 		conn:       conn,
 		rconn:      conn,
-		url:        URL,
+		url:        targetURL,
 		requestURI: u2.String(),
 	}
 	return

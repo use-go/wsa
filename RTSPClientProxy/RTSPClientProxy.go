@@ -11,26 +11,13 @@ package RTSPClientProxy
 
 import (
 	"errors"
-	"io"
-	"net"
 	"net/url"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/use-go/websocket-streamserver/logger"
 )
-
-//ConnectionInfo struct
-type ConnectionInfo struct {
-	DebugConn     bool
-	url           *url.URL
-	conn          net.Conn
-	rconn         io.Reader
-	requestURI    string
-	cseq          uint
-	session       string
-	authorization string
-	body          io.Reader
-}
 
 func checkRequestContent(content string) (err error) {
 
@@ -43,8 +30,7 @@ func checkRequestContent(content string) (err error) {
 	return
 }
 
-func parseruRL(uri string) (targetURL *url.URL, err error) {
-
+func parserURL(uri string) (targetURL *url.URL, err error) {
 	// Parse the URL and ensure there are no errors.
 	url, err := url.Parse(uri)
 	if err != nil {
@@ -52,4 +38,17 @@ func parseruRL(uri string) (targetURL *url.URL, err error) {
 		return nil, err
 	}
 	return url, nil
+}
+
+func parseRTSPVersion(s string) (proto string, major int, minor int, err error) {
+	parts := strings.SplitN(s, "/", 2)
+	proto = parts[0]
+	parts = strings.SplitN(parts[1], ".", 2)
+	if major, err = strconv.Atoi(parts[0]); err != nil {
+		return
+	}
+	if minor, err = strconv.Atoi(parts[0]); err != nil {
+		return
+	}
+	return
 }
