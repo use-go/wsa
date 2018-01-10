@@ -32,30 +32,6 @@ type ConnectionInfo struct {
 	body          io.Reader
 }
 
-//Connect to SS
-func Connect(uri string) (conInfo *ConnectionInfo, err error) {
-	var URL *url.URL
-	if URL, err = url.Parse(uri); err != nil {
-		return
-	}
-
-	dailer := net.Dialer{}
-	var conn net.Conn
-	if conn, err = dailer.Dial("tcp", URL.Host); err != nil {
-		return
-	}
-	u2 := *URL
-	u2.User = nil
-
-	conInfo = &ConnectionInfo{
-		conn:       conn,
-		rconn:      conn,
-		url:        URL,
-		requestURI: u2.String(),
-	}
-	return
-}
-
 func checkRequestContent(content string) (err error) {
 
 	requestRegex := regexp.MustCompile(`([A-Z]*) (.*) RTSP/(.*)\r\n`)
@@ -65,4 +41,15 @@ func checkRequestContent(content string) (err error) {
 		return errors.New("Could not understand request")
 	}
 	return
+}
+
+func parseruRL(uri string) (targetURL *url.URL, err error) {
+
+	// Parse the URL and ensure there are no errors.
+	url, err := url.Parse(uri)
+	if err != nil {
+		logger.LOGE("Could not parse request uri: %s. %s\n", uri, err.Error())
+		return nil, err
+	}
+	return url, nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-//RTSPClient Denote the RTSP Client
+//RTSPClient Denote the RTSP Client auth Struct
 type RTSPClient struct {
 	socket   net.Conn
 	outgoing chan []byte //out chanel
@@ -43,7 +43,9 @@ func (rtspClient *RTSPClient) Write(message string) bool {
 //Read info
 func (rtspClient *RTSPClient) Read() (bool, string) {
 	buffer := make([]byte, 4096)
-	if nb, err := rtspClient.socket.Read(buffer); err != nil || nb <= 0 {
+
+	nb, err := rtspClient.socket.Read(buffer)
+	if err != nil || nb <= 0 {
 		log.Println("socket read failed", err)
 		return false, ""
 	}
