@@ -16,8 +16,47 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/use-go/websocket-streamserver/RTSPClient"
 	"github.com/use-go/websocket-streamserver/logger"
 )
+
+//Open Stream
+func Open(uri string) (cli *RTSPClient.Client, err error) {
+
+	url, err := parserURL(uri)
+
+	if err != nil {
+		return nil, errors.New("URL error")
+	}
+
+	_cli, err := RTSPClient.Connect(url)
+	if err != nil {
+		return
+	}
+
+	streams, err := _cli.Describe()
+	if err != nil {
+		return
+	}
+
+	setup := []int{}
+	for i := range streams {
+		setup = append(setup, i)
+	}
+
+	err = _cli.Setup(setup)
+	if err != nil {
+		return
+	}
+
+	err = _cli.Play()
+	if err != nil {
+		return
+	}
+
+	cli = _cli
+	return
+}
 
 func checkRequestContent(content string) (err error) {
 
@@ -47,7 +86,7 @@ func parseRTSPVersion(s string) (proto string, major int, minor int, err error) 
 	if major, err = strconv.Atoi(parts[0]); err != nil {
 		return
 	}
-	if minor, err = strconv.Atoi(parts[0]); err != nil {
+	if minor, err = strconv.Atoi(parts[1]); err != nil {
 		return
 	}
 	return

@@ -1,13 +1,16 @@
 package RTSPClient
 
 import (
+	"errors"
 	"io"
 	"net"
 	"net/textproto"
 	"net/url"
 	"time"
 
-	"github.com/nareix/joy4/av/pktque"
+	"github.com/nareix/joy4/av"
+	"github.com/nareix/joy4/av/pubsub"
+	"github.com/use-go/websocket-streamserver/logger"
 )
 
 //Client info for RTSP Connetction
@@ -22,7 +25,7 @@ type Client struct {
 	session       string
 	authorization string
 	body          io.Reader
-	pktque        *pktque.Buf
+	pktque        *pubsub.QueueCursor
 }
 
 //Request of RTSP
@@ -62,4 +65,31 @@ func Connect(targetURL *url.URL) (cli *Client, err error) {
 		requestURI: u2.String(),
 	}
 	return
+}
+
+//Read Data
+func (cli *Client) Read() (str string, err error) {
+	buffer := make([]byte, 4096)
+	nb, err := cli.conn.Read(buffer)
+	if err != nil || nb <= 0 {
+		logger.LOGE("socket read failed", err)
+		return "", errors.New("socket read failed")
+	}
+	return string(buffer[:nb]), nil
+
+}
+
+//Write Data
+func (cli *Client) Write(message string) (cnt int, err error) {
+	cli.cseq++
+	count, e := cli.conn.Write([]byte(message))
+	if e != nil {
+		err = errors.New("socket write failed")
+	}
+	return count, nil
+}
+
+//ReadPacket handle RTP Packet
+func (cli *Client) ReadPacket() (pkt av.Packet, err error) {
+	return cli.pktque.ReadPacket()
 }
