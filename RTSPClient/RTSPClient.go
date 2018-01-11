@@ -6,15 +6,14 @@ import (
 	"net"
 	"net/textproto"
 	"net/url"
-	"time"
 
 	"github.com/nareix/joy4/av"
 	"github.com/nareix/joy4/av/pubsub"
 	"github.com/use-go/websocket-streamserver/logger"
 )
 
-//Client info for RTSP Connetction
-type Client struct {
+//SocketChannel info for RTSP Connetction
+type SocketChannel struct {
 	DebugConn     bool
 	url           *url.URL
 	conn          net.Conn
@@ -47,28 +46,8 @@ type Response struct {
 	Body          []byte
 }
 
-//Connect to SS with timeout setting
-func Connect(targetURL *url.URL) (cli *Client, err error) {
-
-	dailer := net.Dialer{Timeout: 3 * time.Second}
-	var conn net.Conn
-	if conn, err = dailer.Dial("tcp", targetURL.Host); err != nil {
-		return
-	}
-	u2 := *targetURL
-	u2.User = nil
-
-	cli = &Client{
-		conn:       conn,
-		rconn:      conn,
-		url:        targetURL,
-		requestURI: u2.String(),
-	}
-	return
-}
-
 //Read Data
-func (cli *Client) Read() (str string, err error) {
+func (cli *SocketChannel) Read() (str string, err error) {
 	buffer := make([]byte, 4096)
 	nb, err := cli.conn.Read(buffer)
 	if err != nil || nb <= 0 {
@@ -80,7 +59,7 @@ func (cli *Client) Read() (str string, err error) {
 }
 
 //Write Data
-func (cli *Client) Write(message string) (cnt int, err error) {
+func (cli *SocketChannel) Write(message string) (cnt int, err error) {
 	cli.cseq++
 	count, e := cli.conn.Write([]byte(message))
 	if e != nil {
@@ -89,7 +68,58 @@ func (cli *Client) Write(message string) (cnt int, err error) {
 	return count, nil
 }
 
+// WriteRequest Message to RTSP
+func (cli *SocketChannel) WriteRequest(req Request) (err error) {
+
+	return
+}
+
+//ReadResponse handle rtsp response
+func (cli *SocketChannel) ReadResponse() (res Response, err error) {
+
+	return
+}
+
+//Options RTSP
+func (cli *SocketChannel) Options() (err error) {
+	if err = cli.WriteRequest(Request{
+		Method: "OPTIONS",
+		URI:    cli.requestURI,
+	}); err != nil {
+		return
+	}
+	if _, err = cli.ReadResponse(); err != nil {
+		return
+	}
+	return
+}
+
+//Describe RTSP
+func (cli *SocketChannel) Describe() (streams []av.CodecData, err error) {
+
+	return
+}
+
+//Setup RTSP
+func (cli *SocketChannel) Setup(streams []int) (err error) {
+
+	return
+}
+
+//Play Video
+func (cli *SocketChannel) Play() (err error) {
+	req := Request{
+		Method: "PLAY",
+		URI:    cli.requestURI,
+	}
+	req.Header = append(req.Header, "Session: "+cli.session)
+	if err = cli.WriteRequest(req); err != nil {
+		return
+	}
+	return
+}
+
 //ReadPacket handle RTP Packet
-func (cli *Client) ReadPacket() (pkt av.Packet, err error) {
+func (cli *SocketChannel) ReadPacket() (pkt av.Packet, err error) {
 	return cli.pktque.ReadPacket()
 }

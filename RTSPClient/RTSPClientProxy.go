@@ -7,34 +7,65 @@
 	see the RFC 2326: https://www.ietf.org/rfc/rfc2326.txt
 */
 
-package RTSPClientProxy
+package RTSPClient
 
 import (
 	"errors"
+	"net"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/use-go/websocket-streamserver/RTSPClient"
 	"github.com/use-go/websocket-streamserver/logger"
 )
 
-//Open Stream
-func Open(uri string) (cli *RTSPClient.Client, err error) {
+var (
+	cli *SocketChannel
+)
 
-	url, err := parserURL(uri)
+//Connect to SS with timeout setting
+func Connect(uri string) (cli *SocketChannel, err error) {
+
+	targetURL, err := parserURL(uri)
 
 	if err != nil {
 		return nil, errors.New("URL error")
 	}
 
-	_cli, err := RTSPClient.Connect(url)
+	dailer := net.Dialer{Timeout: 3 * time.Second}
+	var conn net.Conn
+	if conn, err = dailer.Dial("tcp", targetURL.Host); err != nil {
+		return nil, err
+	}
+	u2 := *targetURL
+	u2.User = nil
+
+	cli = &SocketChannel{
+		conn:       conn,
+		rconn:      conn,
+		url:        targetURL,
+		requestURI: u2.String(),
+	}
+	return
+}
+
+//Open Stream
+func Open(hostURL string) (cli *SocketChannel, err error) {
+
+	_cli, err := Connect(hostURL)
 	if err != nil {
-		return
+		return nil, errors.New("Connect host error: " + hostURL)
 	}
 
-	streams, err := _cli.Describe()
+	//send option
+	err = _cli.Options()
+	if err != nil {
+		return nil, errors.New("Options error: " + hostURL)
+	}
+
+	streams, err := cli.Describe()
 	if err != nil {
 		return
 	}

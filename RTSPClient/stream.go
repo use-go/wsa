@@ -171,7 +171,7 @@ func (strem *Stream) handlePacket(timestamp uint32, packet []byte) (err error) {
 	return
 }
 
-func (strem *Client) parseBlock(blockNo int, packet []byte) (streamIndex int, err error) {
+func (strem *SocketChannel) parseBlock(blockNo int, packet []byte) (streamIndex int, err error) {
 	if blockNo%2 != 0 {
 		// rtcp block
 		return

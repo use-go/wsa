@@ -7,23 +7,32 @@ package webSocketService
 import (
 	"encoding/json"
 	"errors"
-	"net"
 	"strconv"
 
 	"github.com/gorilla/websocket"
 
+	"github.com/use-go/websocket-streamserver/RTSPClient"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
-//channelIndex Denote the Channel Index In Session
-var channelIndex = 0
-var channelWebSocket map[string]*websocket.Conn
-var channelRTPSocket map[int]*net.Conn
+type channelLink struct {
+	rtspSocketChannel *RTSPClient.SocketChannel
+	webSocketChannel  *websocket.Conn
+	//  RTPSocketChannel map[int]*net.Conn
+}
+
+var (
+	//channelIndex Denote the Channel Index In Session
+	channelIndex int //channnel order
+	channnelList map[string]*channelLink
+)
 
 func init() {
-	channelWebSocket = map[string]*websocket.Conn{}
+	//webSocketChannel = map[string]*websocket.Conn{}
+	//rtspSocketChannel = map[string]*RTSPClient.SocketChannel{}
+	channnelList = make(map[string]*channelLink)
 }
 
 //ProcessWSCtrlMessage to deal the RTPS over RTSP
@@ -64,7 +73,7 @@ func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage)
 	headerMsg := map[string]string{}
 	payLoadMsg := ""
 	strChannel := ctrlMsg.Headers["channel"]
-	if _, exist := channelWebSocket[strChannel]; !exist {
+	if _, exist := channnelList[strChannel]; !exist {
 		err = errors.New("Channel information not exist")
 		codeMsg = " 400 Bad Request"
 	}
@@ -102,13 +111,19 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	strChannelIndex := strconv.Itoa(channelIndex)
 	encodedIPStr := strconv.Itoa(encodedIntIP)
 	strChannel = ipStr + "-" + strChannelIndex + portStr + " " + encodedIPStr
-
-	if _, exist := channelWebSocket[strChannel]; !exist {
-		channelWebSocket[strChannel] = websockHandler.conn
+	if _, exist := channnelList[strChannel]; !exist {
+		linkends := &channelLink{}
+		linkends.webSocketChannel = websockHandler.conn
+		channleCli, err := RTSPClient.Connect(ipStr + ":" + portStr)
+		if err != nil {
+			linkends.rtspSocketChannel = channleCli
+			channnelList[strChannel] = linkends
+			return strChannel, nil
+		}
 	}
 
+	return "channel error", errors.New("channnel initial error")
 	//create a tcp channel with rtsp server
-
 	// cli := &websocket.Dialer{}
 	// req := http.Header{}
 	// wsURL := "ws://" + ipStr + ":" + portStr + "/ws/"
@@ -119,7 +134,7 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	// 	return
 	// }
 	// //save Session
-	// channelWebSocket[channelIndex] = wsConn
+	// webSocketChannel[channelIndex] = wsConn
 
 	// below is processing to build up a tcp connection to transferdata to client
 
@@ -186,7 +201,6 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 
 	// })
 
-	return
 }
 
 // rtmpControlMsg for control actions
