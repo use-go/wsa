@@ -46,6 +46,16 @@ type Response struct {
 	Body          []byte
 }
 
+//ForwardToSer Data
+func (cli *SocketChannel) ForwardToSer(message string) (cnt int, err error) {
+	cli.cseq++
+	count, e := cli.conn.Write([]byte(message))
+	if e != nil {
+		err = errors.New("socket write failed")
+	}
+	return count, nil
+}
+
 //Read Data
 func (cli *SocketChannel) Read() (str string, err error) {
 	buffer := make([]byte, 4096)

@@ -26,13 +26,14 @@ type channelLink struct {
 var (
 	//channelIndex Denote the Channel Index In Session
 	channelIndex int //channnel order
-	channnelList map[string]*channelLink
+	channelList  map[*websocket.Conn]*RTSPClient.SocketChannel
 )
 
 func init() {
 	//webSocketChannel = map[string]*websocket.Conn{}
 	//rtspSocketChannel = map[string]*RTSPClient.SocketChannel{}
-	channnelList = make(map[string]*channelLink)
+	channelIndex = 0
+	channelList = make(map[*websocket.Conn]*RTSPClient.SocketChannel)
 }
 
 //ProcessWSCtrlMessage to deal the RTPS over RTSP
@@ -59,9 +60,24 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 	return
 }
 
+func (websockHandler *websocketHandler) checkChannel() (err error) {
+	if _, exist := channelList[websockHandler.conn]; !exist {
+		err = errors.New("Channel information not exist")
+	}
+	return
+}
+
 func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) (err error) {
 	//from here ,we send RTSP message to SS
 	//when receiving reply ,forward it to client
+	//check the end Channel exist
+	if errr := websockHandler.checkChannel(); errr != nil {
+		err = errr
+		return
+	}
+	payloadMsg := ctrlMsg.Payload
+
+	channelList[websockHandler.conn].
 
 	return
 }
@@ -72,11 +88,12 @@ func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage)
 	codeMsg := "200 OK"
 	headerMsg := map[string]string{}
 	payLoadMsg := ""
-	strChannel := ctrlMsg.Headers["channel"]
-	if _, exist := channnelList[strChannel]; !exist {
-		err = errors.New("Channel information not exist")
+	//strChannel := ctrlMsg.Headers["channel"]
+	if errr := websockHandler.checkChannel(); errr != nil {
+		err = errr
 		codeMsg = " 400 Bad Request"
 	}
+
 	replymsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
 	websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
 	return
@@ -111,13 +128,10 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	strChannelIndex := strconv.Itoa(channelIndex)
 	encodedIPStr := strconv.Itoa(encodedIntIP)
 	strChannel = ipStr + "-" + strChannelIndex + portStr + " " + encodedIPStr
-	if _, exist := channnelList[strChannel]; !exist {
-		linkends := &channelLink{}
-		linkends.webSocketChannel = websockHandler.conn
+	if _, exist := channelList[websockHandler.conn]; !exist {
 		channleCli, err := RTSPClient.Connect(ipStr + ":" + portStr)
 		if err != nil {
-			linkends.rtspSocketChannel = channleCli
-			channnelList[strChannel] = linkends
+			channelList[websockHandler.conn] = channleCli
 			return strChannel, nil
 		}
 	}

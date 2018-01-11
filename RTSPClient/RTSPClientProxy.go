@@ -21,10 +21,6 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 )
 
-var (
-	cli *SocketChannel
-)
-
 //Connect to SS with timeout setting
 func Connect(uri string) (cli *SocketChannel, err error) {
 
