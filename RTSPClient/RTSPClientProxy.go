@@ -10,6 +10,7 @@
 package RTSPClient
 
 import (
+	"bufio"
 	"errors"
 	"net"
 	"net/url"
@@ -20,6 +21,38 @@ import (
 
 	"github.com/use-go/websocket-streamserver/logger"
 )
+
+//Write Data
+func write(socket net.Conn, message string) (cnt int, err error) {
+
+	count, e := socket.Write([]byte(message))
+	if e != nil {
+		err = errors.New("socket write failed")
+	}
+	return count, nil
+}
+
+//Read Data
+func read(socket net.Conn) (str string, err error) {
+	// buffer := make([]byte, 4096)
+	// nb, err := cli.conn.Read(buffer)
+	// if err != nil || nb <= 0 {
+	// 	logger.LOGE("socket read failed", err)
+	// 	return "", errors.New("socket read failed")
+	// }
+	// return string(buffer[:nb]), nil
+
+	br := bufio.NewReader(socket)
+	//tp := textproto.NewReader(br)
+	// if strline, err := tp.ReadLine(); err != nil {
+	// 	return strline, err
+	// }
+
+	byteBuffer := make([]byte, br.Buffered())
+
+	return string(byteBuffer), nil
+
+}
 
 //Connect to SS with timeout setting
 func Connect(uri string) (cli *SocketChannel, err error) {
@@ -120,6 +153,15 @@ func parseRTSPVersion(s string) (proto string, major int, minor int, err error) 
 	}
 	if minor, err = strconv.Atoi(parts[1]); err != nil {
 		return
+	}
+	return
+}
+
+//Close Socket
+func Close(socket net.Conn) (err error) {
+
+	if socket != nil {
+		socket.Close()
 	}
 	return
 }

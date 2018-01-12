@@ -14,8 +14,8 @@ import (
 	"github.com/use-go/websocket-streamserver/RTSPClient"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
-	"github.com/use-go/websocket-streamserver/wssAPI"
 	"github.com/use-go/websocket-streamserver/utils"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 type channelLink struct {
@@ -26,8 +26,9 @@ type channelLink struct {
 
 var (
 	//channelIndex Denote the Channel Index In Session
-	channelIndex int //channnel order
-	channelList  map[*websocket.Conn]*RTSPClient.SocketChannel
+	channelIndex   int //channnel order
+	channelSession map[string]*RTSPClient.SocketChannel
+	channelList    map[*websocket.Conn]*RTSPClient.SocketChannel
 )
 
 func init() {
@@ -35,6 +36,7 @@ func init() {
 	//rtspSocketChannel = map[string]*RTSPClient.SocketChannel{}
 	channelIndex = 0
 	channelList = make(map[*websocket.Conn]*RTSPClient.SocketChannel)
+	channelSession = map[string]*RTSPClient.SocketChannel{}
 }
 
 //ProcessWSCtrlMessage to deal the RTPS over RTSP
@@ -61,9 +63,16 @@ func (websockHandler *websocketHandler) ProcessWSCtrlMessage(data []byte) (err e
 	return
 }
 
-func (websockHandler *websocketHandler) checkChannel() (err error) {
-	if _, exist := channelList[websockHandler.conn]; !exist {
+func (websockHandler *websocketHandler) checkChannelSession(channelString string) (err error) {
+	if _, exist := channelSession[channelString]; !exist {
 		err = errors.New("Channel information not exist")
+	}
+	return
+}
+
+func (websockHandler *websocketHandler) checkSocket() (err error) {
+	if _, exist := channelList[websockHandler.conn]; !exist {
+		err = errors.New("Channel socket not exist")
 	}
 	return
 }
@@ -72,13 +81,17 @@ func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) 
 	//from here ,we send RTSP message to SS
 	//when receiving reply ,forward it to client
 	//check the end Channel exist
-	if errr := websockHandler.checkChannel(); errr != nil {
+	if errr := websockHandler.checkSocket(); errr != nil {
 		err = errr
 		return
 	}
-	channelList[websockHandler.conn].ForwardToSer(ctrlMsg.Payload)
-
-	return
+	//forward message to RTSP Srv
+	replymsg, errr := channelList[websockHandler.conn].Forward(ctrlMsg.Payload)
+	if errr != nil {
+		err = errr
+		return
+	}
+	return websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
 }
 
 func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage) (err error) {
@@ -87,8 +100,8 @@ func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage)
 	codeMsg := "200 OK"
 	headerMsg := map[string]string{}
 	payLoadMsg := ""
-	//strChannel := ctrlMsg.Headers["channel"]
-	if errr := websockHandler.checkChannel(); errr != nil {
+	strChannel := ctrlMsg.Headers["channel"]
+	if errr := websockHandler.checkChannelSession(strChannel); errr != nil {
 		err = errr
 		codeMsg = " 400 Bad Request"
 	}
@@ -127,13 +140,14 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	strChannelIndex := strconv.Itoa(channelIndex)
 	encodedIPStr := strconv.Itoa(encodedIntIP)
 	strChannel = ipStr + "-" + strChannelIndex + portStr + " " + encodedIPStr
-	if _, exist := channelList[websockHandler.conn]; !exist {
+	if _, exist := channelSession[strChannel]; !exist {
 
 		rtspURI := "rtsp://" + ipStr + ":" + portStr + "/h264#4cif"
 		channleCli, err := RTSPClient.Connect(rtspURI)
 		if err != nil {
 			return "", err
 		}
+		channelSession[strChannel] = channleCli
 		channelList[websockHandler.conn] = channleCli
 		return strChannel, nil
 	}

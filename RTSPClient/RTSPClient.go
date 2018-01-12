@@ -1,7 +1,6 @@
 package RTSPClient
 
 import (
-	"errors"
 	"io"
 	"net"
 	"net/textproto"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/nareix/joy4/av"
 	"github.com/nareix/joy4/av/pubsub"
-	"github.com/use-go/websocket-streamserver/logger"
 )
 
 //SocketChannel info for RTSP Connetction
@@ -46,36 +44,26 @@ type Response struct {
 	Body          []byte
 }
 
-//ForwardToSer Data
-func (cli *SocketChannel) ForwardToSer(message string) (cnt int, err error) {
-	return cli.write(message)
-}
 
-//Read Data
-func (cli *SocketChannel) read() (str string, err error) {
-	buffer := make([]byte, 4096)
-	nb, err := cli.conn.Read(buffer)
-	if err != nil || nb <= 0 {
-		logger.LOGE("socket read failed", err)
-		return "", errors.New("socket read failed")
+
+//Forward Data
+func (cli *SocketChannel) Forward(message string) (str string, err error) {
+	
+	//send message
+ 	cnt,err :=	write(cli.conn ,message)
+	if cnt <1 || err !=nil {	
+		return "write socket failed",err
 	}
-	return string(buffer[:nb]), nil
-
+	//wait to receive
+   return read(cli.conn)
 }
 
-//Write Data
-func (cli *SocketChannel) write(message string) (cnt int, err error) {
-	cli.cseq++
-	count, e := cli.conn.Write([]byte(message))
-	if e != nil {
-		err = errors.New("socket write failed")
-	}
-	return count, nil
-}
+
 
 // WriteRequest Message to RTSP
 func (cli *SocketChannel) WriteRequest(req Request) (err error) {
-
+	cli.cseq++
+	//
 	return
 }
 
