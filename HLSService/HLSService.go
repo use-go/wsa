@@ -13,14 +13,17 @@ import (
 
 	"github.com/use-go/websocket-streamserver/HTTPMUX"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
+//HLSService Description
 type HLSService struct {
 	sources   map[string]*HLSSource
 	muxSource sync.RWMutex
 	icoData   []byte
 }
 
+//HLSService config
 type HLSConfig struct {
 	Port  int    `json:"Port"`
 	Route string `json:"Route"`
@@ -52,7 +55,7 @@ func (hlsService *HLSService) Init(msg *wssAPI.Msg) (err error) {
 	HTTPMUX.AddRoute(strPort, serviceConfig.Route, hlsService.ServeHTTP)
 
 	if len(serviceConfig.ICO) > 0 {
-		hlsService.icoData, err = wssAPI.ReadFileAll(serviceConfig.ICO)
+		hlsService.icoData, err = utils.ReadFileAll(serviceConfig.ICO)
 		if err != nil {
 			logger.LOGW(err.Error())
 			err = nil
@@ -70,7 +73,7 @@ func (hlsService *HLSService) Init(msg *wssAPI.Msg) (err error) {
 }
 
 func (hlsService *HLSService) loadConfigFile(fileName string) (err error) {
-	buf, err := wssAPI.ReadFileAll(fileName)
+	buf, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		return err
 	}
@@ -119,7 +122,7 @@ func (hlsService *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request
 		//logger.LOGT("serve end")
 	}()
 	if "/hls/ts.html" == req.URL.Path {
-		data, err := wssAPI.ReadFileAll("ts.html")
+		data, err := utils.ReadFileAll("ts.html")
 		if err != nil {
 			logger.LOGE(err.Error())
 			w.WriteHeader(404)
@@ -162,7 +165,7 @@ func (hlsService *HLSService) ServeHTTP(w http.ResponseWriter, req *http.Request
 			hlsService.muxSource.RUnlock()
 			if exist == false {
 				source = hlsService.createSource(streamName)
-				if wssAPI.InterfaceIsNil(source) {
+				if utils.InterfaceIsNil(source) {
 					logger.LOGE("add hls source " + streamName + " failed")
 					w.WriteHeader(404)
 					return

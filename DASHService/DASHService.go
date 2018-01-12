@@ -12,6 +12,7 @@ import (
 	"github.com/use-go/websocket-streamserver/HTTPMUX"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //http://addr/DASH/streamName/req
@@ -103,9 +104,9 @@ func (dashService *DASHService) createSource(streamName string) {
 			if exist {
 				logger.LOGD("competition:" + streamName)
 				return
-			} else {
-				dashService.sources[streamName] = source
-			}
+			} 
+			dashService.sources[streamName] = source
+			
 		}
 	case <-time.After(time.Minute):
 		source.Stop(nil)
@@ -114,7 +115,7 @@ func (dashService *DASHService) createSource(streamName string) {
 }
 
 func (dashService *DASHService) loadConfigFile(fileName string) (err error) {
-	buf, err := wssAPI.ReadFileAll(fileName)
+	buf, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		return
 	}
@@ -122,6 +123,7 @@ func (dashService *DASHService) loadConfigFile(fileName string) (err error) {
 	return err
 }
 
+//Start action
 func (dashService *DASHService) Start(msg *wssAPI.Msg) (err error) {
 	return
 }

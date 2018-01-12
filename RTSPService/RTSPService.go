@@ -8,6 +8,7 @@ import (
 
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //RTSPService Service
@@ -43,7 +44,7 @@ func (rtspService *RTSPService) Init(msg *wssAPI.Msg) (err error) {
 }
 
 func (rtspService *RTSPService) loadConfigFile(fileName string) (err error) {
-	data, err := wssAPI.ReadFileAll(fileName)
+	data, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		return
 	}

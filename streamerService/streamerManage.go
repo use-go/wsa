@@ -13,6 +13,7 @@ import (
 	"github.com/use-go/websocket-streamserver/events/eRTMPEvent"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 func enableBlackList(enable bool) (err error) {
@@ -331,7 +332,7 @@ func (streamerService *StreamerService) pullStream(app, streamName, sinkID strin
 	}
 	src, ok := streamerService.pullStreamExec(app, streamName, addr)
 	defer func() {
-		if true == ok && wssAPI.InterfaceValid(src) {
+		if true == ok && utils.InterfaceValid(src) {
 			source, ok := src.(*streamSource)
 			if true == ok {
 				logger.LOGD("add sink")
@@ -352,7 +353,7 @@ func (streamerService *StreamerService) pullStream(app, streamName, sinkID strin
 		}
 
 	}()
-	if true == ok && wssAPI.InterfaceValid(src) {
+	if true == ok && utils.InterfaceValid(src) {
 		return
 	}
 	//按顺序进行
@@ -365,7 +366,7 @@ func (streamerService *StreamerService) pullStream(app, streamName, sinkID strin
 			continue
 		}
 		src, ok = streamerService.pullStreamExec(app, streamName, addr)
-		if true == ok && wssAPI.InterfaceValid(src) {
+		if true == ok && utils.InterfaceValid(src) {
 			return
 		}
 	}

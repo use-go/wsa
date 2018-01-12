@@ -15,6 +15,7 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/amf"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 type channelLink struct {
@@ -121,17 +122,20 @@ func (websockHandler *websocketHandler) initChannel(headers map[string]string) (
 	ipStr := headers["host"]
 	portStr := headers["port"]
 
-	encodedIntIP := wssAPI.IP2Int(ipStr)
+	encodedIntIP := utils.IP2Int(ipStr)
 	channelIndex++
 	strChannelIndex := strconv.Itoa(channelIndex)
 	encodedIPStr := strconv.Itoa(encodedIntIP)
 	strChannel = ipStr + "-" + strChannelIndex + portStr + " " + encodedIPStr
 	if _, exist := channelList[websockHandler.conn]; !exist {
-		channleCli, err := RTSPClient.Connect(ipStr + ":" + portStr)
+
+		rtspURI := "rtsp://" + ipStr + ":" + portStr + "/h264#4cif"
+		channleCli, err := RTSPClient.Connect(rtspURI)
 		if err != nil {
-			channelList[websockHandler.conn] = channleCli
-			return strChannel, nil
+			return "", err
 		}
+		channelList[websockHandler.conn] = channleCli
+		return strChannel, nil
 	}
 
 	return "channel error", errors.New("channnel initial error")
@@ -460,7 +464,7 @@ func (websockHandler *websocketHandler) doClose() (err error) {
 func (websockHandler *websocketHandler) doPlay(st *stPlay) (err error) {
 
 	logger.LOGT("play")
-	websockHandler.clientID = wssAPI.GenerateGUID()
+	websockHandler.clientID = utils.GenerateGUID()
 	if len(websockHandler.app) > 0 {
 		websockHandler.streamName = websockHandler.app + "/" + st.Name
 	} else {

@@ -12,7 +12,7 @@ import (
 
 	"github.com/use-go/websocket-streamserver/logger"
 
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //RTMP握手协议，包括简单握手和复杂握手
@@ -54,7 +54,7 @@ func rtmpHandleshake(conn net.Conn) (err error) {
 	defer func() {
 		conn.SetReadDeadline(time.Time{})
 	}()
-	buf, err := wssAPI.TCPRead(conn, rtmp_randomsize+1)
+	buf, err := utils.TCPRead(conn, rtmp_randomsize+1)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func sampleHandleShake(conn net.Conn, c1 []byte) (err error) {
 		return errors.New("send s2 failed")
 	}
 	//c2
-	c2, err := wssAPI.TCPRead(conn, rtmp_randomsize)
+	c2, err := utils.TCPRead(conn, rtmp_randomsize)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func complexHandleShake(conn net.Conn, c1 []byte) (err error) {
 	}
 
 	//recv c2
-	c2, err := wssAPI.TCPRead(conn, rtmp_randomsize)
+	c2, err := utils.TCPRead(conn, rtmp_randomsize)
 	if err != nil {
 		return err
 	}

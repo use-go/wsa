@@ -13,7 +13,7 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/wssAPI"
-
+	"github.com/use-go/websocket-streamserver/utils"
 	"github.com/use-go/websocket-streamserver/events/eLiveListCtrl"
 	"github.com/use-go/websocket-streamserver/events/eRTMPEvent"
 	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
@@ -121,12 +121,12 @@ func (rtmppuller *RTMPPuller) Stop(msg *wssAPI.Msg) (err error) {
 	rtmppuller.reading = false
 	rtmppuller.waitRead.Wait()
 
-	if wssAPI.InterfaceValid(rtmppuller.rtmp.Conn) {
+	if utils.InterfaceValid(rtmppuller.rtmp.Conn) {
 		rtmppuller.rtmp.Conn.Close()
 		rtmppuller.rtmp.Conn = nil
 	}
 	//del src
-	if wssAPI.InterfaceValid(rtmppuller.src) {
+	if utils.InterfaceValid(rtmppuller.src) {
 		taskDelSrc := &eStreamerEvent.EveDelSource{}
 		taskDelSrc.StreamName = rtmppuller.pullParams.SourceName
 		taskDelSrc.ID = rtmppuller.srcID
@@ -146,7 +146,7 @@ func (rtmppuller *RTMPPuller) handleShake() (err error) {
 	conn := rtmppuller.rtmp.Conn
 	c0 := make([]byte, 1)
 	c0[0] = 3
-	_, err = wssAPI.TCPWriteTimeDuration(conn, c0, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	_, err = utils.TCPWriteTimeDuration(conn, c0, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("send c0 failed")
 		return
@@ -156,32 +156,32 @@ func (rtmppuller *RTMPPuller) handleShake() (err error) {
 	for idx := 8; idx < len(c1); idx++ {
 		c1[idx] = byte(rand.Intn(255))
 	}
-	_, err = wssAPI.TCPWriteTimeDuration(conn, c1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	_, err = utils.TCPWriteTimeDuration(conn, c1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("send c1 failed")
 		return
 	}
 	//read s0
-	s0, err := wssAPI.TCPReadTimeDuration(conn, 1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	s0, err := utils.TCPReadTimeDuration(conn, 1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("read s0 failed")
 		return
 	}
 	logger.LOGT(s0)
 	//read s1
-	s1, err := wssAPI.TCPReadTimeDuration(conn, randomSize+8, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	s1, err := utils.TCPReadTimeDuration(conn, randomSize+8, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("read s1 failed")
 		return
 	}
 	//send c2
-	_, err = wssAPI.TCPWriteTimeDuration(conn, s1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	_, err = utils.TCPWriteTimeDuration(conn, s1, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("send c2 failed")
 		return
 	}
 	//read s2
-	s2, err := wssAPI.TCPReadTimeDuration(conn, randomSize+8, time.Duration(serviceConfig.TimeoutSec)*time.Second)
+	s2, err := utils.TCPReadTimeDuration(conn, randomSize+8, time.Duration(serviceConfig.TimeoutSec)*time.Second)
 	if err != nil {
 		logger.LOGE("read s2 failed")
 		return
@@ -315,11 +315,11 @@ func (rtmppuller *RTMPPuller) threadRead() {
 }
 
 func (rtmppuller *RTMPPuller) sendFlvToSrc(pkt *RTMPPacket) (err error) {
-	if wssAPI.InterfaceIsNil(rtmppuller.src) && pkt.MessageTypeID != flv.FlvTagScriptData {
+	if utils.InterfaceIsNil(rtmppuller.src) && pkt.MessageTypeID != flv.FlvTagScriptData {
 
 		rtmppuller.CreatePlaySRC()
 	}
-	if wssAPI.InterfaceValid(rtmppuller.src) {
+	if utils.InterfaceValid(rtmppuller.src) {
 		if rtmppuller.metaDatas.Len() > 0 {
 			for e := rtmppuller.metaDatas.Front(); e != nil; e = e.Next() {
 				metaDataPkt := e.Value.(*RTMPPacket).ToFLVTag()
@@ -538,7 +538,7 @@ func (rtmppuller *RTMPPuller) CreatePlaySRC() {
 			logger.LOGE(err.Error())
 		}
 		logger.LOGD(rtmppuller.pullParams.Address)
-		if wssAPI.InterfaceValid(taskGet.SrcObj) && taskGet.HasProducer {
+		if utils.InterfaceValid(taskGet.SrcObj) && taskGet.HasProducer {
 			//已经被其他人抢先了
 			logger.LOGD("some other pulled rtmppuller stream:"+taskGet.StreamName, rtmppuller.pullParams.Address)
 			logger.LOGD(taskGet.HasProducer)
@@ -558,7 +558,7 @@ func (rtmppuller *RTMPPuller) CreatePlaySRC() {
 			logger.LOGE(err.Error())
 			return
 		}
-		if wssAPI.InterfaceIsNil(taskAdd.SrcObj) {
+		if utils.InterfaceIsNil(taskAdd.SrcObj) {
 			rtmppuller.closeCh()
 			rtmppuller.reading = false
 			return
@@ -573,7 +573,7 @@ func (rtmppuller *RTMPPuller) CreatePlaySRC() {
 }
 
 func (rtmppuller *RTMPPuller) checkPlayerCounts() {
-	for rtmppuller.reading && wssAPI.InterfaceValid(rtmppuller.src) {
+	for rtmppuller.reading && utils.InterfaceValid(rtmppuller.src) {
 		time.Sleep(time.Duration(2) * time.Minute)
 		eve := &eLiveListCtrl.EveGetLivePlayerCount{LiveName: rtmppuller.pullParams.SourceName}
 

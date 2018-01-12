@@ -8,6 +8,7 @@ import (
 
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //interface for each service instance
@@ -59,7 +60,7 @@ func (backendService *BackendService) Init(msg *wssAPI.Msg) (err error) {
 }
 
 func (backendService *BackendService) loadConfigFile(fileName string) (err error) {
-	data, err := wssAPI.ReadFileAll(fileName)
+	data, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		return
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/use-go/websocket-streamserver/HTTPMUX"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 // WebSocketService to handle webservice business
@@ -102,7 +103,7 @@ func (websockService *WebSocketService) ProcessMessage(msg *wssAPI.Msg) (err err
 
 //loadConfigFile from FS to config Current Service
 func (websockService *WebSocketService) loadConfigFile(fileName string) (err error) {
-	data, err := wssAPI.ReadFileAll(fileName)
+	data, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		return
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 type RTMPHandler struct {
@@ -195,7 +196,7 @@ func (rtmpHandler *RTMPHandler) HandleRTMPPacket(packet *RTMPPacket) (err error)
 }
 
 func (rtmpHandler *RTMPHandler) sendFlvToSrc(pkt *RTMPPacket) (err error) {
-	if rtmpHandler.publisher.isPublishing() && wssAPI.InterfaceValid(rtmpHandler.source) {
+	if rtmpHandler.publisher.isPublishing() && utils.InterfaceValid(rtmpHandler.source) {
 		msg := &wssAPI.Msg{}
 		msg.Type = wssAPI.MsgFlvTag
 		msg.Param1 = pkt.ToFLVTag()
@@ -390,7 +391,7 @@ func (rtmpHandler *RTMPHandler) handleInvoke(packet *RTMPPacket) (err error) {
 			return
 		}
 
-		rtmpHandler.clientID = wssAPI.GenerateGUID()
+		rtmpHandler.clientID = utils.GenerateGUID()
 		taskAddSink := &eStreamerEvent.EveAddSink{}
 		taskAddSink.StreamName = rtmpHandler.streamName
 		taskAddSink.SinkId = rtmpHandler.clientID

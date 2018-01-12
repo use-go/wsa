@@ -22,6 +22,7 @@ import (
 	"github.com/use-go/websocket-streamserver/streamerService"
 	"github.com/use-go/websocket-streamserver/webSocketService"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 /*
@@ -192,7 +193,7 @@ func (processCtx *context) loadConfig() (err error) {
 		logger.LOGW("use default :config.json")
 		configName = "config.json"
 	}
-	data, err := wssAPI.ReadFileAll(configName)
+	data, err := utils.ReadFileAll(configName)
 	if err != nil {
 		logger.LOGE("process load config file failed:" + err.Error())
 		return
@@ -218,10 +219,10 @@ func (processCtx *context) createLogFile(logPath string) {
 		logPath = strings.TrimSuffix(logPath, "/")
 	}
 	dir := logPath + time.Now().Format("/2006/01/02/")
-	bResult, _ := wssAPI.CheckDirectory(dir)
+	bResult, _ := utils.CheckDirectory(dir)
 
 	if false == bResult {
-		_, err := wssAPI.CreateDirectory(dir)
+		_, err := utils.CreateDirectory(dir)
 		if err != nil {
 			logger.LOGE("create log file failed:", err.Error())
 			return

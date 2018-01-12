@@ -12,7 +12,7 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
 	"github.com/use-go/websocket-streamserver/mediaTypes/mp3"
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 const saveToFile = false
@@ -423,7 +423,7 @@ func (fmp4Creater *FMP4Creater) createAudioInitSeg(tag *flv.FlvTag) (slice *FMP4
 	}
 	if saveToFile {
 
-		wssAPI.CreateDirectory("audio")
+		utils.CreateDirectory("audio")
 		fp, err := os.Create("audio/init.mp4")
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -755,7 +755,7 @@ func (fmp4Creater *FMP4Creater) createVideoInitSeg(tag *flv.FlvTag) (slice *FMP4
 
 	if saveToFile {
 
-		wssAPI.CreateDirectory("video")
+		utils.CreateDirectory("video")
 		fp, err := os.OpenFile("video/init.mp4", os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			logger.LOGE(err.Error())

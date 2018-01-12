@@ -1,59 +1,19 @@
-package wssAPI
+// Copyright 2017-2018 The use-go websocket-streamserver Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package utils
 
 import (
-	"crypto/md5"
-	"crypto/rand"
-	"encoding/base64"
-	"encoding/hex"
+	"errors"
 	"io"
-	"io/ioutil"
 	"net"
-	"os"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/use-go/websocket-streamserver/logger"
 )
-
-//CheckDirectory in FS
-func CheckDirectory(dir string) (bool, error) {
-	_, err := os.Stat(dir)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, err
-	}
-	return false, err
-}
-
-// CreateDirectory for log
-func CreateDirectory(dir string) (bool, error) {
-	err := os.MkdirAll(dir, 0777)
-	if err != nil {
-		logger.LOGE(err.Error())
-		return false, err
-	}
-	return true, nil
-}
-
-// ReadFileAll from json file
-func ReadFileAll(filename string) (data []byte, err error) {
-	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
-	if err != nil {
-		logger.LOGE(err.Error())
-		return
-	}
-	defer fp.Close()
-	data, err = ioutil.ReadAll(fp)
-	if err != nil {
-		logger.LOGE(err.Error())
-		return
-	}
-	return
-}
 
 // TCPRead to get data from tcp buffer
 func TCPRead(conn net.Conn, size int) (data []byte, err error) {
@@ -183,37 +143,6 @@ func TCPWriteTimeDuration(conn net.Conn, data []byte, duration time.Duration) (w
 	return
 }
 
-//GenerateGUID to Get a GUID
-func GenerateGUID() string {
-	b := make([]byte, 48)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return ""
-	}
-	return getMd5String(base64.URLEncoding.EncodeToString(b))
-}
-
-func getMd5String(str string) string {
-	h := md5.New()
-	h.Write([]byte(str))
-	return hex.EncodeToString(h.Sum(nil))
-}
-
-// InterfaceIsNil Check
-func InterfaceIsNil(val interface{}) bool {
-	if nil == val {
-		return true
-	}
-	return reflect.ValueOf(val).IsNil()
-}
-
-// InterfaceValid Check
-func InterfaceValid(val interface{}) bool {
-	if nil == val {
-		return false
-	}
-	return !reflect.ValueOf(val).IsNil()
-}
-
 //IP2Int Enocde IP to a int
 func IP2Int(ip string) int {
 	num := 0
@@ -231,8 +160,26 @@ func IP2Int(ip string) int {
 	return num
 }
 
-// GetMD5Hash return the Encoded HASH
-func GetMD5Hash(text string) string {
-	hash := md5.Sum([]byte(text))
-	return hex.EncodeToString(hash[:])
+//ConnCopy transfer data from one socket to another one
+// This does the actual data transfer.
+// The broker only closes the Read side.
+func ConnCopy(src, dst net.Conn, reverseChan chan int64) (err error) {
+	// We can handle errors in a finer-grained manner by inlining io.Copy (it's
+	// simple, and we drop the ReaderFrom or WriterTo checks for
+	// net.Conn->net.Conn transfers, which aren't needed). This would also let
+	// us adjust buffersize.
+	reverseBytes, err := io.Copy(dst, src)
+	if err != nil {
+		err = errors.New("Server closed connection")
+	}
+
+	// close all connections discarding errors
+	// this is force the other thread to close
+	src.Close()
+	dst.Close()
+
+	//clog.Printf("Wrote %d bytes to reverse connection\n", reverse_bytes)
+	reverseChan <- reverseBytes
+
+	return
 }

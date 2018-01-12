@@ -4,14 +4,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"time"
-
+    "strconv"
 	"github.com/use-go/websocket-streamserver/logger"
-	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
-
-	"strconv"
-
-	"github.com/use-go/websocket-streamserver/wssAPI"
-
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"	
+	"github.com/use-go/websocket-streamserver/utils"
 	"github.com/use-go/websocket-streamserver/mediaTypes/aac"
 	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
 )
@@ -147,13 +143,13 @@ func (dashMpdCreater *mpdCreater) createPeriod(startNumber int) (period []Period
 	period = make([]PeriodXML, 0, 2)
 
 	if dashMpdCreater.videoHeader != nil {
-		videPeroid := PeriodXML{ID: wssAPI.GenerateGUID()}
+		videPeroid := PeriodXML{ID: utils.GenerateGUID()}
 		dashMpdCreater.createVidePeroid(startNumber, &videPeroid)
 		period = append(period, videPeroid)
 	}
 
 	if dashMpdCreater.audioHeader != nil {
-		audioPeriod := PeriodXML{ID: wssAPI.GenerateGUID()}
+		audioPeriod := PeriodXML{ID: utils.GenerateGUID()}
 		dashMpdCreater.createAudioPeroid(startNumber, &audioPeriod)
 		period = append(period, audioPeriod)
 	}

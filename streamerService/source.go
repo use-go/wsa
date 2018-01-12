@@ -9,6 +9,7 @@ import (
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 type streamSource struct {
@@ -106,7 +107,7 @@ func (source *streamSource) SetProducer(status bool) (remove bool) {
 	if source.bProducer == false {
 		//通知生产者
 		logger.LOGD(source.dataProducer)
-		if wssAPI.InterfaceValid(source.dataProducer) {
+		if utils.InterfaceValid(source.dataProducer) {
 			logger.LOGD("force closed")
 			msg := &wssAPI.Msg{Type: wssAPI.MsgSourceClosedForce}
 			source.dataProducer.ProcessMessage(msg)

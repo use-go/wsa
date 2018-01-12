@@ -31,8 +31,8 @@ func Connect(uri string) (cli *SocketChannel, err error) {
 	}
 
 	dailer := net.Dialer{Timeout: 3 * time.Second}
-	var conn net.Conn
-	if conn, err = dailer.Dial("tcp", targetURL.Host); err != nil {
+	conn, err := dailer.Dial("tcp", targetURL.Host)
+	if err != nil {
 		return nil, err
 	}
 	u2 := *targetURL
@@ -97,6 +97,11 @@ func checkRequestContent(content string) (err error) {
 }
 
 func parserURL(uri string) (targetURL *url.URL, err error) {
+	//for example
+	// with aac rtsp://admin:123456@80.254.21.110:554/mpeg4cif
+	// with aac rtsp://admin:123456@95.31.251.50:5050/mpeg4cif
+	// 1808p rtsp://admin:123456@171.25.235.18/mpeg4
+	// 640x360 rtsp://admin:123456@94.242.52.34:5543/mpeg4cif
 	// Parse the URL and ensure there are no errors.
 	url, err := url.Parse(uri)
 	if err != nil {

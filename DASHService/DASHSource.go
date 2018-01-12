@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
-	"github.com/use-go/websocket-streamserver/logger"
-
-	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
-
-	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
-
 	"github.com/panda-media/muxer-fmp4/codec/H264"
 	"github.com/panda-media/muxer-fmp4/dashSlicer"
+
+	"github.com/use-go/websocket-streamserver/logger"
+	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
+	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //DASHSource description
@@ -59,7 +57,7 @@ func (dashSource *DASHSource) serveMPD(param string, w http.ResponseWriter, req 
 		logger.LOGE(err.Error())
 		return
 	}
-	//mpd,err=wssAPI.ReadFileAll("mpd/taotao.mpd")
+	//mpd,err=utils.ReadFileAll("mpd/taotao.mpd")
 	//if err!=nil{
 	//	logger.LOGE(err.Error())
 	//	return
@@ -120,7 +118,7 @@ func (dashSource *DASHSource) Init(msg *wssAPI.Msg) (err error) {
 		return errors.New("invalid param init hls source")
 	}
 	dashSource.chValid = true
-	dashSource.clientID = wssAPI.GenerateGUID()
+	dashSource.clientID = utils.GenerateGUID()
 	taskAddSink := &eStreamerEvent.EveAddSink{
 		StreamName: dashSource.streamName,
 		SinkId:     dashSource.clientID,

@@ -19,6 +19,7 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/h264"
 	"github.com/use-go/websocket-streamserver/mediaTypes/mp3"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 const (
@@ -51,7 +52,7 @@ func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 		return
 	}
 	if '$' == firstByte[0] {
-		threeBytes, err := wssAPI.TCPRead(conn, 3)
+		threeBytes, err := utils.TCPRead(conn, 3)
 		_, err = conn.Read(threeBytes)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -62,7 +63,7 @@ func ReadPacket(conn net.Conn, timeout bool) (data []byte, err error) {
 			logger.LOGE(err.Error())
 			return nil, err
 		}
-		dataLast, err := wssAPI.TCPRead(conn, int(dataLength))
+		dataLast, err := utils.TCPRead(conn, int(dataLength))
 		if err != nil {
 			logger.LOGE(err.Error())
 			return nil, err

@@ -16,6 +16,7 @@ import (
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
 	"github.com/use-go/websocket-streamserver/mediaTypes/ts"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 type hlsTsData struct {
@@ -71,7 +72,7 @@ func (hlsSource *HLSSource) Init(msg *wssAPI.Msg) (err error) {
 	hlsSource.chValid = true
 
 	//create source
-	hlsSource.clientID = wssAPI.GenerateGUID()
+	hlsSource.clientID = utils.GenerateGUID()
 	taskAddSink := &eStreamerEvent.EveAddSink{
 		StreamName: hlsSource.streamName,
 		SinkId:     hlsSource.clientID,
@@ -366,7 +367,7 @@ func (hlsSource *HLSSource) createNewTSSegment(keyframe *flv.FlvTag) {
 
 		if hlsSource.segIdx < 10 {
 			//if true{
-			wssAPI.CreateDirectory("audio")
+			utils.CreateDirectory("audio")
 			fileName := "audio/" + strconv.Itoa(int(hlsSource.segIdx-1)) + ".ts"
 			logger.LOGD(tsdata.durationMs)
 			fp, err := os.Create(fileName)

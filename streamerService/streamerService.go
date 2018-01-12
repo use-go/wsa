@@ -13,6 +13,7 @@ import (
 	"github.com/use-go/websocket-streamserver/events/eStreamerEvent"
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 const (
@@ -70,7 +71,7 @@ func (streamerService *StreamerService) Init(msg *wssAPI.Msg) (err error) {
 }
 
 func (streamerService *StreamerService) loadConfigFile(fileName string) (err error) {
-	data, err := wssAPI.ReadFileAll(fileName)
+	data, err := utils.ReadFileAll(fileName)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return

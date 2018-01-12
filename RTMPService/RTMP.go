@@ -9,7 +9,7 @@ import (
 
 	"github.com/use-go/websocket-streamserver/logger"
 	"github.com/use-go/websocket-streamserver/mediaTypes/flv"
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //RTMP Protocol Setting
@@ -323,7 +323,7 @@ func (rtmp *RTMP) ReadChunk() (packet *RTMPPacket, err error) {
 }
 
 func (rtmp *RTMP) rtmpSocketRead(size int) (data []byte, err error) {
-	data, err = wssAPI.TCPRead(rtmp.Conn, size)
+	data, err = utils.TCPRead(rtmp.Conn, size)
 	if err != nil {
 		return
 	}
@@ -392,7 +392,7 @@ func (rtmp *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		return
 	}
 
-	_, err = wssAPI.TCPWrite(rtmp.Conn, buf)
+	_, err = utils.TCPWrite(rtmp.Conn, buf)
 	if err != nil {
 		return
 	}
@@ -424,7 +424,7 @@ func (rtmp *RTMP) SendPacket(packet *RTMPPacket, queue bool) (err error) {
 		if err != nil {
 			return err
 		}
-		_, err = wssAPI.TCPWrite(rtmp.Conn, buf)
+		_, err = utils.TCPWrite(rtmp.Conn, buf)
 		if err != nil {
 			return err
 		}

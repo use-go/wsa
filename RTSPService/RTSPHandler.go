@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/utils"
 )
 
 //RTSPHandler Of RTSP service
@@ -102,7 +103,7 @@ func (trackinfo *trackInfo) reset() {
 
 //Init RTSP Handler
 func (rtspHandler *RTSPHandler) Init(msg *wssAPI.Msg) (err error) {
-	rtspHandler.session = wssAPI.GenerateGUID()
+	rtspHandler.session = utils.GenerateGUID()
 	rtspHandler.sinkAdded = false
 	rtspHandler.tracks = make(map[string]*trackInfo)
 	rtspHandler.waitPlaying = new(sync.WaitGroup)
@@ -239,7 +240,7 @@ func (rtspHandler *RTSPHandler) handleRTSP(data []byte) (err error) {
 func (rtspHandler *RTSPHandler) send(data []byte) (err error) {
 	rtspHandler.mutexConn.Lock()
 	defer rtspHandler.mutexConn.Unlock()
-	_, err = wssAPI.TCPWriteTimeOut(rtspHandler.conn, data, serviceConfig.TimeoutSec)
+	_, err = utils.TCPWriteTimeOut(rtspHandler.conn, data, serviceConfig.TimeoutSec)
 	return
 }
 
