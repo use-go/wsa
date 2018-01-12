@@ -75,9 +75,7 @@ func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) 
 		err = errr
 		return
 	}
-	payloadMsg := ctrlMsg.Payload
-
-	channelList[websockHandler.conn].
+	channelList[websockHandler.conn].ForwardToSer(ctrlMsg.Payload)
 
 	return
 }

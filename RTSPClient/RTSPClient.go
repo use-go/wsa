@@ -48,16 +48,11 @@ type Response struct {
 
 //ForwardToSer Data
 func (cli *SocketChannel) ForwardToSer(message string) (cnt int, err error) {
-	cli.cseq++
-	count, e := cli.conn.Write([]byte(message))
-	if e != nil {
-		err = errors.New("socket write failed")
-	}
-	return count, nil
+	return cli.write(message)
 }
 
 //Read Data
-func (cli *SocketChannel) Read() (str string, err error) {
+func (cli *SocketChannel) read() (str string, err error) {
 	buffer := make([]byte, 4096)
 	nb, err := cli.conn.Read(buffer)
 	if err != nil || nb <= 0 {
@@ -69,7 +64,7 @@ func (cli *SocketChannel) Read() (str string, err error) {
 }
 
 //Write Data
-func (cli *SocketChannel) Write(message string) (cnt int, err error) {
+func (cli *SocketChannel) write(message string) (cnt int, err error) {
 	cli.cseq++
 	count, e := cli.conn.Write([]byte(message))
 	if e != nil {
