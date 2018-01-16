@@ -3,12 +3,13 @@ package RTSPService
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"strconv"
 
 	"github.com/use-go/websocket-streamserver/logger"
-	"github.com/use-go/websocket-streamserver/wssAPI"
 	"github.com/use-go/websocket-streamserver/utils"
+	"github.com/use-go/websocket-streamserver/wssAPI"
 )
 
 //RTSPService Service
@@ -105,6 +106,7 @@ func (rtspService *RTSPService) handleConn(conn net.Conn) {
 			handler.handlePacket(nil)
 			return
 		}
+		logger.LOGT(fmt.Sprintf("new rtsp client connected: %s", conn.RemoteAddr().String()))
 		logger.LOGT(string(data))
 		err = handler.handlePacket(data)
 		if err != nil {

@@ -33,7 +33,10 @@ func (rtspHandler *RTSPHandler) serveOptions(lines []string) (err error) {
 	if hasSession {
 		str += "Session: " + rtspHandler.session + RTSPEndLine
 	}
-	str += "Public: OPTIONS,DESCRIBE,SETUP,PLAY,PAUSE,TEARDOWN " + RTSPEndLine + RTSPEndLine
+	str += "Public: OPTIONS, DESCRIBE, GET_PARAMETER, PAUSE, PLAY, SETUP, SET_PARAMETER, TEARDOWN " + RTSPEndLine 
+	str += "Server: GStreamer RTSP server " + RTSPEndLine
+	//Date: Mon, 15 Jan 2018 09:20:38 GMT
+	str += "Date: "+  time.Now().Format("Mon, 02 Jan 2006 15:04:05 GMT")  + RTSPEndLine + RTSPEndLine
 	err = rtspHandler.send([]byte(str))
 
 	if rtspHandler.tcpTimeout {

@@ -133,8 +133,10 @@ func EncodeWSPCtrlMsg(code, seq string, headers map[string]string, payload strin
 			msg += key + ": " + value + "\r\n"
 		}
 	}
-	msg += "\r\n\r\n"
-	if payload != "" {
+	msg += "\r\n"
+	if payload == "" {
+		msg += "\r\n"
+	}else{
 		msg += payload
 	}
 	return msg

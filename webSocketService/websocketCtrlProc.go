@@ -85,29 +85,36 @@ func (websockHandler *websocketHandler) procWSPWarp(ctrlMsg *wssAPI.WSPMessage) 
 		err = errr
 		return
 	}
+	seqStr := ctrlMsg.Headers["seq"]
+	codeMsg := "200 OK"
 	//forward message to RTSP Srv
-	replymsg, errr := channelList[websockHandler.conn].Forward(ctrlMsg.Payload)
+	rspMessage, errr := channelList[websockHandler.conn].Forward(ctrlMsg.Payload)
 	if errr != nil {
-		err = errr
+		err = errors.New("Protocol Warp handler error: " + errr.Error())
+		codeMsg = "Protocol Warp handler error"
 		return
 	}
-	return websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
+	replyMsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, nil, rspMessage)
+
+	if replyMsg!="" {
+		logger.LOGE(  "reply(forward) to client :\r\n" + replyMsg)
+	}
+	
+	return websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replyMsg))
 }
 
 func (websockHandler *websocketHandler) procWSPCJoin(ctrlMsg *wssAPI.WSPMessage) (err error) {
 
 	seqStr := ctrlMsg.Headers["seq"]
 	codeMsg := "200 OK"
-	headerMsg := map[string]string{}
-	payLoadMsg := ""
 	strChannel := ctrlMsg.Headers["channel"]
 	if errr := websockHandler.checkChannelSession(strChannel); errr != nil {
 		err = errr
 		codeMsg = " 400 Bad Request"
 	}
 
-	replymsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
-	websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
+	replyMsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, nil, "")
+	websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replyMsg))
 	return
 }
 func (websockHandler *websocketHandler) procWSPCInit(ctrlMsg *wssAPI.WSPMessage) (err error) {
@@ -123,8 +130,8 @@ func (websockHandler *websocketHandler) procWSPCInit(ctrlMsg *wssAPI.WSPMessage)
 			err = errors.New("initChannel error with inner eror: " + errr.Error())
 			codeMsg = "500 Internal Server Error"
 		}
-		replymsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
-		websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replymsg))
+		replyMsg := wssAPI.EncodeWSPCtrlMsg(codeMsg, seqStr, headerMsg, payLoadMsg)
+		websockHandler.conn.WriteMessage(websocket.TextMessage, []byte(replyMsg))
 		return
 	}
 	return errors.New("Check WSPInit Header Failed")

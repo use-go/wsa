@@ -10,7 +10,6 @@
 package RTSPClient
 
 import (
-	"bufio"
 	"errors"
 	"net"
 	"net/url"
@@ -34,24 +33,13 @@ func write(socket net.Conn, message string) (cnt int, err error) {
 
 //Read Data
 func read(socket net.Conn) (str string, err error) {
-	// buffer := make([]byte, 4096)
-	// nb, err := cli.conn.Read(buffer)
-	// if err != nil || nb <= 0 {
-	// 	logger.LOGE("socket read failed", err)
-	// 	return "", errors.New("socket read failed")
-	// }
-	// return string(buffer[:nb]), nil
-
-	br := bufio.NewReader(socket)
-	//tp := textproto.NewReader(br)
-	// if strline, err := tp.ReadLine(); err != nil {
-	// 	return strline, err
-	// }
-
-	byteBuffer := make([]byte, br.Buffered())
-
-	return string(byteBuffer), nil
-
+	buffer := make([]byte, 4096)
+	nb, err := socket.Read(buffer)
+	if err != nil || nb <= 0 {
+		logger.LOGE("socket read failed", err)
+		return "", errors.New("socket read failed")
+	}
+	 return string(buffer[:nb]), nil
 }
 
 //Connect to SS with timeout setting
