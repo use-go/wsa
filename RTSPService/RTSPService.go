@@ -88,6 +88,7 @@ func (rtspService *RTSPService) rtspLoop(listener *net.TCPListener) {
 			logger.LOGE(err.Error())
 			continue
 		}
+		logger.LOGT(fmt.Sprintf("new rtsp client connected: %s", conn.RemoteAddr().String()))
 		go rtspService.handleConn(conn)
 	}
 }
@@ -106,7 +107,6 @@ func (rtspService *RTSPService) handleConn(conn net.Conn) {
 			handler.handlePacket(nil)
 			return
 		}
-		logger.LOGT(fmt.Sprintf("new rtsp client connected: %s", conn.RemoteAddr().String()))
 		logger.LOGT(string(data))
 		err = handler.handlePacket(data)
 		if err != nil {
