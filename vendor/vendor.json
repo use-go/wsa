@@ -1,0 +1,95 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "cE3zgHwftWtfEm0PJmqSsOt14/M=",
+			"path": "github.com/gorilla/websocket",
+			"revision": "cdedf21e585dae942951e34d6defc3215b4280fa",
+			"revisionTime": "2017-12-10T03:53:53Z"
+		},
+		{
+			"path": "github.com/nareix/av",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "D+1lyLkqS5BneJBWw2q/NYdxLSg=",
+			"path": "github.com/nareix/joy4/av",
+			"revision": "bd41a3b90ff2205431b4a74e4d45d6f63e987519",
+			"revisionTime": "2017-11-03T04:20:16Z"
+		},
+		{
+			"checksumSHA1": "B7QaEwaBW5KNwCP7pwjrgzsz6cg=",
+			"path": "github.com/nareix/joy4/av/pktque",
+			"revision": "bd41a3b90ff2205431b4a74e4d45d6f63e987519",
+			"revisionTime": "2017-11-03T04:20:16Z"
+		},
+		{
+			"checksumSHA1": "ckr14CXUrylmK3VEzt+4oH3rb3c=",
+			"path": "github.com/nareix/joy4/av/pubsub",
+			"revision": "bd41a3b90ff2205431b4a74e4d45d6f63e987519",
+			"revisionTime": "2017-11-03T04:20:16Z"
+		},
+		{
+			"checksumSHA1": "tvcrfxy3pTSb5d5awkaDB9Gaa9I=",
+			"path": "github.com/nareix/joy4/format/rtsp/sdp",
+			"revision": "bd41a3b90ff2205431b4a74e4d45d6f63e987519",
+			"revisionTime": "2017-11-03T04:20:16Z"
+		},
+		{
+			"checksumSHA1": "H0qk//EurMEkfwJuiLxXEZGJ9v8=",
+			"path": "github.com/panda-media/muxer-fmp4/codec/AAC",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "H04+2kDrC/p0l3j46/zj31MAX9U=",
+			"path": "github.com/panda-media/muxer-fmp4/codec/H264",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "iUzLNik9ePLdS6dh+Pr+H/OKImQ=",
+			"path": "github.com/panda-media/muxer-fmp4/dashSlicer",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "5uJlEukz26gTpTT93a2SUGZB8GM=",
+			"path": "github.com/panda-media/muxer-fmp4/dashSlicer/AVSlicer",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "lLsR0yIyW+ndcfO2hInjpa38Sgk=",
+			"path": "github.com/panda-media/muxer-fmp4/format/AVPacket",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "BrhVLqWEbap6poRGDqIlYFBlcCg=",
+			"path": "github.com/panda-media/muxer-fmp4/format/MP4",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "gAJhfUX2MfNST3saaCUQU6bEfBE=",
+			"path": "github.com/panda-media/muxer-fmp4/format/MP4/commonBoxes",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "j4RUaMOheIHvw/m34Icc9ixdbnI=",
+			"path": "github.com/panda-media/muxer-fmp4/mpd",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		},
+		{
+			"checksumSHA1": "HygSgVQ0vxpg66vXSU5oVK0Z1s0=",
+			"path": "github.com/panda-media/muxer-fmp4/utils",
+			"revision": "c3ea7b6b8bea80ce4267b30957b2b0c70984314e",
+			"revisionTime": "2017-09-27T07:57:19Z"
+		}
+	],
+	"rootPath": "github.com/use-go/websocket-streamserver"
+}

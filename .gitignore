@@ -4,3 +4,4 @@ debug
 /streamServer/debug
 main.exe
 *.test
+vendor/
