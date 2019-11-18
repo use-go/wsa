@@ -8,3 +8,7 @@ smpte=10:07:00-10:07:33:05.01
 smpte-25=10:07:00-10:07:33:05.01
 */
 const SMPTE_30_drop_frame_rate = 29.97
+
+func IsSMPTE(line string) (ret bool) {
+	return false
+}
