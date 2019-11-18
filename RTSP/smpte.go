@@ -31,3 +31,5 @@ func IsSMPTE(line string) bool {
 
 	return true
 }
+
+func 
