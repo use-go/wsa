@@ -1,7 +1,7 @@
 package eRTMPEvent
 
 import (
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 const (
@@ -16,11 +16,11 @@ type EvePullRTMPStream struct {
 	Address    string
 	Port       int
 	StreamName string
-	Src        chan wssAPI.MsgHandler
+	Src        chan wssapi.MsgHandler
 }
 
 func (evePullRTMPStream *EvePullRTMPStream) Receiver() string {
-	return wssAPI.OBJRTMPServer
+	return wssapi.OBJRTMPServer
 }
 
 func (evePullRTMPStream *EvePullRTMPStream) Type() string {
@@ -35,7 +35,7 @@ func (evePullRTMPStream *EvePullRTMPStream) Init(protocol, app, instance, addr, 
 	evePullRTMPStream.Port = port
 	evePullRTMPStream.StreamName = streamName
 	evePullRTMPStream.SourceName = sourceName
-	evePullRTMPStream.Src = make(chan wssAPI.MsgHandler)
+	evePullRTMPStream.Src = make(chan wssapi.MsgHandler)
 }
 
 func (evePullRTMPStream *EvePullRTMPStream) Copy() (out *EvePullRTMPStream) {

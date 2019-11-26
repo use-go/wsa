@@ -1,4 +1,4 @@
-package HTTPMUX
+package httpmux
 
 /*
  mapping of  the addres and route of httpmux

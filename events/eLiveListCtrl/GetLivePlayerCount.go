@@ -1,7 +1,7 @@
 package eLiveListCtrl
 
 import (
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 type EveGetLivePlayerCount struct {
@@ -10,7 +10,7 @@ type EveGetLivePlayerCount struct {
 }
 
 func (eveGetLivePlayerCount *EveGetLivePlayerCount) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveGetLivePlayerCount *EveGetLivePlayerCount) Type() string {

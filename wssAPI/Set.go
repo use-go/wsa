@@ -1,4 +1,4 @@
-package wssAPI
+package wssapi
 
 import (
 	"sync"

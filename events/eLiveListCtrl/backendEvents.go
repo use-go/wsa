@@ -3,7 +3,7 @@ package eLiveListCtrl
 import (
 	"container/list"
 
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 // const string to describe the action
@@ -24,7 +24,7 @@ type EveEnableBlackList struct {
 
 //Receiver of Event
 func (eveEnableBlackList *EveEnableBlackList) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 //Type of Event
@@ -40,7 +40,7 @@ type EveSetBlackList struct {
 
 //Receiver of EveSetBlackList
 func (eveSetBlackList *EveSetBlackList) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 //Type of EveSetBlackList
@@ -55,7 +55,7 @@ type EveEnableWhiteList struct {
 
 //Receiver of eveEnableWhiteList
 func (eveEnableWhiteList *EveEnableWhiteList) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 // Type of eveEnableWhiteList
@@ -71,7 +71,7 @@ type EveSetWhiteList struct {
 
 //Receiver of eveSetWhiteList
 func (eveSetWhiteList *EveSetWhiteList) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 //Type of eveSetWhiteList

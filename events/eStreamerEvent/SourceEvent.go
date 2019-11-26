@@ -3,7 +3,7 @@ package eStreamerEvent
 import (
 	"net"
 
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 const (
@@ -15,13 +15,13 @@ const (
 type EveAddSource struct {
 	StreamName string
 	RemoteIp   net.Addr
-	Producer   wssAPI.MsgHandler
+	Producer   wssapi.MsgHandler
 	ID         int64      //outPut
-	SrcObj     wssAPI.MsgHandler //out
+	SrcObj     wssapi.MsgHandler //out
 }
 
 func (eveAddsource *EveAddSource) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveAddsource *EveAddSource) Type() string {
@@ -34,7 +34,7 @@ type EveDelSource struct {
 }
 
 func (eveAddsource *EveDelSource) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveAddsource *EveDelSource) Type() string {
@@ -43,12 +43,12 @@ func (eveAddsource *EveDelSource) Type() string {
 
 type EveGetSource struct {
 	StreamName  string
-	SrcObj      wssAPI.MsgHandler
+	SrcObj      wssapi.MsgHandler
 	HasProducer bool
 }
 
 func (eveAddsource *EveGetSource) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveAddsource *EveGetSource) Type() string {

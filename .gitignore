@@ -1,7 +1,7 @@
 examples/examples
 *.log
 debug
-/streamServer/debug
+/streamserver/debug
 main.exe
 *.test
 vendor/

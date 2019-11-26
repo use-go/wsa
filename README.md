@@ -1,6 +1,6 @@
 # websocket-streamserver
 
-based and forked from [this websocket-streamserver](https://github.com/widefire/websocket-streamserver)
+websocket server for h264
 
 ## a stream server support rtmp and websocket in html5
 
@@ -15,3 +15,13 @@ websocket transfer the WSP that wrap rtsp content
 ### Structure instruction
 
 #### backend : web-service to admin the Stream
+
+
+## inspired by
+
++ [websocketStreamServer](https://github.com/widefire/websocketStreamServer)
+
++ [websocket-mse-demo](https://github.com/elsampsa/websocket-mse-demo)
+
++ [WebStreamer](https://github.com/urbenlegend/WebStreamer)
+

@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/use-go/websocket-streamserver/logger"
-	"github.com/use-go/websocket-streamserver/webSocketService"
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	wss "github.com/use-go/websocket-streamserver/websocket"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 // SetTest test
 func SetTest() {
-	si := wssAPI.NewSet()
+	si := wssapi.NewSet()
 	si.Add("111")
 	si.Add(2)
 	fmt.Println(si.Has(3))
@@ -54,7 +54,7 @@ func Play(conn *websocket.Conn) {
 	stPlay.Name = "hks"
 
 	dataSend, _ := json.Marshal(stPlay)
-	err := webSocketService.SendWsControl(conn, webSocketService.WSCPlay, dataSend)
+	err := wss.SendWsControl(conn, wss.WSCPlay, dataSend)
 	if err != nil {
 		logger.LOGE(err.Error())
 		return
@@ -84,11 +84,11 @@ func readResult(conn *websocket.Conn) (err error) {
 		logger.LOGT(data)
 		pktType := data[0]
 		switch pktType {
-		case webSocketService.WSPktAudio:
+		case wss.WSPktAudio:
 			logger.LOGT("audio")
-		case webSocketService.WSPktVideo:
+		case wss.WSPktVideo:
 			logger.LOGT("video")
-		case webSocketService.WSPktControl:
+		case wss.WSPktControl:
 			logger.LOGT(data)
 		}
 	}

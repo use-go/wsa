@@ -1,7 +1,7 @@
 package eLiveListCtrl
 
 import (
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 // EveSetUpStreamApp struct
@@ -17,7 +17,7 @@ type EveSetUpStreamApp struct {
 }
 
 func (eveSetUpStreamApp *EveSetUpStreamApp) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveSetUpStreamApp *EveSetUpStreamApp) Type() string {

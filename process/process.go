@@ -13,16 +13,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/use-go/websocket-streamserver/DASHService"
-	"github.com/use-go/websocket-streamserver/HLSService"
-	"github.com/use-go/websocket-streamserver/RTMPService"
-	"github.com/use-go/websocket-streamserver/RTSPService"
-	"github.com/use-go/websocket-streamserver/backendService"
+	"github.com/use-go/websocket-streamserver/rtspsrv"
+	"github.com/use-go/websocket-streamserver/backend"
+	"github.com/use-go/websocket-streamserver/dash"
+	"github.com/use-go/websocket-streamserver/hls"
 	"github.com/use-go/websocket-streamserver/logger"
-	"github.com/use-go/websocket-streamserver/streamerService"
-	"github.com/use-go/websocket-streamserver/webSocketService"
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/rtmp"
+	"github.com/use-go/websocket-streamserver/streamer"
 	"github.com/use-go/websocket-streamserver/utils"
+	"github.com/use-go/websocket-streamserver/websocket"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 /*
@@ -46,7 +46,7 @@ type contextConfiguration struct {
 //context : context holding all the Service that will be launched in Process
 type context struct {
 	servicesRWMutex sync.RWMutex //service sync operation
-	services        map[string]wssAPI.MsgHandler
+	services        map[string]wssapi.MsgHandler
 }
 
 var processContext *context
@@ -54,7 +54,7 @@ var processConfig *contextConfiguration
 
 func init() {
 	processContext = &context{}
-	wssAPI.SetHandler(processContext)
+	wssapi.SetHandler(processContext)
 }
 
 // Run all Services Of current processing
@@ -65,8 +65,8 @@ func Run() {
 }
 
 // Init the service Configuration from json file such as hls/dash/rtsp
-func (processCtx *context) Init(msg *wssAPI.Msg) (err error) {
-	processCtx.services = make(map[string]wssAPI.MsgHandler)
+func (processCtx *context) Init(msg *wssapi.Msg) (err error) {
+	processCtx.services = make(map[string]wssapi.MsgHandler)
 	err = processCtx.loadConfig()
 	if err != nil {
 		logger.LOGE("process load config failed")
@@ -76,12 +76,12 @@ func (processCtx *context) Init(msg *wssAPI.Msg) (err error) {
 }
 
 //Create the needed Service Instance And Save it to HttpMux
-func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
+func (processCtx *context) createAllService(msg *wssapi.Msg) (err error) {
 
 	//Cretate Streamer Service
 	if true {
-		livingSvr := &streamerService.StreamerService{}
-		msg := &wssAPI.Msg{}
+		livingSvr := &streamer.StreamerService{}
+		msg := &wssapi.Msg{}
 		if len(processConfig.StreamManagerConfigName) > 0 {
 			msg.Param1 = processConfig.StreamManagerConfigName
 		}
@@ -97,8 +97,8 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 
 	//create RTMP Service
 	if len(processConfig.RTMPConfigName) > 0 {
-		rtmpSvr := &RTMPService.RTMPService{}
-		msg := &wssAPI.Msg{}
+		rtmpSvr := &rtmp.RTMPService{}
+		msg := &wssapi.Msg{}
 		msg.Param1 = processConfig.RTMPConfigName
 		err = rtmpSvr.Init(msg)
 		if err != nil {
@@ -112,8 +112,8 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 
 	//create WebSocket Service
 	if len(processConfig.WebSocketConfigName) > 0 {
-		webSocketSvr := &webSocketService.WebSocketService{}
-		msg := &wssAPI.Msg{}
+		webSocketSvr := &websocket.WebSocketService{}
+		msg := &wssapi.Msg{}
 		msg.Param1 = processConfig.WebSocketConfigName
 		err = webSocketSvr.Init(msg)
 		if err != nil {
@@ -125,10 +125,10 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 		}
 	}
 
-	//create backendService
+	//create backend
 	if len(processConfig.BackendConfigName) > 0 {
-		backendSvr := &backendService.BackendService{}
-		msg := &wssAPI.Msg{}
+		backendSvr := &backend.BackendService{}
+		msg := &wssapi.Msg{}
 		msg.Param1 = processConfig.BackendConfigName
 		err = backendSvr.Init(msg)
 		if err != nil {
@@ -142,8 +142,8 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 
 	//create RTSP Service
 	if len(processConfig.RTSPConfigName) > 0 {
-		rtspSvr := &RTSPService.RTSPService{}
-		msg := &wssAPI.Msg{}
+		rtspSvr := &rtspsrv.RTSPService{}
+		msg := &wssapi.Msg{}
 		msg.Param1 = processConfig.RTSPConfigName
 		err = rtspSvr.Init(msg)
 		if err != nil {
@@ -156,8 +156,8 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 	//create HLS Service
 	if len(processConfig.HLSConfigName) > 0 {
-		hls := &HLSService.HLSService{}
-		msg := &wssAPI.Msg{Param1: processConfig.HLSConfigName}
+		hls := &hls.HLSService{}
+		msg := &wssapi.Msg{Param1: processConfig.HLSConfigName}
 		err = hls.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -169,8 +169,8 @@ func (processCtx *context) createAllService(msg *wssAPI.Msg) (err error) {
 	}
 	//create DASH Service
 	if len(processConfig.DASHConfigName) > 0 {
-		dash := &DASHService.DASHService{}
-		msg := &wssAPI.Msg{Param1: processConfig.DASHConfigName}
+		dash := &dash.DASHService{}
+		msg := &wssapi.Msg{Param1: processConfig.DASHConfigName}
 		err = dash.Init(msg)
 		if err != nil {
 			logger.LOGE(err.Error())
@@ -254,11 +254,11 @@ func (processCtx *context) createLogFile(logPath string) {
 }
 
 //Start all the configed service ,such as rtsp ,websocket ,backend
-func (processCtx *context) Start(msg *wssAPI.Msg) (err error) {
+func (processCtx *context) Start(msg *wssapi.Msg) (err error) {
 	//if false {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//}
-	//HTTPMUX.Start() //remove Logic Design to Start All Service Once
+	//httpmux.Start() //remove Logic Design to Start All Service Once
 	processCtx.servicesRWMutex.RLock()
 	defer processCtx.servicesRWMutex.RUnlock()
 
@@ -281,7 +281,7 @@ func (processCtx *context) Start(msg *wssAPI.Msg) (err error) {
 }
 
 //Stop all the launched services
-func (processCtx *context) Stop(msg *wssAPI.Msg) (err error) {
+func (processCtx *context) Stop(msg *wssapi.Msg) (err error) {
 	processCtx.servicesRWMutex.RLock()
 	defer processCtx.servicesRWMutex.RUnlock()
 	for _, v := range processCtx.services {
@@ -292,11 +292,11 @@ func (processCtx *context) Stop(msg *wssAPI.Msg) (err error) {
 
 //GetType for process
 func (processCtx *context) GetType() string {
-	return wssAPI.OBJProcess
+	return wssapi.OBJProcess
 }
 
 //HandleTask for process
-func (processCtx *context) HandleTask(task wssAPI.Task) (err error) {
+func (processCtx *context) HandleTask(task wssapi.Task) (err error) {
 	processCtx.servicesRWMutex.RLock()
 	defer processCtx.servicesRWMutex.RUnlock()
 	handler, exist := processCtx.services[task.Receiver()]
@@ -307,16 +307,16 @@ func (processCtx *context) HandleTask(task wssAPI.Task) (err error) {
 }
 
 //ProcessMessage for process
-func (processCtx *context) ProcessMessage(msg *wssAPI.Msg) (err error) {
+func (processCtx *context) ProcessMessage(msg *wssapi.Msg) (err error) {
 	return nil
 }
 
 //SetParent for process
-func (processCtx *context) SetParent(arent wssAPI.MsgHandler) {
+func (processCtx *context) SetParent(arent wssapi.MsgHandler) {
 
 }
 
 //AddSvr for process
-func AddSvr(svr wssAPI.MsgHandler) {
+func AddSvr(svr wssapi.MsgHandler) {
 	logger.LOGE("add svr")
 }

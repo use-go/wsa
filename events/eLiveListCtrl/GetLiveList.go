@@ -3,7 +3,7 @@ package eLiveListCtrl
 import (
 	"container/list"
 
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 type LiveInfo struct {
@@ -17,7 +17,7 @@ type EveGetLiveList struct {
 }
 
 func (eveGetLiveList *EveGetLiveList) Receiver() string {
-	return wssAPI.OBJStreamerServer
+	return wssapi.OBJStreamerServer
 }
 
 func (eveGetLiveList *EveGetLiveList) Type() string {

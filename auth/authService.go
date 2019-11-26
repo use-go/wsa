@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/use-go/websocket-streamserver/wssAPI"
+	"github.com/use-go/websocket-streamserver/wssapi"
 )
 
 //RTSPClient Denote the RTSP Client auth Struct
@@ -70,9 +70,9 @@ func (rtspClient *RTSPClient) AuthBasic(phase string, message string) bool {
 func (rtspClient *RTSPClient) AuthDigest(phase string, message string) bool {
 	nonce := ParseDirective(message, "nonce")
 	realm := ParseDirective(message, "realm")
-	hs1 := wssAPI.GetMD5Hash(rtspClient.login + ":" + realm + ":" + rtspClient.password)
-	hs2 := wssAPI.GetMD5Hash(phase + ":" + rtspClient.uri)
-	responce := wssAPI.GetMD5Hash(hs1 + ":" + nonce + ":" + hs2)
+	hs1 := wssapi.GetMD5Hash(rtspClient.login + ":" + realm + ":" + rtspClient.password)
+	hs2 := wssapi.GetMD5Hash(phase + ":" + rtspClient.uri)
+	responce := wssapi.GetMD5Hash(hs1 + ":" + nonce + ":" + hs2)
 	dauth := "\r\n" + `Authorization: Digest username="` + rtspClient.login + `", realm="` + realm + `", nonce="` + nonce + `", uri="` + rtspClient.uri + `", response="` + responce + `"`
 	if !rtspClient.Write(phase + " " + rtspClient.uri + " RTSP/1.0\r\nCSeq: " + strconv.Itoa(rtspClient.cseq) + dauth + "\r\n\r\n") {
 		return false
@@ -88,9 +88,9 @@ func (rtspClient *RTSPClient) AuthDigest(phase string, message string) bool {
 func (rtspClient *RTSPClient) AuthDigestOnly(phase string, message string) string {
 	nonce := ParseDirective(message, "nonce")
 	realm := ParseDirective(message, "realm")
-	hs1 := wssAPI.GetMD5Hash(rtspClient.login + ":" + realm + ":" + rtspClient.password)
-	hs2 := wssAPI.GetMD5Hash(phase + ":" + rtspClient.uri)
-	responce := wssAPI.GetMD5Hash(hs1 + ":" + nonce + ":" + hs2)
+	hs1 := wssapi.GetMD5Hash(rtspClient.login + ":" + realm + ":" + rtspClient.password)
+	hs2 := wssapi.GetMD5Hash(phase + ":" + rtspClient.uri)
+	responce := wssapi.GetMD5Hash(hs1 + ":" + nonce + ":" + hs2)
 	dauth := "\r\n" + `Authorization: Digest username="` + rtspClient.login + `", realm="` + realm + `", nonce="` + nonce + `", uri="` + rtspClient.uri + `", response="` + responce + `"`
 	return dauth
 }
