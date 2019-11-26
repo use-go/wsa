@@ -1,7 +1,0 @@
-{
-    "WebSocket": "WebSocketConfig.json",
-    "Backend": "BackendConfig.json",
-    "Streamer": "Streamer.json",
-    "RTSP": "RTSPConfig.json",
-    "LogPath": "Log"
-}
