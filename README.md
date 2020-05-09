@@ -2,19 +2,23 @@
 
 websocket agent server for h264 streaming over websocket
 
-## a stream server support rtmp and websocket in html5
+## target
+
+current repo has a target
+
++ a stream server support rtmp and websocket in html5
 
 init Order : streamserver  --> process  ---> service
 
-### code will be refactored to support websocket for RTP-Data
++   RTP-Data packet over websocket
 
-### code will be refactored to support WSP cmd Protocal
++  WSP cmd Protocal
 
-websocket transfer the WSP that wrap rtsp content
+ WSP  over websocketthat wrap rtsp content
 
-### Structure instruction
+## Structure instruction
 
-#### backend : web-service to admin the Stream
++ prcoessing
 
 
 ## inspired by
