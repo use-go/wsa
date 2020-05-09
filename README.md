@@ -8,13 +8,13 @@ current repo has a target
 
 + a stream server support rtmp and websocket in html5
 
-init Order : streamserver  --> process  ---> service
+  + init Order : streamserver  --> process  ---> service
 
 +   RTP-Data packet over websocket
 
 +  WSP cmd Protocal
 
- WSP  over websocketthat wrap rtsp content
+   + WSP  over websocketthat wrap rtsp content
 
 ## Structure instruction
 
