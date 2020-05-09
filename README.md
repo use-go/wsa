@@ -1,6 +1,6 @@
-# websocket-streamserver
+# Instruction
 
-websocket server for h264
+websocket agent server for h264 streaming over websocket
 
 ## a stream server support rtmp and websocket in html5
 
